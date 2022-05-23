@@ -223,64 +223,6 @@ namespace Neat.Unicode
 
     #endregion Equals, equality operators, IEquatable<Char8> members, object members
 
-    #region highly efficient operations
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static bool Leads1(byte value)
-    {
-      return value < 0x80u;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static bool Continues(byte value)
-    {
-      return (value & 0xC0) == 0x80;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static bool Leads2(byte value)
-    {
-      return (value & 0xE0) == 0xC0;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static bool Leads3(byte value)
-    {
-      return (value & 0xF0) == 0xE0;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static bool Leads4(byte value)
-    {
-      return (value & 0xF8) == 0xF0;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static int ToChar32Unchecked1(byte lead1)
-    {
-      return lead1;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static int ToChar32Unchecked2(byte lead2, byte cont1)
-    {
-      return ((lead2 & 0x1F) << 6) | (cont1 & 0x3F);
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static int ToChar32Unchecked3(byte lead3, byte cont1, byte cont2)
-    {
-      return ((lead3 & 0x1F) << 12) | ((cont1 & 0x3F) << 6) | (cont2 & 0x3F);
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static int ToChar32Unchecked4(byte lead4, byte cont1, byte cont2, byte cont3)
-    {
-      return ((lead4 & 0x1F) << 18) | ((cont1 & 0x3F) << 12) | ((cont2 & 0x3F) << 6) | (cont3 & 0x3F);
-    }
-
-    #endregion highly efficient operations
-
     /// <summary>
     /// Standard implementation of <see cref="IComparer{T}"/> and <see cref="IEqualityComparer2{T}"/> for <see cref="Char8"/>.
     /// </summary>

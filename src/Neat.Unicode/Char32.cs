@@ -196,21 +196,21 @@ namespace Neat.Unicode
     private static unsafe string GetString(int value)
     {
       char* char18 = stackalloc char[18];
-      if (IsBelow0x80(value))
+      if (Utf.Char32IsBelow0x80(value))
       {
         return theToStringResults[value];
       }
-      if (IsBelow0x10000(value))
+      if (Utf.Char32IsBelow0x10000(value))
       {
-        if (IsSurrogate(value))
+        if (Utf.Char32IsSurrogate(value))
         {
           goto NotValidCodepoint;
         }
-        return new string(To1Char16Unchecked(value), 1);
+        return new string(Utf.Char32To1Char16Unchecked(value), 1);
       }
-      if (IsBelow0x110000(value))
+      if (Utf.Char32IsBelow0x110000(value))
       {
-        To2Char16sUnchecked(value, out char18[0], out char18[1]);
+        Utf.Char32To2Char16sUnchecked(value, out char18[0], out char18[1]);
         return new string(char18, 0, 2);
       }
     NotValidCodepoint:
@@ -238,151 +238,6 @@ namespace Neat.Unicode
     }
 
     #endregion Equals, equality operators, IEquatable<Char32> members, object members
-
-    #region highly efficient operations
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static bool IsValid(int value)
-    {
-      return (uint)value < 0x110000u && (value & 0xFFFFF800) != 0xD800;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static bool IsBelow0x80(int value)
-    {
-      return (uint)value < 0x80u;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static bool IsBelow0x800(int value)
-    {
-      return (uint)value < 0x800u;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static bool IsBelow0x10000(int value)
-    {
-      return (uint)value < 0x10000u;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static bool IsBelow0x110000(int value)
-    {
-      return (uint)value < 0x110000u;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static bool IsSurrogate(int value)
-    {
-      return (value & 0xFFFFF800) == 0xD800;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static bool IsHighSurrogate(int value)
-    {
-      return (value & 0xFFFFFC00) == 0xD800;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static bool IsLowSurrogate(int value)
-    {
-      return (value & 0xFFFFFC00) == 0xDC00;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static bool Is1Char8(int value)
-    {
-      return (uint)value < 0x80u;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static bool Is2Char8s(int value)
-    {
-      return 0x80u <= (uint)value && (uint)value < 0x800u;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static bool Is3Char8s(int value)
-    {
-      return 0x800u <= (uint)value && (uint)value < 0x10000u
-        && (value & 0xFFFFF800) != 0xD800;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static bool Is4Char8s(int value)
-    {
-      return 0x10000u <= (uint)value && (uint)value < 0x110000u;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static bool Is1Char16(int value)
-    {
-      return (uint)value < 0x10000u && (value & 0xFFFFF800) != 0xD800;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static bool Is2Char16s(int value)
-    {
-      return 0x10000u <= (uint)value && (uint)value < 0x110000u;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static byte To1Char8Unchecked(int value)
-    {
-      return (byte)value;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static void To1Char8Unchecked(int value, out byte lead1)
-    {
-      lead1 = (byte)value;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static void To2Char8sUnchecked(int value, out byte lead2, out byte cont1)
-    {
-      lead2 = (byte)((value >> 6) | 0xC0);
-      cont1 = (byte)((value & 0x3F) | 0x80);
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static void To3Char8sUnchecked(int value, out byte lead3, out byte cont1, out byte cont2)
-    {
-      lead3 = (byte)((value >> 12) | 0xE0);
-      cont1 = (byte)(((value >> 6) & 0x3F) | 0x80);
-      cont2 = (byte)((value & 0x3F) | 0x80);
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static void To4Char8sUnchecked(int value, out byte lead4, out byte cont1, out byte cont2, out byte cont3)
-    {
-      lead4 = (byte)((value >> 18) | 0xF0);
-      cont1 = (byte)(((value >> 12) & 0x3F) | 0x80);
-      cont2 = (byte)(((value >> 6) & 0x3F) | 0x80);
-      cont3 = (byte)((value & 0x3F) | 0x80);
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static char To1Char16Unchecked(int value)
-    {
-      return (char)value;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static void To1Char16Unchecked(int value, out char ch)
-    {
-      ch = (char)value;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    public static void To2Char16sUnchecked(int value, out char high, out char low)
-    {
-      value -= 0x10000;
-      high = (char)((value >> 10) | 0xD800);
-      low = (char)((value & 0x3FF) | 0xDC00);
-    }
-
-    #endregion highly efficient operations
 
     /// <summary>
     /// Standard implementation of <see cref="IComparer{T}"/> and <see cref="IEqualityComparer2{T}"/> for <see cref="Char32"/>.
