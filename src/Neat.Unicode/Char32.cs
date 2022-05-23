@@ -196,7 +196,7 @@ namespace Neat.Unicode
       }
       if (IsBelow0x10000(value))
       {
-        if (IsSurrogateGivenBelow0x10000(value))
+        if (IsSurrogate(value))
         {
           goto NotValidCodepoint;
         }
@@ -239,9 +239,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.OptimizeInline)]
     public static bool IsValid(int value)
     {
-      return (uint)value < 0x10000u
-        ? (value & 0xF800) != 0xD800
-        : (uint)value < 0x110000u;
+      return (uint)value < 0x110000u && (value & 0xFFFFF800) != 0xD800;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
@@ -269,21 +267,21 @@ namespace Neat.Unicode
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    public static bool IsSurrogateGivenBelow0x10000(int value)
+    public static bool IsSurrogate(int value)
     {
-      return (value & 0xF800) == 0xD800;
+      return (value & 0xFFFFF800) == 0xD800;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    public static bool IsHighSurrogateGivenBelow0x10000(int value)
+    public static bool IsHighSurrogate(int value)
     {
-      return (value & 0xFC00) == 0xD800;
+      return (value & 0xFFFFFC00) == 0xD800;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    public static bool IsLowSurrogateGivenBelow0x10000(int value)
+    public static bool IsLowSurrogate(int value)
     {
-      return (value & 0xFC00) == 0xDC00;
+      return (value & 0xFFFFFC00) == 0xDC00;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
@@ -302,7 +300,7 @@ namespace Neat.Unicode
     public static bool Is3Char8s(int value)
     {
       return 0x800u <= (uint)value && (uint)value < 0x10000u
-        && (value & 0xF800) != 0xD800;
+        && (value & 0xFFFFF800) != 0xD800;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
@@ -314,7 +312,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Is1Char16(int value)
     {
-      return (uint)value < 0x10000u && (value & 0xF800) != 0xD800;
+      return (uint)value < 0x10000u && (value & 0xFFFFF800) != 0xD800;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
