@@ -195,6 +195,7 @@ namespace Neat.Unicode
 
     private static unsafe string GetString(int value)
     {
+      char* char18 = stackalloc char[18];
       if (IsBelow0x80(value))
       {
         return theToStringResults[value];
@@ -205,15 +206,14 @@ namespace Neat.Unicode
         {
           goto NotValidCodepoint;
         }
-        return new string((char)value, 1);
+        return new string(To1Char16Unchecked(value), 1);
       }
       if (IsBelow0x110000(value))
       {
-        char* char2 = stackalloc char[2];
-        return new string(char2, 0, 2);
+        To2Char16sUnchecked(value, out char18[0], out char18[1]);
+        return new string(char18, 0, 2);
       }
     NotValidCodepoint:
-      char* char18 = stackalloc char[18];
       char18[0] = 'C';
       char18[1] = 'h';
       char18[2] = 'a';
@@ -232,7 +232,7 @@ namespace Neat.Unicode
       return new string(char18, 0, 18);
     }
 
-    public override unsafe string ToString()
+    public override string ToString()
     {
       return GetString(Value);
     }
@@ -327,6 +327,12 @@ namespace Neat.Unicode
     }
 
     [MethodImpl(Helper.OptimizeInline)]
+    public static byte To1Char8Unchecked(int value)
+    {
+      return (byte)value;
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
     public static void To1Char8Unchecked(int value, out byte lead1)
     {
       lead1 = (byte)value;
@@ -354,6 +360,12 @@ namespace Neat.Unicode
       cont1 = (byte)(((value >> 12) & 0x3F) | 0x80);
       cont2 = (byte)(((value >> 6) & 0x3F) | 0x80);
       cont3 = (byte)((value & 0x3F) | 0x80);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    public static char To1Char16Unchecked(int value)
+    {
+      return (char)value;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
