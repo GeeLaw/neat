@@ -392,25 +392,6 @@ namespace Neat.Unicode
       {
         return obj.Value;
       }
-
-      #region object members
-
-      public override bool Equals(object obj)
-      {
-        return obj is Comparer;
-      }
-
-      public override int GetHashCode()
-      {
-        return -42;
-      }
-
-      public override string ToString()
-      {
-        return "Neat.Unicode.Char32.Comparer";
-      }
-
-      #endregion object members
     }
   }
 }
