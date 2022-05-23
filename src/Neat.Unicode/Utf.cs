@@ -290,5 +290,351 @@ namespace Neat.Unicode
     }
 
     #endregion validity of Char32 from Char8 (overlong, surrogate, above 0x10FFFF)
+
+    /// <summary>
+    /// Finds the first invalid <see cref="Char8"/> instance.
+    /// This method returns <c>-1</c> if the stream is valid.
+    /// </summary>
+    internal static int FindFirstInvalidChar8(ref byte src0, int src8s)
+    {
+      byte lead, cont1, cont2, cont3;
+      for (int i = 0, j; i != src8s; ++i)
+      {
+        if (Char8Leads1(lead = Unsafe.Add(ref src0, i)))
+        {
+          continue;
+        }
+        j = i;
+        if (Char8Leads2(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && Char32From2Char8sIsValid(Char8ToChar32Unchecked2(lead, cont1)))
+          {
+            goto Valid;
+          }
+          goto Invalid;
+        }
+        if (Char8Leads3(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
+            && Char32From3Char8sIsValid(Char8ToChar32Unchecked3(lead, cont1, cont2)))
+          {
+            goto Valid;
+          }
+          goto Invalid;
+        }
+        if (Char8Leads4(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont3 = Unsafe.Add(ref src0, j))
+            && Char32From4Char8sIsValid(Char8ToChar32Unchecked4(lead, cont1, cont2, cont3)))
+          {
+            goto Valid;
+          }
+          goto Invalid;
+        }
+      Invalid:
+        return i;
+      Valid:
+        i = j;
+      }
+      return -1;
+    }
+
+    /// <summary>
+    /// Counts the number of invalid <see cref="Char8"/> instances.
+    /// </summary>
+    internal static int CountInvalidChar8s(ref byte src0, int src8s)
+    {
+      int invalids = 0;
+      byte lead, cont1, cont2, cont3;
+      for (int i = 0, j; i != src8s; ++i)
+      {
+        if (Char8Leads1(lead = Unsafe.Add(ref src0, i)))
+        {
+          continue;
+        }
+        j = i;
+        if (Char8Leads2(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && Char32From2Char8sIsValid(Char8ToChar32Unchecked2(lead, cont1)))
+          {
+            goto Valid;
+          }
+          goto Invalid;
+        }
+        if (Char8Leads3(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
+            && Char32From3Char8sIsValid(Char8ToChar32Unchecked3(lead, cont1, cont2)))
+          {
+            goto Valid;
+          }
+          goto Invalid;
+        }
+        if (Char8Leads4(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont3 = Unsafe.Add(ref src0, j))
+            && Char32From4Char8sIsValid(Char8ToChar32Unchecked4(lead, cont1, cont2, cont3)))
+          {
+            goto Valid;
+          }
+          goto Invalid;
+        }
+      Invalid:
+        ++invalids;
+        continue;
+      Valid:
+        i = j;
+      }
+      return invalids;
+    }
+
+    /// <summary>
+    /// Replaces invalid <see cref="Char8"/> instances by the replacement character.
+    /// </summary>
+    internal static void SanitizeChar8s(ref byte src0, int src8s, ref byte dst0, int dst8s)
+    {
+      int k = 0;
+      byte lead, cont1, cont2, cont3;
+      for (int i = 0, j = 0, value; i != src8s && k != dst8s; j = ++i)
+      {
+        if (Char8Leads1(lead = Unsafe.Add(ref src0, i)))
+        {
+          Unsafe.Add(ref dst0, k++) = lead;
+          continue;
+        }
+        if (Char8Leads2(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && Char32From2Char8sIsValid(value = Char8ToChar32Unchecked2(lead, cont1)))
+          {
+            goto Below0x800;
+          }
+          goto Invalid;
+        }
+        if (Char8Leads3(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
+            && Char32From3Char8sIsValid(value = Char8ToChar32Unchecked3(lead, cont1, cont2)))
+          {
+            goto Below0x10000;
+          }
+          goto Invalid;
+        }
+        if (Char8Leads4(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont3 = Unsafe.Add(ref src0, j))
+            && Char32From4Char8sIsValid(value = Char8ToChar32Unchecked4(lead, cont1, cont2, cont3)))
+          {
+            goto Below0x110000;
+          }
+          goto Invalid;
+        }
+      Invalid:
+        value = ReplacementCharacter32;
+        goto IsReplacement;
+      Below0x800:
+        i = j;
+        if (dst8s == k + 1)
+        {
+          break;
+        }
+        Char32To2Char8sUnchecked(value,
+          out Unsafe.Add(ref dst0, k++),
+          out Unsafe.Add(ref dst0, k++));
+        continue;
+      Below0x10000:
+        i = j;
+      IsReplacement:
+        if (dst8s <= k + 2)
+        {
+          break;
+        }
+        Char32To3Char8sUnchecked(value,
+          out Unsafe.Add(ref dst0, k++),
+          out Unsafe.Add(ref dst0, k++),
+          out Unsafe.Add(ref dst0, k++));
+        continue;
+      Below0x110000:
+        i = j;
+        if (dst8s <= k + 3)
+        {
+          break;
+        }
+        Char32To4Char8sUnchecked(value,
+          out Unsafe.Add(ref dst0, k++),
+          out Unsafe.Add(ref dst0, k++),
+          out Unsafe.Add(ref dst0, k++),
+          out Unsafe.Add(ref dst0, k++));
+        continue;
+      }
+      while (k != dst8s)
+      {
+        Unsafe.Add(ref dst0, k++) = 0;
+      }
+    }
+
+    /// <summary>
+    /// Finds the first invalid <see langword="char"/> instance.
+    /// This method returns <c>-1</c> if the stream is valid.
+    /// </summary>
+    internal static int FindFirstInvalidChar16(ref char src0, int src16s)
+    {
+      char first;
+      for (int i = 0; i != src16s; ++i)
+      {
+        if (Char16IsLowSurrogate(first = Unsafe.Add(ref src0, i)))
+        {
+          goto Invalid;
+        }
+        if (Char16IsHighSurrogate(first))
+        {
+          if (++i == src16s || !Char16IsLowSurrogate(Unsafe.Add(ref src0, i)))
+          {
+            goto InvalidDecrease;
+          }
+          continue;
+        }
+        continue;
+      InvalidDecrease:
+        return --i;
+      Invalid:
+        return i;
+      }
+      return -1;
+    }
+
+    /// <summary>
+    /// Counts the number of invalid <see langword="char"/> instances.
+    /// </summary>
+    internal static int CountInvalidChar16s(ref char src0, int src16s)
+    {
+      int invalids = 0;
+      char first;
+      for (int i = 0; i != src16s; ++i)
+      {
+        if (Char16IsLowSurrogate(first = Unsafe.Add(ref src0, i)))
+        {
+          goto Invalid;
+        }
+        if (Char16IsHighSurrogate(first))
+        {
+          if (++i == src16s || !Char16IsLowSurrogate(Unsafe.Add(ref src0, i)))
+          {
+            goto InvalidDecrease;
+          }
+          continue;
+        }
+        continue;
+      InvalidDecrease:
+        --i;
+      Invalid:
+        ++invalids;
+      }
+      return invalids;
+    }
+
+    /// <summary>
+    /// Replaces invalid <see langword="char"/> instances by the replacement character.
+    /// </summary>
+    internal static void SanitizeChar16s(ref char src0, int src16s, ref char dst0, int dst16s)
+    {
+      int k = 0;
+      char first, low;
+      for (int i = 0; i != src16s && k != dst16s; ++i)
+      {
+        if (Char16IsLowSurrogate(first = Unsafe.Add(ref src0, i)))
+        {
+          goto Invalid;
+        }
+        if (Char16IsHighSurrogate(first))
+        {
+          if (++i == src16s || !Char16IsLowSurrogate(low = Unsafe.Add(ref src0, i)))
+          {
+            goto InvalidDecrease;
+          }
+          goto Valid2;
+        }
+        /* Valid1: */
+        Unsafe.Add(ref dst0, k++) = first;
+        continue;
+      Valid2:
+        if (dst16s == k + 1)
+        {
+          break;
+        }
+        Unsafe.Add(ref dst0, k++) = first;
+        Unsafe.Add(ref dst0, k++) = low;
+        continue;
+      InvalidDecrease:
+        --i;
+      Invalid:
+        Unsafe.Add(ref dst0, k++) = ReplacementCharacter16;
+      }
+      while (k != dst16s)
+      {
+        Unsafe.Add(ref dst0, k++) = (char)0;
+      }
+    }
+
+    /// <summary>
+    /// Finds the first invalid <see cref="Char32"/> instance.
+    /// This method returns <c>-1</c> if the stream is valid.
+    /// </summary>
+    internal static int FindFirstInvalidChar32(ref int src0, int src32s)
+    {
+      for (int i = 0; i != src32s; ++i)
+      {
+        if (!Char32IsValid(Unsafe.Add(ref src0, i)))
+        {
+          return i;
+        }
+      }
+      return -1;
+    }
+
+    /// <summary>
+    /// Counts the number of invalid <see cref="Char32"/> instances.
+    /// </summary>
+    internal static int CountInvalidChar32s(ref int src0, int src32s)
+    {
+      int invalids = 0;
+      for (int i = 0; i != src32s; ++i)
+      {
+        if (!Char32IsValid(Unsafe.Add(ref src0, i)))
+        {
+          ++invalids;
+        }
+      }
+      return invalids;
+    }
+
+    /// <summary>
+    /// Replaces invalid <see langword="Char32"/> instances by the replacement character.
+    /// </summary>
+    internal static void SanitizeChar32s(ref int src0, int src32s, ref int dst0, int dst32s)
+    {
+      int k = 0;
+      for (int i = 0, value; i != src32s && k != dst32s; ++i)
+      {
+        Unsafe.Add(ref dst0, k++) = Char32IsValid(value = Unsafe.Add(ref src0, i))
+          ? value
+          : ReplacementCharacter32;
+      }
+      while (k != dst32s)
+      {
+        Unsafe.Add(ref dst0, k++) = 0;
+      }
+    }
   }
 }
