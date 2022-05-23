@@ -81,7 +81,13 @@ namespace Neat.Unicode
 
     #endregion constructors, cast operators
 
-    #region order operators, IComparable<Char32> members, IComparable members
+    #region Compare, order operators, IComparable<Char32> members, IComparable members
+
+    public static int Compare(Char32 x, Char32 y)
+    {
+      int xx = x.Value, yy = y.Value;
+      return xx < yy ? -1 : xx > yy ? 1 : 0;
+    }
 
     public static bool operator <=(Char32 x, Char32 y)
     {
@@ -101,12 +107,6 @@ namespace Neat.Unicode
     public static bool operator >(Char32 x, Char32 y)
     {
       return x.Value > y.Value;
-    }
-
-    public static int Compare(Char32 x, Char32 y)
-    {
-      int xx = x.Value, yy = y.Value;
-      return xx < yy ? -1 : xx > yy ? 1 : 0;
     }
 
     public int CompareTo(Char32 other)
@@ -129,9 +129,14 @@ namespace Neat.Unicode
       throw new ArgumentException("The argument '" + nameof(obj) + "' must be Neat.Unicode.Char32 or null.", nameof(obj));
     }
 
-    #endregion order operators, IComparable<Char32> members, IComparable members
+    #endregion Compare, order operators, IComparable<Char32> members, IComparable members
 
-    #region equality operators, IEquatable<Char32> members, object members
+    #region Equals, equality operators, IEquatable<Char32> members, object members
+
+    public static bool Equals(Char32 x, Char32 y)
+    {
+      return x.Value == y.Value;
+    }
 
     public static bool operator ==(Char32 x, Char32 y)
     {
@@ -232,7 +237,7 @@ namespace Neat.Unicode
       return GetString(Value);
     }
 
-    #endregion equality operators, IEquatable<Char32> members, object members
+    #endregion Equals, equality operators, IEquatable<Char32> members, object members
 
     #region highly efficient operations
 

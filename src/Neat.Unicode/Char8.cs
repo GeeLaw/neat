@@ -82,7 +82,13 @@ namespace Neat.Unicode
 
     #endregion constructors, cast operators
 
-    #region order operators, IComparable members, IComparable<Char8> members
+    #region Compare, order operators, IComparable<Char8> members, IComparable members
+
+    [SuppressMessage("Style", "IDE0004", Justification = "Avoid mistaking it for mod-256 subtraction.")]
+    public static int Compare(Char8 x, Char8 y)
+    {
+      return (int)x.Value - (int)y.Value;
+    }
 
     public static bool operator <=(Char8 x, Char8 y)
     {
@@ -105,12 +111,6 @@ namespace Neat.Unicode
     }
 
     [SuppressMessage("Style", "IDE0004", Justification = "Avoid mistaking it for mod-256 subtraction.")]
-    public static int Compare(Char8 x, Char8 y)
-    {
-      return (int)x.Value - (int)y.Value;
-    }
-
-    [SuppressMessage("Style", "IDE0004", Justification = "Avoid mistaking it for mod-256 subtraction.")]
     public int CompareTo(Char8 other)
     {
       return (int)Value - (int)other.Value;
@@ -126,9 +126,14 @@ namespace Neat.Unicode
         : throw new ArgumentException("The argument '" + nameof(obj) + "' must be Neat.Unicode.Char8 or null.", nameof(obj));
     }
 
-    #endregion order operators, IComparable members, IComparable<Char8> members
+    #endregion Compare, order operators, IComparable<Char8> members, IComparable members
 
-    #region equality operators, IEquatable<Char8> members, object members
+    #region Equals, equality operators, IEquatable<Char8> members, object members
+
+    public static bool Equals(Char8 x, Char8 y)
+    {
+      return x.Value == y.Value;
+    }
 
     public static bool operator ==(Char8 x, Char8 y)
     {
@@ -216,7 +221,7 @@ namespace Neat.Unicode
       return theToStringResults[Value];
     }
 
-    #endregion equality operators, IEquatable<Char8> members, object members
+    #endregion Equals, equality operators, IEquatable<Char8> members, object members
 
     #region highly efficient operations
 
