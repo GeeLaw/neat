@@ -241,6 +241,174 @@ namespace Neat.Unicode
 
     #endregion Equals, equality operators, IEquatable<Char32> members, object members
 
+    #region properties
+
+    /// <summary>
+    /// Returns <see langword="true"/> if and only if the <see cref="Char32"/> instance is a valid Unicode code point.
+    /// This means that <see cref="Value"/> is between either <c>0x0</c> and <c>0xD7FF</c> or <c>0xE000</c> and <c>0x10FFFF</c> (all inclusive).
+    /// </summary>
+    public bool IsValid
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      get
+      {
+        return Utf.Char32IsValid(Value);
+      }
+    }
+
+    #endregion properties
+
+    #region properties related to Char8
+
+    /// <summary>
+    /// Returns <see langword="true"/> if and only if the <see cref="Char32"/> instance can be encoded as a 1-byte sequence in UTF-8.
+    /// This means that <see cref="Value"/> is between <c>0x0</c> and <c>0x7F</c> (both inclusive).
+    /// </summary>
+    public bool Is1Char8
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      get
+      {
+        return Utf.Char32Is1Char8(Value);
+      }
+    }
+
+    /// <summary>
+    /// Returns <see langword="true"/> if and only if the <see cref="Char32"/> instance can be encoded as a 2-byte sequence in UTF-8.
+    /// This means that <see cref="Value"/> is between <c>0x80</c> and <c>0x7FF</c> (both inclusive).
+    /// </summary>
+    public bool Is2Char8s
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      get
+      {
+        return Utf.Char32Is2Char8s(Value);
+      }
+    }
+
+    /// <summary>
+    /// Returns <see langword="true"/> if and only if the <see cref="Char32"/> instance can be encoded as a 3-byte sequence in UTF-8.
+    /// This means that <see cref="Value"/> is between either <c>0x800</c> and <c>0xDBFF</c> or <c>0xE000</c> and <c>0xFFFF</c> (all inclusive).
+    /// </summary>
+    public bool Is3Char8s
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      get
+      {
+        return Utf.Char32Is3Char8s(Value);
+      }
+    }
+
+    /// <summary>
+    /// Returns <see langword="true"/> if and only if the <see cref="Char32"/> instance can be encoded as a 4-byte sequence in UTF-8.
+    /// This means that <see cref="Value"/> is between <c>0x10000</c> and <c>0x10FFFF</c> (both inclusive).
+    /// </summary>
+    public bool Is4Char8s
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      get
+      {
+        return Utf.Char32Is4Char8s(Value);
+      }
+    }
+
+    /// <summary>
+    /// Gets the number of bytes used to encode the <see cref="Char32"/> instance in UTF-8.
+    /// Returns <c>-1</c> if the instance is not a valid Unicode code point.
+    /// </summary>
+    public int LengthInChar8s
+    {
+      [MethodImpl(Helper.JustOptimize)]
+      get
+      {
+        return Utf.Char32LengthInChar8s(Value);
+      }
+    }
+
+    #endregion properties related to Char8
+
+    #region properties related to Char16
+
+    /// <summary>
+    /// Returns <see langword="true"/> if and only if the <see cref="Char32"/> instance is a surrogate code point (which is invalid).
+    /// This means that <see cref="Value"/> is between <c>0xD800</c> and <c>0xDFFF</c> (both inclusive).
+    /// </summary>
+    public bool IsSurrogate
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      get
+      {
+        return Utf.Char32IsSurrogate(Value);
+      }
+    }
+
+    /// <summary>
+    /// Returns <see langword="true"/> if and only if the <see cref="Char32"/> instance is a high (leading) surrogate code point (which is invalid).
+    /// This means that <see cref="Value"/> is between <c>0xD800</c> and <c>0xDBFF</c> (both inclusive).
+    /// </summary>
+    public bool IsHighSurrogate
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      get
+      {
+        return Utf.Char32IsHighSurrogate(Value);
+      }
+    }
+
+    /// <summary>
+    /// Returns <see langword="true"/> if and only if the <see cref="Char32"/> instance is a low (leading) surrogate code point (which is invalid).
+    /// This means that <see cref="Value"/> is between <c>0xDC00</c> and <c>0xDFFF</c> (both inclusive).
+    /// </summary>
+    public bool IsLowSurrogate
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      get
+      {
+        return Utf.Char32IsLowSurrogate(Value);
+      }
+    }
+
+    /// <summary>
+    /// Returns <see langword="true"/> if and only if the <see cref="Char32"/> instance can be encoded as one code unit in UTF-16.
+    /// This means that <see cref="Value"/> is between either <c>0x0</c> and <c>0xD7FF</c> or <c>0xE000</c> and <c>0xFFFF</c> (all inclusive).
+    /// </summary>
+    public bool Is1Char16
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      get
+      {
+        return Utf.Char32Is1Char16(Value);
+      }
+    }
+
+    /// <summary>
+    /// Returns <see langword="true"/> if and only if the <see cref="Char32"/> instance can be encoded as two code units in UTF-16.
+    /// This means that <see cref="Value"/> is between <c>0x10000</c> and <c>0x10FFFF</c> (both inclusive).
+    /// </summary>
+    public bool Is2Char16s
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      get
+      {
+        return Utf.Char32Is2Char16s(Value);
+      }
+    }
+
+    /// <summary>
+    /// Gets the number of code units used to encode the <see cref="Char32"/> instance in UTF-16.
+    /// Returns <c>-1</c> if the instance is not a valid Unicode code point.
+    /// </summary>
+    public int LengthInChar16s
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      get
+      {
+        return Utf.Char32LengthInChar16s(Value);
+      }
+    }
+
+    #endregion properties related to Char16
+
     /// <summary>
     /// Standard implementation of <see cref="IComparer{T}"/> and <see cref="IEqualityComparer2{T}"/> for <see cref="Char32"/>.
     /// </summary>

@@ -223,6 +223,83 @@ namespace Neat.Unicode
 
     #endregion Equals, equality operators, IEquatable<Char8> members, object members
 
+    #region properties
+
+    /// <summary>
+    /// Returns <see langword="true"/> if and only if the <see cref="Char8"/> instance is a valid one-byte sequence in UTF-8.
+    /// This means that <see cref="Value"/> is <c>0xxxxxxx</c>.
+    /// </summary>
+    public bool Leads1
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      get
+      {
+        return Utf.Char8Leads1(Value);
+      }
+    }
+
+    /// <summary>
+    /// Returns <see langword="true"/> if and only if the <see cref="Char8"/> instance is a valid continuation byte in UTF-8,
+    /// without considering overlong sequences, surrogate code points, or values above <c>0x10FFFF</c>.
+    /// This means that <see cref="Value"/> is <c>10xxxxxx</c>.
+    /// </summary>
+    public bool Continues
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      get
+      {
+        return Utf.Char8Continues(Value);
+      }
+    }
+
+    /// <summary>
+    /// Returns <see langword="true"/> if and only if the <see cref="Char8"/> instance is a valid leading byte for a 2-byte sequence in UTF-8,
+    /// without considering overlong sequences, surrogate code points, or values above <c>0x10FFFF</c>.
+    /// This means that <see cref="Value"/> is <c>110xxxxx</c>.
+    /// (In particular, this property is <see langword="true"/> even if <see cref="Value"/> is <c>11000000</c> or <c>11000001</c>,
+    /// which cannot appear in any valid UTF-8 sequence as overlong sequences are invalid.)
+    /// </summary>
+    public bool Leads2
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      get
+      {
+        return Utf.Char8Leads2(Value);
+      }
+    }
+
+    /// <summary>
+    /// Returns <see langword="true"/> if and only if the <see cref="Char8"/> instance is a valid leading byte for a 3-byte sequence in UTF-8,
+    /// without considering overlong sequences, surrogate code points, or values above <c>0x10FFFF</c>.
+    /// This means that <see cref="Value"/> is <c>1110xxxx</c>.
+    /// </summary>
+    public bool Leads3
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      get
+      {
+        return Utf.Char8Leads3(Value);
+      }
+    }
+
+    /// <summary>
+    /// Returns <see langword="true"/> if and only if the <see cref="Char8"/> instance is a valid leading byte for a 4-byte sequence in UTF-8,
+    /// without considering overlong sequences, surrogate code points, or values above <c>0x10FFFF</c>.
+    /// This means that <see cref="Value"/> is <c>11110xxx</c>.
+    /// (In particular, this property is <see langword="true"/> even if <see cref="Value"/> is <c>11110111</c>,
+    /// which cannot appear in any valid UTF-8 sequence.)
+    /// </summary>
+    public bool Leads4
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      get
+      {
+        return Utf.Char8Leads4(Value);
+      }
+    }
+
+    #endregion properties
+
     /// <summary>
     /// Standard implementation of <see cref="IComparer{T}"/> and <see cref="IEqualityComparer2{T}"/> for <see cref="Char8"/>.
     /// </summary>

@@ -4,6 +4,186 @@ namespace Neat.Unicode
 {
   public static class Utf
   {
+    #region public methods for decoding or encoding 1 code point
+
+    /// <summary>
+    /// Tries to decode a 1-byte UTF-8 sequence.
+    /// Returns <see langword="true"/> if and only if the decoding was successful,
+    /// upon which <paramref name="char32"/> contains the valid decoded Unicode code point.
+    /// Otherwise, there is no guarantee as to what is contained in <paramref name="char32"/>.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static bool Try1Char8ToChar32(Char8 lead1, out Char32 char32)
+    {
+      char32 = new Char32(Char8ToChar32Unchecked1(lead1.Value));
+      return Char8Leads1(lead1.Value);
+    }
+
+    /// <summary>
+    /// Tries to decode a 2-byte UTF-8 sequence.
+    /// Returns <see langword="true"/> if and only if the decoding was successful,
+    /// upon which <paramref name="char32"/> contains the valid decoded Unicode code point.
+    /// Otherwise, there is no guarantee as to what is contained in <paramref name="char32"/>.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static bool Try2Char8sToChar32(Char8 lead2, Char8 cont1, out Char32 char32)
+    {
+      int value = Char8ToChar32Unchecked2(lead2.Value, cont1.Value);
+      char32 = new Char32(value);
+      return Char8Leads2(lead2.Value)
+        && Char8Continues(cont1.Value)
+        && Char32From2Char8sIsValid(value);
+    }
+
+    /// <summary>
+    /// Tries to decode a 3-byte UTF-8 sequence.
+    /// Returns <see langword="true"/> if and only if the decoding was successful,
+    /// upon which <paramref name="char32"/> contains the valid decoded Unicode code point.
+    /// Otherwise, there is no guarantee as to what is contained in <paramref name="char32"/>.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static bool Try3Char8sToChar32(Char8 lead3, Char8 cont1, Char8 cont2, out Char32 char32)
+    {
+      int value = Char8ToChar32Unchecked3(lead3.Value, cont1.Value, cont2.Value);
+      char32 = new Char32(value);
+      return Char8Leads3(lead3.Value)
+        && Char8Continues(cont1.Value)
+        && Char8Continues(cont2.Value)
+        && Char32From3Char8sIsValid(value);
+    }
+
+    /// <summary>
+    /// Tries to decode a 4-byte UTF-8 sequence.
+    /// Returns <see langword="true"/> if and only if the decoding was successful,
+    /// upon which <paramref name="char32"/> contains the valid decoded Unicode code point.
+    /// Otherwise, there is no guarantee as to what is contained in <paramref name="char32"/>.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static bool Try4Char8sToChar32(Char8 lead4, Char8 cont1, Char8 cont2, Char8 cont3, out Char32 char32)
+    {
+      int value = Char8ToChar32Unchecked4(lead4.Value, cont1.Value, cont2.Value, cont3.Value);
+      char32 = new Char32(value);
+      return Char8Leads4(lead4.Value)
+        && Char8Continues(cont1.Value)
+        && Char8Continues(cont2.Value)
+        && Char8Continues(cont3.Value)
+        && Char32From4Char8sIsValid(value);
+    }
+
+    /// <summary>
+    /// Tries to decode a 1-unit UTF-16 sequence.
+    /// Returns <see langword="true"/> if and only if the decoding was successful,
+    /// upon which <paramref name="char32"/> contains the valid decoded Unicode code point.
+    /// Otherwise, there is no guarantee as to what is contained in <paramref name="char32"/>.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static bool Try1Char16ToChar32(char char16, out Char32 char32)
+    {
+      char32 = new Char32(Char16ToChar32Unchecked1(char16));
+      return !Char16IsSurrogate(char16);
+    }
+
+    /// <summary>
+    /// Tries to decode a 2-unit UTF-16 sequence.
+    /// Returns <see langword="true"/> if and only if the decoding was successful,
+    /// upon which <paramref name="char32"/> contains the valid decoded Unicode code point.
+    /// Otherwise, there is no guarantee as to what is contained in <paramref name="char32"/>.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static bool Try2Char16sToChar32(char high, char low, out Char32 char32)
+    {
+      char32 = new Char32(Char16ToChar32Unchecked2(high, low));
+      return Char16IsHighSurrogate(high) && Char16IsLowSurrogate(low);
+    }
+
+    /// <summary>
+    /// Tries to encode a 1-byte UTF-8 sequence.
+    /// Returns <see langword="true"/> if and only if the encoding was successful,
+    /// upon which <paramref name="lead1"/> contains the valid encoded UTF-8 sequence.
+    /// Otherwise, there is no guarantee as to what is contained in <paramref name="lead1"/>.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static bool TryChar32To1Char8(Char32 char32, out byte lead1)
+    {
+      lead1 = Char32To1Char8UncheckedLead1(char32.Value);
+      return Char32Is1Char8(char32.Value);
+    }
+
+    /// <summary>
+    /// Tries to encode a 2-byte UTF-8 sequence.
+    /// Returns <see langword="true"/> if and only if the encoding was successful,
+    /// upon which <paramref name="lead2"/>, <paramref name="cont1"/> contain the valid encoded UTF-8 sequence.
+    /// Otherwise, there is no guarantee as to what are contained in <paramref name="lead2"/>, <paramref name="cont1"/>.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static bool TryChar32To2Char8s(Char32 char32, out byte lead2, out byte cont1)
+    {
+      lead2 = Char32To2Char8sUncheckedLead2(char32.Value);
+      cont1 = Char32To2Char8sUncheckedCont1(char32.Value);
+      return Char32Is2Char8s(char32.Value);
+    }
+
+    /// <summary>
+    /// Tries to encode a 3-byte UTF-8 sequence.
+    /// Returns <see langword="true"/> if and only if the encoding was successful,
+    /// upon which <paramref name="lead3"/>, <paramref name="cont1"/>, <paramref name="cont2"/> contain the valid encoded UTF-8 sequence.
+    /// Otherwise, there is no guarantee as to what are contained in <paramref name="lead3"/>, <paramref name="cont1"/>, <paramref name="cont2"/>.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static bool TryChar32To3Char8s(Char32 char32, out byte lead3, out byte cont1, out byte cont2)
+    {
+      lead3 = Char32To3Char8sUncheckedLead3(char32.Value);
+      cont1 = Char32To3Char8sUncheckedCont1(char32.Value);
+      cont2 = Char32To3Char8sUncheckedCont2(char32.Value);
+      return Char32Is3Char8s(char32.Value);
+    }
+
+    /// <summary>
+    /// Tries to encode a 4-byte UTF-8 sequence.
+    /// Returns <see langword="true"/> if and only if the encoding was successful,
+    /// upon which <paramref name="lead4"/>, <paramref name="cont1"/>, <paramref name="cont2"/>, <paramref name="cont3"/> contain the valid encoded UTF-8 sequence.
+    /// Otherwise, there is no guarantee as to what are contained in <paramref name="lead4"/>, <paramref name="cont1"/>, <paramref name="cont2"/>, <paramref name="cont3"/>.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static bool TryChar32To4Char8s(Char32 char32, out byte lead4, out byte cont1, out byte cont2, out byte cont3)
+    {
+      lead4 = Char32To4Char8sUncheckedLead4(char32.Value);
+      cont1 = Char32To4Char8sUncheckedCont1(char32.Value);
+      cont2 = Char32To4Char8sUncheckedCont2(char32.Value);
+      cont3 = Char32To4Char8sUncheckedCont3(char32.Value);
+      return Char32Is4Char8s(char32.Value);
+    }
+
+    /// <summary>
+    /// Tries to encode a 1-unit UTF-16 sequence.
+    /// Returns <see langword="true"/> if and only if the encoding was successful,
+    /// upon which <paramref name="char16"/> contains the valid encoded UTF-16 sequence.
+    /// Otherwise, there is no guarantee as to what is contained in <paramref name="char16"/>.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static bool TryChar32To1Char16(Char32 char32, out char char16)
+    {
+      char16 = Char32To1Char16Unchecked(char32.Value);
+      return Char32Is1Char16(char32.Value);
+    }
+
+    /// <summary>
+    /// Tries to encode a 2-unit UTF-16 sequence.
+    /// Returns <see langword="true"/> if and only if the encoding was successful,
+    /// upon which <paramref name="high"/>, <paramref name="low"/> contain the valid encoded UTF-16 sequence.
+    /// Otherwise, there is no guarantee as to what are contained in <paramref name="high"/>, <paramref name="low"/>.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static bool TryChar32To2Char16s(Char32 char32, out char high, out char low)
+    {
+      int prepared = Char32To2Char16sUncheckedPrepare(char32.Value);
+      high = Char32To1Char16Unchecked(prepared);
+      low = Char32To1Char16Unchecked(prepared);
+      return Char32Is2Char16s(char32.Value);
+    }
+
+    #endregion public methods for decoding or encoding 1 code point
+
     internal const int ReplacementCharacter32 = 0xFFFD;
     internal const char ReplacementCharacter16 = (char)0xFFFD;
 
@@ -190,6 +370,33 @@ namespace Neat.Unicode
       return 0x10000u <= (uint)value && (uint)value < 0x110000u;
     }
 
+    [MethodImpl(Helper.JustOptimize)]
+    internal static int Char32LengthInChar8s(int value)
+    {
+      if (Char32IsBelow0x80(value))
+      {
+        return 1;
+      }
+      if (Char32IsBelow0x800(value))
+      {
+        return 2;
+      }
+      if (Char32IsBelow0x10000(value))
+      {
+        if (Char32IsSurrogate(value))
+        {
+          goto Invalid;
+        }
+        return 3;
+      }
+      if (Char32IsBelow0x110000(value))
+      {
+        return 4;
+      }
+    Invalid:
+      return -1;
+    }
+
     #endregion generic encoding length counting for Char32 in Char8s
 
     #region generic encoding length counting for Char32 in Char16s
@@ -204,6 +411,25 @@ namespace Neat.Unicode
     internal static bool Char32Is2Char16s(int value)
     {
       return 0x10000u <= (uint)value && (uint)value < 0x110000u;
+    }
+
+    [MethodImpl(Helper.JustOptimize)]
+    internal static int Char32LengthInChar16s(int value)
+    {
+      if (Char32IsBelow0x10000(value))
+      {
+        if (Char32IsSurrogate(value))
+        {
+          goto Invalid;
+        }
+        return 1;
+      }
+      if (Char32IsBelow0x110000(value))
+      {
+        return 2;
+      }
+    Invalid:
+      return -1;
     }
 
     #endregion generic encoding length counting for Char32 in Char16s
