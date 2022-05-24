@@ -189,6 +189,9 @@ namespace Neat.Unicode
     internal const byte ReplacementCharacter8Lead3 = 0xEF;
     internal const byte ReplacementCharacter8Cont1 = 0xBF;
     internal const byte ReplacementCharacter8Cont2 = 0xBD;
+    internal const int MaximumLength32 = 0x7FEFFFFF;
+    internal const int MaximumLength16 = 0x7FEFFFFF;
+    internal const int MaximumLength8 = 0x7FFFFFC7;
 
     #region generic property determination for Char8
 
@@ -556,7 +559,9 @@ namespace Neat.Unicode
     /// <summary>
     /// Finds the first invalid <see cref="Char8"/> instance.
     /// This method returns <c>-1</c> if the stream is valid.
+    /// This method does not validate arguments.
     /// </summary>
+    /// <param name="src8s">The length must not exceed <see cref="MaximumLength8"/>.</param>
     [MethodImpl(Helper.JustOptimize)]
     internal static int FindFirstInvalidChar8(ref byte src0, int src8s)
     {
@@ -608,7 +613,9 @@ namespace Neat.Unicode
 
     /// <summary>
     /// Counts the number of invalid <see cref="Char8"/> instances.
+    /// This method does not validate arguments.
     /// </summary>
+    /// <param name="src8s">The length must not exceed <see cref="MaximumLength8"/>.</param>
     [MethodImpl(Helper.JustOptimize)]
     internal static int CountInvalidChar8s(ref byte src0, int src8s)
     {
@@ -663,7 +670,10 @@ namespace Neat.Unicode
     /// <summary>
     /// Replaces invalid <see cref="Char8"/> instances by the UTF-8 encoding of the replacement character.
     /// Each invalid instance becomes 3 valid instances.
+    /// This method does not validate arguments.
     /// </summary>
+    /// <param name="src8s">The length must not exceed <see cref="MaximumLength8"/>.</param>
+    /// <param name="dst8s">The length must not exceed <see cref="MaximumLength8"/>.</param>
     [MethodImpl(Helper.JustOptimize)]
     internal static void SanitizeChar8s(ref byte src0, int src8s, ref byte dst0, int dst8s)
     {
@@ -756,7 +766,9 @@ namespace Neat.Unicode
     /// <summary>
     /// Finds the first invalid <see langword="char"/> instance.
     /// This method returns <c>-1</c> if the stream is valid.
+    /// This method does not validate arguments.
     /// </summary>
+    /// <param name="src16s">The length must not exceed <see cref="MaximumLength16"/>.</param>
     [MethodImpl(Helper.JustOptimize)]
     internal static int FindFirstInvalidChar16(ref char src0, int src16s)
     {
@@ -788,7 +800,9 @@ namespace Neat.Unicode
 
     /// <summary>
     /// Counts the number of invalid <see langword="char"/> instances.
+    /// This method does not validate arguments.
     /// </summary>
+    /// <param name="src16s">The length must not exceed <see cref="MaximumLength16"/>.</param>
     [MethodImpl(Helper.JustOptimize)]
     internal static int CountInvalidChar16s(ref char src0, int src16s)
     {
@@ -822,7 +836,10 @@ namespace Neat.Unicode
     /// <summary>
     /// Replaces invalid <see langword="char"/> instances by the UTF-16 encoding of the replacement character.
     /// Each invalid instance becomes 1 valid instance.
+    /// This method does not validate arguments.
     /// </summary>
+    /// <param name="src16s">The length must not exceed <see cref="MaximumLength16"/>.</param>
+    /// <param name="dst16s">The length must not exceed <see cref="MaximumLength16"/>.</param>
     [MethodImpl(Helper.JustOptimize)]
     internal static void SanitizeChar16s(ref char src0, int src16s, ref char dst0, int dst16s)
     {
@@ -871,7 +888,9 @@ namespace Neat.Unicode
     /// <summary>
     /// Finds the first invalid <see cref="Char32"/> instance.
     /// This method returns <c>-1</c> if the stream is valid.
+    /// This method does not validate arguments.
     /// </summary>
+    /// <param name="src32s">The length must not exceed <see cref="MaximumLength32"/>.</param>
     [MethodImpl(Helper.JustOptimize)]
     internal static int FindFirstInvalidChar32(ref int src0, int src32s)
     {
@@ -887,7 +906,9 @@ namespace Neat.Unicode
 
     /// <summary>
     /// Counts the number of invalid <see cref="Char32"/> instances.
+    /// This method does not validate arguments.
     /// </summary>
+    /// <param name="src32s">The length must not exceed <see cref="MaximumLength32"/>.</param>
     [MethodImpl(Helper.JustOptimize)]
     internal static int CountInvalidChar32s(ref int src0, int src32s)
     {
@@ -905,7 +926,10 @@ namespace Neat.Unicode
     /// <summary>
     /// Replaces invalid <see langword="Char32"/> instances by the UTF-32 encoding of the replacement character.
     /// Each invalid instance becomes 1 valid instance.
+    /// This method does not validate arguments.
     /// </summary>
+    /// <param name="src32s">The length must not exceed <see cref="MaximumLength32"/>.</param>
+    /// <param name="dst32s">The length must not exceed <see cref="MaximumLength32"/>.</param>
     [MethodImpl(Helper.JustOptimize)]
     internal static void SanitizeChar32s(ref int src0, int src32s, ref int dst0, int dst32s)
     {
