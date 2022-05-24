@@ -217,12 +217,6 @@ namespace Neat.Unicode
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static byte Char32To1Char8Unchecked(int value)
-    {
-      return (byte)value;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
     internal static byte Char32To2Char8sUncheckedLead2(int value)
     {
       return (byte)((value >> 6) | 0xC0);
@@ -293,15 +287,15 @@ namespace Neat.Unicode
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static char Char32PreparedTo2Char16sUncheckedHigh(int value)
+    internal static char Char32PreparedTo2Char16sUncheckedHigh(int prepared)
     {
-      return (char)((value >> 10) | 0xD800);
+      return (char)((prepared >> 10) | 0xD800);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static char Char32PreparedTo2Char16sUncheckedLow(int value)
+    internal static char Char32PreparedTo2Char16sUncheckedLow(int prepared)
     {
-      return (char)((value & 0x3FF) | 0xDC00);
+      return (char)((prepared & 0x3FF) | 0xDC00);
     }
 
     #endregion Char32 to Char16
