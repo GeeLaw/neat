@@ -20,6 +20,7 @@ namespace Neat.Unicode
     /// Initializes a new instance of <see cref="String32"/>.
     /// </summary>
     /// <param name="immutableData">This array must not escape to the user.</param>
+    [MethodImpl(Helper.OptimizeInline)]
     internal String32(Char32[] immutableData)
     {
       myData = immutableData;
@@ -27,6 +28,7 @@ namespace Neat.Unicode
 
     public int Length
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
         return myData.Length;
@@ -35,6 +37,7 @@ namespace Neat.Unicode
 
     public Char32 this[int index]
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
         return myData[index];
@@ -43,6 +46,7 @@ namespace Neat.Unicode
 
     int IReadOnlyCollection<Char32>.Count
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
         return myData.Length;
@@ -51,6 +55,7 @@ namespace Neat.Unicode
 
     #region Compare, order operators, IComparable<String32> members, IComparable members
 
+    [MethodImpl(Helper.JustOptimize)]
     private static int Compare(Char32[] x, Char32[] y)
     {
       if (ReferenceEquals(x, y))
@@ -89,36 +94,43 @@ namespace Neat.Unicode
       return xlength - ylength;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static int Compare(String32 x, String32 y)
     {
       return Compare(x.myData, y.myData);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool operator <=(String32 x, String32 y)
     {
       return Compare(x.myData, y.myData) <= 0;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool operator >=(String32 x, String32 y)
     {
       return Compare(x.myData, y.myData) >= 0;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool operator <(String32 x, String32 y)
     {
       return Compare(x.myData, y.myData) < 0;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool operator >(String32 x, String32 y)
     {
       return Compare(x.myData, y.myData) > 0;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public int CompareTo(String32 other)
     {
       return Compare(myData, other.myData);
     }
 
+    [MethodImpl(Helper.JustOptimize)]
     int IComparable.CompareTo(object obj)
     {
       return ReferenceEquals(obj, null)
@@ -132,6 +144,7 @@ namespace Neat.Unicode
 
     #region Equals, equality operators, IEquatable<String32> members, object members
 
+    [MethodImpl(Helper.JustOptimize)]
     private static bool Equals(Char32[] x, Char32[] y)
     {
       if (ReferenceEquals(x, y))
@@ -163,31 +176,37 @@ namespace Neat.Unicode
       return true;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool Equals(String32 x, String32 y)
     {
       return Equals(x.myData, y.myData);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool operator ==(String32 x, String32 y)
     {
       return Equals(x.myData, y.myData);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool operator !=(String32 x, String32 y)
     {
       return !Equals(x.myData, y.myData);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public bool Equals(String32 other)
     {
       return Equals(myData, other.myData);
     }
 
+    [MethodImpl(Helper.JustOptimize)]
     public override bool Equals(object obj)
     {
       return (obj is String32 other) && Equals(myData, other.myData);
     }
 
+    [MethodImpl(Helper.JustOptimize)]
     private static int ComputeHashCode(Char32[] x)
     {
       if (ReferenceEquals(x, null))
@@ -209,6 +228,7 @@ namespace Neat.Unicode
       return hash ^ x.Length;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public override int GetHashCode()
     {
       return ComputeHashCode(myData);
@@ -230,17 +250,20 @@ namespace Neat.Unicode
       private Char32[] myData;
       private int myIndex;
 
+      [MethodImpl(Helper.OptimizeInline)]
       internal Enumerator(Char32[] data)
       {
         myData = data;
         myIndex = -1;
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       void IEnumerator.Reset()
       {
         myIndex = -1;
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public bool MoveNext(out Char32 item)
       {
         Char32[] data = myData;
@@ -255,6 +278,7 @@ namespace Neat.Unicode
         return false;
       }
 
+      [MethodImpl(Helper.JustOptimize)]
       bool IEnumerator2.MoveNext(out object item)
       {
         Char32[] data = myData;
@@ -269,6 +293,7 @@ namespace Neat.Unicode
         return false;
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public bool MoveNext()
       {
         return ++myIndex < myData.Length;
@@ -276,6 +301,7 @@ namespace Neat.Unicode
 
       public Char32 Current
       {
+        [MethodImpl(Helper.OptimizeInline)]
         get
         {
           return myData[myIndex];
@@ -284,12 +310,14 @@ namespace Neat.Unicode
 
       object IEnumerator.Current
       {
+        [MethodImpl(Helper.JustOptimize)]
         get
         {
           return myData[myIndex];
         }
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       void IDisposable.Dispose()
       {
       }
@@ -304,21 +332,25 @@ namespace Neat.Unicode
       return new Enumerator(data);
     }
 
+    [MethodImpl(Helper.JustOptimize)]
     IEnumerator2<Char32> IEnumerable2<Char32>.GetEnumerator()
     {
       return GetEnumerator();
     }
 
+    [MethodImpl(Helper.JustOptimize)]
     IEnumerator2 IEnumerable2.GetEnumerator()
     {
       return GetEnumerator();
     }
 
+    [MethodImpl(Helper.JustOptimize)]
     IEnumerator<Char32> IEnumerable<Char32>.GetEnumerator()
     {
       return GetEnumerator();
     }
 
+    [MethodImpl(Helper.JustOptimize)]
     IEnumerator IEnumerable.GetEnumerator()
     {
       return GetEnumerator();

@@ -23,6 +23,7 @@ namespace Neat.Unicode
     /// Initializes a new instance of <see cref="Char8"/>.
     /// </summary>
     /// <param name="value">The value does not have to be a possible byte in a valid UTF-8 sequence.</param>
+    [MethodImpl(Helper.OptimizeInline)]
     public Char8(byte value)
     {
       Value = value;
@@ -33,6 +34,7 @@ namespace Neat.Unicode
     /// </summary>
     /// <param name="value">The value does not have to be a possible byte in a valid UTF-8 sequence.</param>
     [CLSCompliant(false)]
+    [MethodImpl(Helper.OptimizeInline)]
     public Char8(sbyte value)
     {
       Value = (byte)value;
@@ -43,6 +45,7 @@ namespace Neat.Unicode
     /// This conversion always succeeds.
     /// </summary>
     /// <param name="value">The value does not have to be a possible byte in a valid UTF-8 sequence.</param>
+    [MethodImpl(Helper.OptimizeInline)]
     public static explicit operator Char8(byte value)
     {
       return new Char8(value);
@@ -54,6 +57,7 @@ namespace Neat.Unicode
     /// </summary>
     /// <param name="value">The value does not have to be a possible byte in a valid UTF-8 sequence.</param>
     [CLSCompliant(false)]
+    [MethodImpl(Helper.OptimizeInline)]
     public static explicit operator Char8(sbyte value)
     {
       return new Char8((byte)value);
@@ -64,6 +68,7 @@ namespace Neat.Unicode
     /// This conversion always succeeds.
     /// </summary>
     /// <param name="value">The value does not have to be a possible byte in a valid UTF-8 sequence.</param>
+    [MethodImpl(Helper.OptimizeInline)]
     public static explicit operator byte(Char8 value)
     {
       return value.Value;
@@ -75,6 +80,7 @@ namespace Neat.Unicode
     /// </summary>
     /// <param name="value">The value does not have to be a possible byte in a valid UTF-8 sequence.</param>
     [CLSCompliant(false)]
+    [MethodImpl(Helper.OptimizeInline)]
     public static explicit operator sbyte(Char8 value)
     {
       return (sbyte)value.Value;
@@ -85,38 +91,45 @@ namespace Neat.Unicode
     #region Compare, order operators, IComparable<Char8> members, IComparable members
 
     [SuppressMessage("Style", "IDE0004", Justification = "Avoid mistaking it for mod-256 subtraction.")]
+    [MethodImpl(Helper.OptimizeInline)]
     public static int Compare(Char8 x, Char8 y)
     {
       return (int)x.Value - (int)y.Value;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool operator <=(Char8 x, Char8 y)
     {
       return x.Value <= y.Value;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool operator >=(Char8 x, Char8 y)
     {
       return x.Value >= y.Value;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool operator <(Char8 x, Char8 y)
     {
       return x.Value < y.Value;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool operator >(Char8 x, Char8 y)
     {
       return x.Value > y.Value;
     }
 
     [SuppressMessage("Style", "IDE0004", Justification = "Avoid mistaking it for mod-256 subtraction.")]
+    [MethodImpl(Helper.OptimizeInline)]
     public int CompareTo(Char8 other)
     {
       return (int)Value - (int)other.Value;
     }
 
     [SuppressMessage("Style", "IDE0004", Justification = "Avoid mistaking it for mod-256 subtraction.")]
+    [MethodImpl(Helper.JustOptimize)]
     int IComparable.CompareTo(object obj)
     {
       return ReferenceEquals(obj, null)
@@ -130,31 +143,37 @@ namespace Neat.Unicode
 
     #region Equals, equality operators, IEquatable<Char8> members, object members
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool Equals(Char8 x, Char8 y)
     {
       return x.Value == y.Value;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool operator ==(Char8 x, Char8 y)
     {
       return x.Value == y.Value;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool operator !=(Char8 x, Char8 y)
     {
       return x.Value != y.Value;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public bool Equals(Char8 other)
     {
       return Value == other.Value;
     }
 
+    [MethodImpl(Helper.JustOptimize)]
     public override bool Equals(object obj)
     {
       return (obj is Char8 other) && (Value == other.Value);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public override int GetHashCode()
     {
       return Value;
@@ -216,6 +235,7 @@ namespace Neat.Unicode
       "Char8(0xFC)", "Char8(0xFD)", "Char8(0xFE)", "Char8(0xFF)"
     };
 
+    [MethodImpl(Helper.OptimizeInline)]
     public override string ToString()
     {
       return theToStringResults[Value];
@@ -306,16 +326,19 @@ namespace Neat.Unicode
     public struct Comparer : IComparer<Char8>, IEqualityComparer2<Char8>
     {
       [SuppressMessage("Style", "IDE0004", Justification = "Avoid mistaking it for mod-256 subtraction.")]
+      [MethodImpl(Helper.OptimizeInline)]
       public int Compare(Char8 x, Char8 y)
       {
         return (int)x.Value - (int)y.Value;
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public bool Equals(Char8 x, Char8 y)
       {
         return x.Value == y.Value;
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public int GetHashCode(Char8 obj)
       {
         return obj.Value;

@@ -22,6 +22,7 @@ namespace Neat.Unicode
     /// Initializes a new instance of <see cref="Char32"/>.
     /// </summary>
     /// <param name="value">The value does not have to be a valid Unicode code point.</param>
+    [MethodImpl(Helper.OptimizeInline)]
     public Char32(int value)
     {
       Value = value;
@@ -32,6 +33,7 @@ namespace Neat.Unicode
     /// </summary>
     /// <param name="value">The value does not have to be a valid Unicode code point.</param>
     [CLSCompliant(false)]
+    [MethodImpl(Helper.OptimizeInline)]
     public Char32(uint value)
     {
       Value = (int)value;
@@ -42,6 +44,7 @@ namespace Neat.Unicode
     /// This conversion always succeeds.
     /// </summary>
     /// <param name="value">The value does not have to be a valid Unicode code point.</param>
+    [MethodImpl(Helper.OptimizeInline)]
     public static explicit operator Char32(int value)
     {
       return new Char32(value);
@@ -53,6 +56,7 @@ namespace Neat.Unicode
     /// </summary>
     /// <param name="value">The value does not have to be a valid Unicode code point.</param>
     [CLSCompliant(false)]
+    [MethodImpl(Helper.OptimizeInline)]
     public static explicit operator Char32(uint value)
     {
       return new Char32((int)value);
@@ -63,6 +67,7 @@ namespace Neat.Unicode
     /// This conversion always succeeds.
     /// </summary>
     /// <param name="value">The value does not have to be a valid Unicode code point.</param>
+    [MethodImpl(Helper.OptimizeInline)]
     public static explicit operator int(Char32 value)
     {
       return value.Value;
@@ -74,6 +79,7 @@ namespace Neat.Unicode
     /// </summary>
     /// <param name="value">The value does not have to be a valid Unicode code point.</param>
     [CLSCompliant(false)]
+    [MethodImpl(Helper.OptimizeInline)]
     public static explicit operator uint(Char32 value)
     {
       return (uint)value.Value;
@@ -83,38 +89,45 @@ namespace Neat.Unicode
 
     #region Compare, order operators, IComparable<Char32> members, IComparable members
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static int Compare(Char32 x, Char32 y)
     {
       int xx = x.Value, yy = y.Value;
       return xx < yy ? -1 : xx > yy ? 1 : 0;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool operator <=(Char32 x, Char32 y)
     {
       return x.Value <= y.Value;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool operator >=(Char32 x, Char32 y)
     {
       return x.Value >= y.Value;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool operator <(Char32 x, Char32 y)
     {
       return x.Value < y.Value;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool operator >(Char32 x, Char32 y)
     {
       return x.Value > y.Value;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public int CompareTo(Char32 other)
     {
       int xx = Value, yy = other.Value;
       return xx < yy ? -1 : xx > yy ? 1 : 0;
     }
 
+    [MethodImpl(Helper.JustOptimize)]
     int IComparable.CompareTo(object obj)
     {
       if (ReferenceEquals(obj, null))
@@ -133,31 +146,37 @@ namespace Neat.Unicode
 
     #region Equals, equality operators, IEquatable<Char32> members, object members
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool Equals(Char32 x, Char32 y)
     {
       return x.Value == y.Value;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool operator ==(Char32 x, Char32 y)
     {
       return x.Value == y.Value;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool operator !=(Char32 x, Char32 y)
     {
       return x.Value != y.Value;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public bool Equals(Char32 other)
     {
       return Value == other.Value;
     }
 
+    [MethodImpl(Helper.JustOptimize)]
     public override bool Equals(object obj)
     {
       return (obj is Char32 other) && (Value == other.Value);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public override int GetHashCode()
     {
       return Value;
@@ -193,6 +212,7 @@ namespace Neat.Unicode
       return (char)((below16 < 10 ? 48 : 55) + below16);
     }
 
+    [MethodImpl(Helper.JustOptimize)]
     private static unsafe string GetString(int value)
     {
       char* char18 = stackalloc char[18];
@@ -234,6 +254,7 @@ namespace Neat.Unicode
       return new string(char18, 0, 18);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     public override string ToString()
     {
       return GetString(Value);
@@ -318,7 +339,7 @@ namespace Neat.Unicode
     /// </summary>
     public int LengthInChar8s
     {
-      [MethodImpl(Helper.JustOptimize)]
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
         return Utf.Char32LengthInChar8s(Value);
@@ -414,17 +435,20 @@ namespace Neat.Unicode
     /// </summary>
     public struct Comparer : IComparer<Char32>, IEqualityComparer2<Char32>
     {
+      [MethodImpl(Helper.OptimizeInline)]
       public int Compare(Char32 x, Char32 y)
       {
         int xx = x.Value, yy = y.Value;
         return xx < yy ? -1 : xx > yy ? 1 : 0;
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public bool Equals(Char32 x, Char32 y)
       {
         return x.Value == y.Value;
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public int GetHashCode(Char32 obj)
       {
         return obj.Value;
