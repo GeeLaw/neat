@@ -911,5 +911,29 @@ namespace Neat.Unicode
     }
 
     #endregion Char32 to Char32
+
+    #region Char8 to Char32
+
+    #endregion Char8 to Char32
+
+    #region Char16 to Char32
+
+    #endregion Char16 to Char32
+
+    #region Char32 to Char8
+
+    #endregion Char32 to Char8
+
+    #region Char32 to Char16
+
+    #endregion Char32 to Char16
+
+    #region Char8 to Char16
+
+    #endregion Char8 to Char16
+
+    #region Char16 to Char8
+
+    #endregion Char16 to Char8
   }
 }
