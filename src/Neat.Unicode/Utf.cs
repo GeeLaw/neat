@@ -223,12 +223,6 @@ namespace Neat.Unicode
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static void Char32To1Char8Unchecked(int value, out byte lead1)
-    {
-      lead1 = (byte)value;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
     internal static byte Char32To2Char8sUncheckedLead2(int value)
     {
       return (byte)((value >> 6) | 0xC0);
@@ -238,13 +232,6 @@ namespace Neat.Unicode
     internal static byte Char32To2Char8sUncheckedCont1(int value)
     {
       return (byte)((value & 0x3F) | 0x80);
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    internal static void Char32To2Char8sUnchecked(int value, out byte lead2, out byte cont1)
-    {
-      lead2 = (byte)((value >> 6) | 0xC0);
-      cont1 = (byte)((value & 0x3F) | 0x80);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
@@ -263,14 +250,6 @@ namespace Neat.Unicode
     internal static byte Char32To3Char8sUncheckedCont2(int value)
     {
       return (byte)((value & 0x3F) | 0x80);
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    internal static void Char32To3Char8sUnchecked(int value, out byte lead3, out byte cont1, out byte cont2)
-    {
-      lead3 = (byte)((value >> 12) | 0xE0);
-      cont1 = (byte)(((value >> 6) & 0x3F) | 0x80);
-      cont2 = (byte)((value & 0x3F) | 0x80);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
@@ -297,15 +276,6 @@ namespace Neat.Unicode
       return (byte)((value & 0x3F) | 0x80);
     }
 
-    [MethodImpl(Helper.OptimizeInline)]
-    internal static void Char32To4Char8sUnchecked(int value, out byte lead4, out byte cont1, out byte cont2, out byte cont3)
-    {
-      lead4 = (byte)((value >> 18) | 0xF0);
-      cont1 = (byte)(((value >> 12) & 0x3F) | 0x80);
-      cont2 = (byte)(((value >> 6) & 0x3F) | 0x80);
-      cont3 = (byte)((value & 0x3F) | 0x80);
-    }
-
     #endregion Char32 to Char8
 
     #region Char32 to Char16
@@ -314,12 +284,6 @@ namespace Neat.Unicode
     internal static char Char32To1Char16Unchecked(int value)
     {
       return (char)value;
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    internal static void Char32To1Char16Unchecked(int value, out char ch)
-    {
-      ch = (char)value;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
@@ -338,14 +302,6 @@ namespace Neat.Unicode
     internal static char Char32PreparedTo2Char16sUncheckedLow(int value)
     {
       return (char)((value & 0x3FF) | 0xDC00);
-    }
-
-    [MethodImpl(Helper.OptimizeInline)]
-    internal static void Char32To2Char16sUnchecked(int value, out char high, out char low)
-    {
-      value -= 0x10000;
-      high = (char)((value >> 10) | 0xD800);
-      low = (char)((value & 0x3FF) | 0xDC00);
     }
 
     #endregion Char32 to Char16
@@ -527,9 +483,8 @@ namespace Neat.Unicode
         {
           break;
         }
-        Char32To2Char8sUnchecked(value,
-          out Unsafe.Add(ref dst0, k++),
-          out Unsafe.Add(ref dst0, k++));
+        Unsafe.Add(ref dst0, k++) = Char32To2Char8sUncheckedLead2(value);
+        Unsafe.Add(ref dst0, k++) = Char32To2Char8sUncheckedCont1(value);
         continue;
       Below0x10000:
         i = j;
@@ -538,10 +493,9 @@ namespace Neat.Unicode
         {
           break;
         }
-        Char32To3Char8sUnchecked(value,
-          out Unsafe.Add(ref dst0, k++),
-          out Unsafe.Add(ref dst0, k++),
-          out Unsafe.Add(ref dst0, k++));
+        Unsafe.Add(ref dst0, k++) = Char32To3Char8sUncheckedLead3(value);
+        Unsafe.Add(ref dst0, k++) = Char32To3Char8sUncheckedCont1(value);
+        Unsafe.Add(ref dst0, k++) = Char32To3Char8sUncheckedCont2(value);
         continue;
       Below0x110000:
         i = j;
@@ -549,11 +503,10 @@ namespace Neat.Unicode
         {
           break;
         }
-        Char32To4Char8sUnchecked(value,
-          out Unsafe.Add(ref dst0, k++),
-          out Unsafe.Add(ref dst0, k++),
-          out Unsafe.Add(ref dst0, k++),
-          out Unsafe.Add(ref dst0, k++));
+        Unsafe.Add(ref dst0, k++) = Char32To4Char8sUncheckedLead4(value);
+        Unsafe.Add(ref dst0, k++) = Char32To4Char8sUncheckedCont1(value);
+        Unsafe.Add(ref dst0, k++) = Char32To4Char8sUncheckedCont2(value);
+        Unsafe.Add(ref dst0, k++) = Char32To4Char8sUncheckedCont3(value);
         continue;
       }
       while (k != dst8s)

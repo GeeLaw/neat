@@ -210,7 +210,9 @@ namespace Neat.Unicode
       }
       if (Utf.Char32IsBelow0x110000(value))
       {
-        Utf.Char32To2Char16sUnchecked(value, out char18[0], out char18[1]);
+        value = Utf.Char32To2Char16sUncheckedPrepare(value);
+        char18[0] = Utf.Char32PreparedTo2Char16sUncheckedHigh(value);
+        char18[1] = Utf.Char32PreparedTo2Char16sUncheckedLow(value);
         return new string(char18, 0, 2);
       }
     NotValidCodepoint:
