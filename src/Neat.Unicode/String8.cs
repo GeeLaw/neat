@@ -72,12 +72,8 @@ namespace Neat.Unicode
         return 1;
       }
       int xlength = x.Length, ylength = y.Length;
-      if (xlength == 0 || ylength == 0)
-      {
-        goto SharePrefix;
-      }
-      ref byte x0 = ref Unsafe.As<Char8, byte>(ref x[0]);
-      ref byte y0 = ref Unsafe.As<Char8, byte>(ref y[0]);
+      ref byte x0 = ref Unsafe.As<Char8, byte>(ref MemoryMarshal.GetArrayDataReference(x));
+      ref byte y0 = ref Unsafe.As<Char8, byte>(ref MemoryMarshal.GetArrayDataReference(y));
       for (int i = 0, length = (xlength < ylength ? xlength : ylength), result; i != length; ++i)
       {
         result = (int)Unsafe.Add(ref x0, i) - (int)Unsafe.Add(ref y0, i);
@@ -86,7 +82,6 @@ namespace Neat.Unicode
           return result;
         }
       }
-    SharePrefix:
       return xlength - ylength;
     }
 
@@ -156,12 +151,8 @@ namespace Neat.Unicode
       {
         return false;
       }
-      if (length == 0)
-      {
-        return true;
-      }
-      ref int x0 = ref Unsafe.As<Char8, int>(ref x[0]);
-      ref int y0 = ref Unsafe.As<Char8, int>(ref y[0]);
+      ref int x0 = ref Unsafe.As<Char8, int>(ref MemoryMarshal.GetArrayDataReference(x));
+      ref int y0 = ref Unsafe.As<Char8, int>(ref MemoryMarshal.GetArrayDataReference(y));
       int mask = (length & 3);
       length >>= 2;
       for (int i = 0; i != length; i++)
@@ -185,6 +176,9 @@ namespace Neat.Unicode
       default:
         return true;
       }
+      /* We take a leap of faith to assume that it is safe to read past the end
+      /* on the belief that array data have alignment and packing of 4 bytes.
+      /* We do NOT read past the end if the valid data are exactly a multiple of 4 bytes. */
       return ((Unsafe.Add(ref x0, length) ^ Unsafe.Add(ref y0, length)) & mask) == 0;
     }
 

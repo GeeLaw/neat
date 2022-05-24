@@ -71,12 +71,8 @@ namespace Neat.Unicode
         return 1;
       }
       int xlength = x.Length, ylength = y.Length;
-      if (xlength == 0 || ylength == 0)
-      {
-        goto SharePrefix;
-      }
-      ref int x0 = ref Unsafe.As<Char32, int>(ref x[0]);
-      ref int y0 = ref Unsafe.As<Char32, int>(ref y[0]);
+      ref int x0 = ref Unsafe.As<Char32, int>(ref MemoryMarshal.GetArrayDataReference(x));
+      ref int y0 = ref Unsafe.As<Char32, int>(ref MemoryMarshal.GetArrayDataReference(y));
       for (int i = 0, length = (xlength < ylength ? xlength : ylength), xi, yi; i != length; ++i)
       {
         xi = Unsafe.Add(ref x0, i);
@@ -90,7 +86,6 @@ namespace Neat.Unicode
           return 1;
         }
       }
-    SharePrefix:
       return xlength - ylength;
     }
 
@@ -160,12 +155,8 @@ namespace Neat.Unicode
       {
         return false;
       }
-      if (length == 0)
-      {
-        return true;
-      }
-      ref int x0 = ref Unsafe.As<Char32, int>(ref x[0]);
-      ref int y0 = ref Unsafe.As<Char32, int>(ref y[0]);
+      ref int x0 = ref Unsafe.As<Char32, int>(ref MemoryMarshal.GetArrayDataReference(x));
+      ref int y0 = ref Unsafe.As<Char32, int>(ref MemoryMarshal.GetArrayDataReference(y));
       for (int i = 0; i != length; i++)
       {
         if (Unsafe.Add(ref x0, i) != Unsafe.Add(ref y0, i))
