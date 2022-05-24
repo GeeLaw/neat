@@ -58,13 +58,13 @@ namespace Neat.Unicode
     [MethodImpl(Helper.OptimizeInline)]
     internal static int Char8ToChar32Unchecked3(byte lead3, byte cont1, byte cont2)
     {
-      return ((lead3 & 0x1F) << 12) | ((cont1 & 0x3F) << 6) | (cont2 & 0x3F);
+      return ((lead3 & 0x0F) << 12) | ((cont1 & 0x3F) << 6) | (cont2 & 0x3F);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
     internal static int Char8ToChar32Unchecked4(byte lead4, byte cont1, byte cont2, byte cont3)
     {
-      return ((lead4 & 0x1F) << 18) | ((cont1 & 0x3F) << 12) | ((cont2 & 0x3F) << 6) | (cont3 & 0x3F);
+      return ((lead4 & 0x07) << 18) | ((cont1 & 0x3F) << 12) | ((cont2 & 0x3F) << 6) | (cont3 & 0x3F);
     }
 
     #endregion Char8 to Char32
