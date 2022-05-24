@@ -211,6 +211,12 @@ namespace Neat.Unicode
     #region Char32 to Char8
 
     [MethodImpl(Helper.OptimizeInline)]
+    internal static byte Char32To1Char8UncheckedLead1(int value)
+    {
+      return (byte)value;
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
     internal static byte Char32To1Char8Unchecked(int value)
     {
       return (byte)value;
@@ -223,10 +229,40 @@ namespace Neat.Unicode
     }
 
     [MethodImpl(Helper.OptimizeInline)]
+    internal static byte Char32To2Char8sUncheckedLead2(int value)
+    {
+      return (byte)((value >> 6) | 0xC0);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    internal static byte Char32To2Char8sUncheckedCont1(int value)
+    {
+      return (byte)((value & 0x3F) | 0x80);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
     internal static void Char32To2Char8sUnchecked(int value, out byte lead2, out byte cont1)
     {
       lead2 = (byte)((value >> 6) | 0xC0);
       cont1 = (byte)((value & 0x3F) | 0x80);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    internal static byte Char32To3Char8sUncheckedLead3(int value)
+    {
+      return (byte)((value >> 12) | 0xE0);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    internal static byte Char32To3Char8sUncheckedCont1(int value)
+    {
+      return (byte)(((value >> 6) & 0x3F) | 0x80);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    internal static byte Char32To3Char8sUncheckedCont2(int value)
+    {
+      return (byte)((value & 0x3F) | 0x80);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
@@ -235,6 +271,30 @@ namespace Neat.Unicode
       lead3 = (byte)((value >> 12) | 0xE0);
       cont1 = (byte)(((value >> 6) & 0x3F) | 0x80);
       cont2 = (byte)((value & 0x3F) | 0x80);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    internal static byte Char32To4Char8sUncheckedLead4(int value)
+    {
+      return (byte)((value >> 18) | 0xF0);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    internal static byte Char32To4Char8sUncheckedCont1(int value)
+    {
+      return (byte)(((value >> 12) & 0x3F) | 0x80);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    internal static byte Char32To4Char8sUncheckedCont2(int value)
+    {
+      return (byte)(((value >> 6) & 0x3F) | 0x80);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    internal static byte Char32To4Char8sUncheckedCont3(int value)
+    {
+      return (byte)((value & 0x3F) | 0x80);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
@@ -260,6 +320,24 @@ namespace Neat.Unicode
     internal static void Char32To1Char16Unchecked(int value, out char ch)
     {
       ch = (char)value;
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    internal static int Char32To2Char16sUncheckedPrepare(int value)
+    {
+      return value - 0x10000;
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    internal static char Char32PreparedTo2Char16sUncheckedHigh(int value)
+    {
+      return (char)((value >> 10) | 0xD800);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    internal static char Char32PreparedTo2Char16sUncheckedLow(int value)
+    {
+      return (char)((value & 0x3FF) | 0xDC00);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
