@@ -186,6 +186,9 @@ namespace Neat.Unicode
 
     internal const int ReplacementCharacter32 = 0xFFFD;
     internal const char ReplacementCharacter16 = (char)0xFFFD;
+    internal const byte ReplacementCharacter8Lead3 = 0xEF;
+    internal const byte ReplacementCharacter8Cont1 = 0xBF;
+    internal const byte ReplacementCharacter8Cont2 = 0xBD;
 
     #region generic property determination for Char8
 
@@ -666,7 +669,7 @@ namespace Neat.Unicode
     {
       int k = 0;
       byte lead, cont1, cont2, cont3;
-      for (int i = 0, j = 0, value; i != src8s && k != dst8s; j = ++i)
+      for (int i = 0, j = 0; i != src8s && k != dst8s; j = ++i)
       {
         if (Char8Leads1(lead = Unsafe.Add(ref src0, i)))
         {
@@ -676,7 +679,7 @@ namespace Neat.Unicode
         if (Char8Leads2(lead))
         {
           if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
-            && Char32From2Char8sIsValid(value = Char8ToChar32Unchecked2(lead, cont1)))
+            && Char32From2Char8sIsValid(Char8ToChar32Unchecked2(lead, cont1)))
           {
             goto Below0x800;
           }
@@ -686,7 +689,7 @@ namespace Neat.Unicode
         {
           if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
             && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
-            && Char32From3Char8sIsValid(value = Char8ToChar32Unchecked3(lead, cont1, cont2)))
+            && Char32From3Char8sIsValid(Char8ToChar32Unchecked3(lead, cont1, cont2)))
           {
             goto Below0x10000;
           }
@@ -697,14 +700,16 @@ namespace Neat.Unicode
           if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
             && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
             && ++j != src8s && Char8Continues(cont3 = Unsafe.Add(ref src0, j))
-            && Char32From4Char8sIsValid(value = Char8ToChar32Unchecked4(lead, cont1, cont2, cont3)))
+            && Char32From4Char8sIsValid(Char8ToChar32Unchecked4(lead, cont1, cont2, cont3)))
           {
             goto Below0x110000;
           }
           goto Invalid;
         }
       Invalid:
-        value = ReplacementCharacter32;
+        lead = ReplacementCharacter8Lead3;
+        cont1 = ReplacementCharacter8Cont1;
+        cont2 = ReplacementCharacter8Cont2;
         goto IsReplacement;
       Below0x800:
         i = j;
@@ -712,8 +717,8 @@ namespace Neat.Unicode
         {
           break;
         }
-        Unsafe.Add(ref dst0, k++) = Char32To2Char8sUncheckedLead2(value);
-        Unsafe.Add(ref dst0, k++) = Char32To2Char8sUncheckedCont1(value);
+        Unsafe.Add(ref dst0, k++) = lead;
+        Unsafe.Add(ref dst0, k++) = cont1;
         continue;
       Below0x10000:
         i = j;
@@ -722,9 +727,9 @@ namespace Neat.Unicode
         {
           break;
         }
-        Unsafe.Add(ref dst0, k++) = Char32To3Char8sUncheckedLead3(value);
-        Unsafe.Add(ref dst0, k++) = Char32To3Char8sUncheckedCont1(value);
-        Unsafe.Add(ref dst0, k++) = Char32To3Char8sUncheckedCont2(value);
+        Unsafe.Add(ref dst0, k++) = lead;
+        Unsafe.Add(ref dst0, k++) = cont1;
+        Unsafe.Add(ref dst0, k++) = cont2;
         continue;
       Below0x110000:
         i = j;
@@ -732,10 +737,10 @@ namespace Neat.Unicode
         {
           break;
         }
-        Unsafe.Add(ref dst0, k++) = Char32To4Char8sUncheckedLead4(value);
-        Unsafe.Add(ref dst0, k++) = Char32To4Char8sUncheckedCont1(value);
-        Unsafe.Add(ref dst0, k++) = Char32To4Char8sUncheckedCont2(value);
-        Unsafe.Add(ref dst0, k++) = Char32To4Char8sUncheckedCont3(value);
+        Unsafe.Add(ref dst0, k++) = lead;
+        Unsafe.Add(ref dst0, k++) = cont1;
+        Unsafe.Add(ref dst0, k++) = cont2;
+        Unsafe.Add(ref dst0, k++) = cont3;
         continue;
       }
       while (k != dst8s)
