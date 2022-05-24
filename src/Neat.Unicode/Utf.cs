@@ -528,16 +528,19 @@ namespace Neat.Unicode
 
     #region validity of Char32 from Char8 (overlong, surrogate, above 0x10FFFF)
 
+    [MethodImpl(Helper.OptimizeInline)]
     internal static bool Char32From2Char8sIsValid(int value)
     {
       return 0x80u <= (uint)value;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     internal static bool Char32From3Char8sIsValid(int value)
     {
       return 0x800u <= (uint)value && (value & 0xFFFFF800) != 0xD800;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     internal static bool Char32From4Char8sIsValid(int value)
     {
       return 0x10000u <= (uint)value && (uint)value < 0x110000u;
@@ -549,6 +552,7 @@ namespace Neat.Unicode
     /// Finds the first invalid <see cref="Char8"/> instance.
     /// This method returns <c>-1</c> if the stream is valid.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     internal static int FindFirstInvalidChar8(ref byte src0, int src8s)
     {
       byte lead, cont1, cont2, cont3;
@@ -600,6 +604,7 @@ namespace Neat.Unicode
     /// <summary>
     /// Counts the number of invalid <see cref="Char8"/> instances.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     internal static int CountInvalidChar8s(ref byte src0, int src8s)
     {
       int invalids = 0;
@@ -653,6 +658,7 @@ namespace Neat.Unicode
     /// <summary>
     /// Replaces invalid <see cref="Char8"/> instances by the replacement character.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     internal static void SanitizeChar8s(ref byte src0, int src8s, ref byte dst0, int dst8s)
     {
       int k = 0;
@@ -739,6 +745,7 @@ namespace Neat.Unicode
     /// Finds the first invalid <see langword="char"/> instance.
     /// This method returns <c>-1</c> if the stream is valid.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     internal static int FindFirstInvalidChar16(ref char src0, int src16s)
     {
       char first;
@@ -768,6 +775,7 @@ namespace Neat.Unicode
     /// <summary>
     /// Counts the number of invalid <see langword="char"/> instances.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     internal static int CountInvalidChar16s(ref char src0, int src16s)
     {
       int invalids = 0;
@@ -798,6 +806,7 @@ namespace Neat.Unicode
     /// <summary>
     /// Replaces invalid <see langword="char"/> instances by the replacement character.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     internal static void SanitizeChar16s(ref char src0, int src16s, ref char dst0, int dst16s)
     {
       int k = 0;
@@ -842,6 +851,7 @@ namespace Neat.Unicode
     /// Finds the first invalid <see cref="Char32"/> instance.
     /// This method returns <c>-1</c> if the stream is valid.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     internal static int FindFirstInvalidChar32(ref int src0, int src32s)
     {
       for (int i = 0; i != src32s; ++i)
@@ -857,6 +867,7 @@ namespace Neat.Unicode
     /// <summary>
     /// Counts the number of invalid <see cref="Char32"/> instances.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     internal static int CountInvalidChar32s(ref int src0, int src32s)
     {
       int invalids = 0;
@@ -873,6 +884,7 @@ namespace Neat.Unicode
     /// <summary>
     /// Replaces invalid <see langword="Char32"/> instances by the replacement character.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     internal static void SanitizeChar32s(ref int src0, int src32s, ref int dst0, int dst32s)
     {
       int k = 0;
