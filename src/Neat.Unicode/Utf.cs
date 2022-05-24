@@ -658,7 +658,8 @@ namespace Neat.Unicode
     }
 
     /// <summary>
-    /// Replaces invalid <see cref="Char8"/> instances by the replacement character.
+    /// Replaces invalid <see cref="Char8"/> instances by the UTF-8 encoding of the replacement character.
+    /// Each invalid instance becomes 3 valid instances.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
     internal static void SanitizeChar8s(ref byte src0, int src8s, ref byte dst0, int dst8s)
@@ -767,8 +768,10 @@ namespace Neat.Unicode
           {
             goto InvalidDecrease;
           }
+          /* Valid2 */
           continue;
         }
+        /* Valid1 */
         continue;
       InvalidDecrease:
         return --i;
@@ -798,8 +801,10 @@ namespace Neat.Unicode
           {
             goto InvalidDecrease;
           }
+          /* Valid2 */
           continue;
         }
+        /* Valid1 */
         continue;
       InvalidDecrease:
         --i;
@@ -810,7 +815,8 @@ namespace Neat.Unicode
     }
 
     /// <summary>
-    /// Replaces invalid <see langword="char"/> instances by the replacement character.
+    /// Replaces invalid <see langword="char"/> instances by the UTF-16 encoding of the replacement character.
+    /// Each invalid instance becomes 1 valid instance.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
     internal static void SanitizeChar16s(ref char src0, int src16s, ref char dst0, int dst16s)
@@ -831,7 +837,7 @@ namespace Neat.Unicode
           }
           goto Valid2;
         }
-        /* Valid1: */
+        /* Valid1 */
         Unsafe.Add(ref dst0, k++) = first;
         continue;
       Valid2:
@@ -892,7 +898,8 @@ namespace Neat.Unicode
     }
 
     /// <summary>
-    /// Replaces invalid <see langword="Char32"/> instances by the replacement character.
+    /// Replaces invalid <see langword="Char32"/> instances by the UTF-32 encoding of the replacement character.
+    /// Each invalid instance becomes 1 valid instance.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
     internal static void SanitizeChar32s(ref int src0, int src32s, ref int dst0, int dst32s)
