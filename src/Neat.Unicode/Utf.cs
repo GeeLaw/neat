@@ -548,6 +548,8 @@ namespace Neat.Unicode
 
     #endregion validity of Char32 from Char8 (overlong, surrogate, above 0x10FFFF)
 
+    #region Char8 to Char8
+
     /// <summary>
     /// Finds the first invalid <see cref="Char8"/> instance.
     /// This method returns <c>-1</c> if the stream is valid.
@@ -741,6 +743,10 @@ namespace Neat.Unicode
       }
     }
 
+    #endregion Char8 to Char8
+
+    #region Char16 to Char16
+
     /// <summary>
     /// Finds the first invalid <see langword="char"/> instance.
     /// This method returns <c>-1</c> if the stream is valid.
@@ -847,6 +853,10 @@ namespace Neat.Unicode
       }
     }
 
+    #endregion Char16 to Char16
+
+    #region Char32 to Char32
+
     /// <summary>
     /// Finds the first invalid <see cref="Char32"/> instance.
     /// This method returns <c>-1</c> if the stream is valid.
@@ -899,5 +909,7 @@ namespace Neat.Unicode
         Unsafe.Add(ref dst0, k++) = 0;
       }
     }
+
+    #endregion Char32 to Char32
   }
 }
