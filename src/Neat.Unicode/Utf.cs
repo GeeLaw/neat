@@ -80,7 +80,7 @@ namespace Neat.Unicode
     public static bool Try1Char16ToChar32(char char16, out Char32 char32)
     {
       char32 = new Char32(Char16ToChar32Unchecked1(char16));
-      return !Char16IsSurrogate(char16);
+      return Char16IsNotSurrogate(char16);
     }
 
     /// <summary>
@@ -914,7 +914,7 @@ namespace Neat.Unicode
     {
       for (int i = 0; i != src32s; ++i)
       {
-        if (!Char32IsValid(Unsafe.Add(ref src0, i)))
+        if (Char32IsNotValid(Unsafe.Add(ref src0, i)))
         {
           return i;
         }
@@ -933,7 +933,7 @@ namespace Neat.Unicode
       int invalids = 0;
       for (int i = 0; i != src32s; ++i)
       {
-        if (!Char32IsValid(Unsafe.Add(ref src0, i)))
+        if (Char32IsNotValid(Unsafe.Add(ref src0, i)))
         {
           ++invalids;
         }
