@@ -264,6 +264,12 @@ namespace Neat.Unicode
     }
 
     [MethodImpl(Helper.OptimizeInline)]
+    internal static bool Char16IsNotSurrogate(char value)
+    {
+      return (value & 0xFFFFF800) != 0xD800;
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
     internal static bool Char16IsHighSurrogate(char value)
     {
       return (value & 0xFFFFFC00) == 0xD800;
@@ -273,6 +279,12 @@ namespace Neat.Unicode
     internal static bool Char16IsLowSurrogate(char value)
     {
       return (value & 0xFFFFFC00) == 0xDC00;
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    internal static bool Char16IsNotLowSurrogate(char value)
+    {
+      return (value & 0xFFFFFC00) != 0xDC00;
     }
 
     #endregion generic property determination for Char16
@@ -327,6 +339,12 @@ namespace Neat.Unicode
     internal static bool Char32IsValid(int value)
     {
       return (uint)value < 0x110000u && (value & 0xFFFFF800) != 0xD800;
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    internal static bool Char32IsNotValid(int value)
+    {
+      return (uint)value >= 0x110000u || (value & 0xFFFFF800) == 0xD800;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
