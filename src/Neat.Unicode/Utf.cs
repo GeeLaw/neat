@@ -977,6 +977,106 @@ namespace Neat.Unicode
 
     #region Char16 to Char32
 
+    /// <summary>
+    /// Given UTF-16, computes UTF-32 length.
+    /// Returns <see langword="true"/> if and only if UTF-16 is valid,
+    /// upon which <paramref name="countIndex"/> contains the number of <see cref="Char32"/> instances needed.
+    /// Otherwise, <paramref name="countIndex"/> contains the index of the first invalid <see cref="char"/> instance.
+    /// This method does not validate arguments.
+    /// </summary>
+    /// <param name="src16s">The length must not exceed <see cref="MaximumLength16"/>.</param>
+    internal static bool Char16sToChar32sCountStrict(ref char src0, int src16s, out int countIndex)
+    {
+      int dst32s = 0;
+      char first;
+      for (int i = 0; i != src16s; ++i, ++dst32s)
+      {
+        if (Char16IsNotSurrogate(first = Unsafe.Add(ref src0, i)))
+        {
+          /* Valid1 */
+          continue;
+        }
+        if (Char16IsHighSurrogate(first))
+        {
+          if (++i == src16s || Char16IsNotLowSurrogate(Unsafe.Add(ref src0, i)))
+          {
+            /* InvalidDecrease */
+            --i;
+            goto Invalid;
+          }
+          /* Valid2 */
+          continue;
+        }
+      Invalid:
+        countIndex = i;
+        return false;
+      }
+      countIndex = dst32s;
+      return true;
+    }
+
+    /// <summary>
+    /// Given UTF-16, computes UTF-32 length, with invalid <see cref="char"/> instances replaced by the UTF-32 encoding of the replacement character.
+    /// This method does not validate arguments.
+    /// </summary>
+    /// <param name="src16s">The length must not exceed <see cref="MaximumLength16"/>.</param>
+    internal static int Char16sToChar32sCountReplace(ref char src0, int src16s)
+    {
+      int dst32s = 0;
+      for (int i = 0; i != src16s; ++i, ++dst32s)
+      {
+        if (Char16IsHighSurrogate(Unsafe.Add(ref src0, i))
+          && (++i == src16s || Char16IsNotLowSurrogate(Unsafe.Add(ref src0, i))))
+        {
+          /* InvalidDecrease */
+          --i;
+        }
+        /* Valid1, Valid2, Invalid (including falling through from InvalidDecrease) */
+      }
+      return dst32s;
+    }
+
+    /// <summary>
+    /// Transforms UTF-16 to UTF-32, with invalid <see cref="char"/> instances replaced by the UTF-32 encoding of the replacement character.
+    /// This method does not validate arguments, and will write exactly <paramref name="dst32s"/> elements beginning <paramref name="dst0"/>.
+    /// </summary>
+    /// <param name="src16s">The length must not exceed <see cref="MaximumLength16"/>.</param>
+    /// <param name="dst32s">The length must not exceed <see cref="MaximumLength32"/>.</param>
+    internal static void Char16sToChar32sTransform(ref char src0, int src16s, ref int dst0, int dst32s)
+    {
+      int k = 0;
+      char first, low;
+      for (int i = 0; i != src16s && k != dst32s; ++i)
+      {
+        if (Char16IsNotSurrogate(first = Unsafe.Add(ref src0, i)))
+        {
+          goto Valid1;
+        }
+        if (Char16IsHighSurrogate(first))
+        {
+          if (++i == src16s || Char16IsNotLowSurrogate(low = Unsafe.Add(ref src0, i)))
+          {
+            /* InvalidDecrease */
+            --i;
+            goto Invalid;
+          }
+          goto Valid2;
+        }
+      Invalid:
+        first = ReplacementCharacter16;
+      Valid1:
+        Unsafe.Add(ref dst0, k++) = Char16ToChar32Unchecked1(first);
+        continue;
+      Valid2:
+        Unsafe.Add(ref dst0, k++) = Char16ToChar32Unchecked2(first, low);
+        continue;
+      }
+      while (k != dst32s)
+      {
+        Unsafe.Add(ref dst0, k++) = 0;
+      }
+    }
+
     #endregion Char16 to Char32
 
     #region Char32 to Char8
