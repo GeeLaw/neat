@@ -588,6 +588,7 @@ namespace Neat.Unicode
       {
         if (Char8Leads1(lead = Unsafe.Add(ref src0, i)))
         {
+          /* Valid1 */
           continue;
         }
         j = i;
@@ -596,7 +597,7 @@ namespace Neat.Unicode
           if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
             && Char32From2Char8sIsValid(Char8ToChar32Unchecked2(lead, cont1)))
           {
-            goto Valid;
+            goto Valid2;
           }
           goto Invalid;
         }
@@ -606,7 +607,7 @@ namespace Neat.Unicode
             && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
             && Char32From3Char8sIsValid(Char8ToChar32Unchecked3(lead, cont1, cont2)))
           {
-            goto Valid;
+            goto Valid3;
           }
           goto Invalid;
         }
@@ -617,13 +618,15 @@ namespace Neat.Unicode
             && ++j != src8s && Char8Continues(cont3 = Unsafe.Add(ref src0, j))
             && Char32From4Char8sIsValid(Char8ToChar32Unchecked4(lead, cont1, cont2, cont3)))
           {
-            goto Valid;
+            goto Valid4;
           }
           goto Invalid;
         }
       Invalid:
         return i;
-      Valid:
+      Valid2:
+      Valid3:
+      Valid4:
         i = j;
       }
       return -1;
@@ -643,6 +646,7 @@ namespace Neat.Unicode
       {
         if (Char8Leads1(lead = Unsafe.Add(ref src0, i)))
         {
+          /* Valid1 */
           continue;
         }
         j = i;
@@ -651,7 +655,7 @@ namespace Neat.Unicode
           if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
             && Char32From2Char8sIsValid(Char8ToChar32Unchecked2(lead, cont1)))
           {
-            goto Valid;
+            goto Valid2;
           }
           goto Invalid;
         }
@@ -661,7 +665,7 @@ namespace Neat.Unicode
             && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
             && Char32From3Char8sIsValid(Char8ToChar32Unchecked3(lead, cont1, cont2)))
           {
-            goto Valid;
+            goto Valid3;
           }
           goto Invalid;
         }
@@ -672,14 +676,16 @@ namespace Neat.Unicode
             && ++j != src8s && Char8Continues(cont3 = Unsafe.Add(ref src0, j))
             && Char32From4Char8sIsValid(Char8ToChar32Unchecked4(lead, cont1, cont2, cont3)))
           {
-            goto Valid;
+            goto Valid4;
           }
           goto Invalid;
         }
       Invalid:
         ++invalids;
         continue;
-      Valid:
+      Valid2:
+      Valid3:
+      Valid4:
         i = j;
       }
       return invalids;
@@ -701,6 +707,7 @@ namespace Neat.Unicode
       {
         if (Char8Leads1(lead = Unsafe.Add(ref src0, i)))
         {
+          /* Valid1 */
           Unsafe.Add(ref dst0, k++) = lead;
           continue;
         }
@@ -709,7 +716,7 @@ namespace Neat.Unicode
           if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
             && Char32From2Char8sIsValid(Char8ToChar32Unchecked2(lead, cont1)))
           {
-            goto Below0x800;
+            goto Valid2;
           }
           goto Invalid;
         }
@@ -719,7 +726,7 @@ namespace Neat.Unicode
             && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
             && Char32From3Char8sIsValid(Char8ToChar32Unchecked3(lead, cont1, cont2)))
           {
-            goto Below0x10000;
+            goto Valid3;
           }
           goto Invalid;
         }
@@ -730,7 +737,7 @@ namespace Neat.Unicode
             && ++j != src8s && Char8Continues(cont3 = Unsafe.Add(ref src0, j))
             && Char32From4Char8sIsValid(Char8ToChar32Unchecked4(lead, cont1, cont2, cont3)))
           {
-            goto Below0x110000;
+            goto Valid4;
           }
           goto Invalid;
         }
@@ -739,7 +746,7 @@ namespace Neat.Unicode
         cont1 = ReplacementCharacter8Cont1;
         cont2 = ReplacementCharacter8Cont2;
         goto IsReplacement;
-      Below0x800:
+      Valid2:
         i = j;
         if (dst8s == k + 1)
         {
@@ -748,7 +755,7 @@ namespace Neat.Unicode
         Unsafe.Add(ref dst0, k++) = lead;
         Unsafe.Add(ref dst0, k++) = cont1;
         continue;
-      Below0x10000:
+      Valid3:
         i = j;
       IsReplacement:
         if (dst8s <= k + 2)
@@ -759,7 +766,7 @@ namespace Neat.Unicode
         Unsafe.Add(ref dst0, k++) = cont1;
         Unsafe.Add(ref dst0, k++) = cont2;
         continue;
-      Below0x110000:
+      Valid4:
         i = j;
         if (dst8s <= k + 3)
         {
