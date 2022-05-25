@@ -790,30 +790,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     internal static int FindFirstInvalidChar16(ref char src0, int src16s)
     {
-      char first;
-      for (int i = 0; i != src16s; ++i)
-      {
-        if (Char16IsLowSurrogate(first = Unsafe.Add(ref src0, i)))
-        {
-          goto Invalid;
-        }
-        if (Char16IsHighSurrogate(first))
-        {
-          if (++i == src16s || !Char16IsLowSurrogate(Unsafe.Add(ref src0, i)))
-          {
-            goto InvalidDecrease;
-          }
-          /* Valid2 */
-          continue;
-        }
-        /* Valid1 */
-        continue;
-      InvalidDecrease:
-        return --i;
-      Invalid:
-        return i;
-      }
-      return -1;
+      throw new System.NotImplementedException();
     }
 
     /// <summary>
@@ -824,31 +801,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     internal static int CountInvalidChar16s(ref char src0, int src16s)
     {
-      int invalids = 0;
-      char first;
-      for (int i = 0; i != src16s; ++i)
-      {
-        if (Char16IsLowSurrogate(first = Unsafe.Add(ref src0, i)))
-        {
-          goto Invalid;
-        }
-        if (Char16IsHighSurrogate(first))
-        {
-          if (++i == src16s || !Char16IsLowSurrogate(Unsafe.Add(ref src0, i)))
-          {
-            goto InvalidDecrease;
-          }
-          /* Valid2 */
-          continue;
-        }
-        /* Valid1 */
-        continue;
-      InvalidDecrease:
-        --i;
-      Invalid:
-        ++invalids;
-      }
-      return invalids;
+      throw new System.NotImplementedException();
     }
 
     /// <summary>
@@ -861,42 +814,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     internal static void SanitizeChar16s(ref char src0, int src16s, ref char dst0, int dst16s)
     {
-      int k = 0;
-      char first, low;
-      for (int i = 0; i != src16s && k != dst16s; ++i)
-      {
-        if (Char16IsLowSurrogate(first = Unsafe.Add(ref src0, i)))
-        {
-          goto Invalid;
-        }
-        if (Char16IsHighSurrogate(first))
-        {
-          if (++i == src16s || !Char16IsLowSurrogate(low = Unsafe.Add(ref src0, i)))
-          {
-            goto InvalidDecrease;
-          }
-          goto Valid2;
-        }
-        /* Valid1 */
-        Unsafe.Add(ref dst0, k++) = first;
-        continue;
-      Valid2:
-        if (dst16s == k + 1)
-        {
-          break;
-        }
-        Unsafe.Add(ref dst0, k++) = first;
-        Unsafe.Add(ref dst0, k++) = low;
-        continue;
-      InvalidDecrease:
-        --i;
-      Invalid:
-        Unsafe.Add(ref dst0, k++) = ReplacementCharacter16;
-      }
-      while (k != dst16s)
-      {
-        Unsafe.Add(ref dst0, k++) = (char)0;
-      }
+      throw new System.NotImplementedException();
     }
 
     #endregion Char16 to Char16
