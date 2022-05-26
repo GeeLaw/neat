@@ -981,7 +981,7 @@ namespace Neat.Unicode
     /// Given UTF-16, computes UTF-32 length.
     /// Returns <see langword="true"/> if and only if UTF-16 is valid,
     /// upon which <paramref name="countIndex"/> contains the number of <see cref="Char32"/> instances needed.
-    /// Otherwise, <paramref name="countIndex"/> contains the index of the first invalid <see cref="char"/> instance.
+    /// Otherwise, <paramref name="countIndex"/> contains the index of the first invalid <see langword="char"/> instance.
     /// This method does not validate arguments.
     /// </summary>
     /// <param name="src16s">The length must not exceed <see cref="MaximumLength16"/>.</param>
@@ -1016,7 +1016,7 @@ namespace Neat.Unicode
     }
 
     /// <summary>
-    /// Given UTF-16, computes UTF-32 length, with invalid <see cref="char"/> instances replaced by the UTF-32 encoding of the replacement character.
+    /// Given UTF-16, computes UTF-32 length, with invalid <see langword="char"/> instances replaced by the UTF-32 encoding of the replacement character.
     /// This method does not validate arguments.
     /// </summary>
     /// <param name="src16s">The length must not exceed <see cref="MaximumLength16"/>.</param>
@@ -1037,7 +1037,7 @@ namespace Neat.Unicode
     }
 
     /// <summary>
-    /// Transforms UTF-16 to UTF-32, with invalid <see cref="char"/> instances replaced by the UTF-32 encoding of the replacement character.
+    /// Transforms UTF-16 to UTF-32, with invalid <see langword="char"/> instances replaced by the UTF-32 encoding of the replacement character.
     /// This method does not validate arguments, and will write exactly <paramref name="dst32s"/> elements beginning <paramref name="dst0"/>.
     /// </summary>
     /// <param name="src16s">The length must not exceed <see cref="MaximumLength16"/>.</param>
