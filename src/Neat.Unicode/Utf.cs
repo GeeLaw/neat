@@ -1078,6 +1078,105 @@ namespace Neat.Unicode
 
     #region String32 to String16
 
+    /// <summary>
+    /// Given UTF-32, computes UTF-16 length.
+    /// Returns <see langword="true"/> if and only if UTF-32 is valid,
+    /// upon which <paramref name="countIndex"/> contains the number of <see langword="char"/> instances needed.
+    /// Otherwise, <paramref name="countIndex"/> contains the index of the first invalid <see cref="Char32"/> instance.
+    /// This method does not validate arguments.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    internal static bool String32ToString16CountStrict(ref int src0, int src32s, out long countIndex)
+    {
+      int dst16sMoreThanSrc32s = 0;
+      for (int i = 0, value; i != src32s; ++i)
+      {
+        if (Char32IsBelow0x10000(value = Unsafe.Add(ref src0, i)))
+        {
+          if (Char32IsNotSurrogate(value))
+          {
+            /* Valid1 */
+            continue;
+          }
+          goto Invalid;
+        }
+        if (Char32IsBelow0x110000(value))
+        {
+          /* Valid2 */
+          ++dst16sMoreThanSrc32s;
+          continue;
+        }
+      Invalid:
+        countIndex = i;
+        return false;
+      }
+      countIndex = (long)src32s + dst16sMoreThanSrc32s;
+      return true;
+    }
+
+    /// <summary>
+    /// Given UTF-32, computes UTF-16 length, with invalid <see cref="Char32"/> instances replaced by the UTF-16 encoding of the replacement character.
+    /// This method does not validate arguments.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    internal static long String32ToString16CountReplace(ref int src0, int src32s)
+    {
+      int dst16sMoreThanSrc32s = 0;
+      for (int i = 0; i != src32s; ++i)
+      {
+        if (Char32Is2Char16s(Unsafe.Add(ref src0, i)))
+        {
+          /* Valid2 */
+          ++dst16sMoreThanSrc32s;
+        }
+        /* Valid1, Invalid */
+      }
+      return (long)src32s + dst16sMoreThanSrc32s;
+    }
+
+    /// <summary>
+    /// Transforms UTF-32 to UTF-16, with invalid <see cref="Char32"/> instances replaced by the UTF-16 encoding of the replacement character.
+    /// This method does not validate arguments, and will write exactly <paramref name="dst16s"/> elements beginning <paramref name="dst0"/>.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    internal static void String32ToString16Transform(ref int src0, int src32s, ref char dst0, int dst16s)
+    {
+      int k = 0;
+      for (int i = 0, value; i != src32s && k != dst16s; ++i)
+      {
+        if (Char32IsBelow0x10000(value = Unsafe.Add(ref src0, i)))
+        {
+          if (Char32IsNotSurrogate(value))
+          {
+            goto Valid1;
+          }
+          goto Invalid;
+        }
+        if (Char32IsBelow0x110000(value))
+        {
+          goto Valid2;
+        }
+      Invalid:
+        value = ReplacementCharacter16;
+      Valid1:
+        Unsafe.Add(ref dst0, k++) = Char32To1Char16Unchecked(value);
+        continue;
+      Valid2:
+        if (dst16s == k + 1)
+        {
+          break;
+        }
+        value = Char32To2Char16sUncheckedPrepare(value);
+        Unsafe.Add(ref dst0, k++) = Char32PreparedTo2Char16sUncheckedHigh(value);
+        Unsafe.Add(ref dst0, k++) = Char32PreparedTo2Char16sUncheckedLow(value);
+        continue;
+      }
+      while (k != dst16s)
+      {
+        Unsafe.Add(ref dst0, k++) = (char)0;
+      }
+    }
+
     #endregion String32 to String16
 
     #region String8 to String16
