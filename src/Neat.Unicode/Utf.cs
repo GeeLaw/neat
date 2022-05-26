@@ -579,7 +579,6 @@ namespace Neat.Unicode
     /// This method returns <c>-1</c> if the stream is valid.
     /// This method does not validate arguments.
     /// </summary>
-    /// <param name="src8s">The length must not exceed <see cref="MaximumLength8"/>.</param>
     [MethodImpl(Helper.JustOptimize)]
     internal static int FindFirstInvalidChar8(ref byte src0, int src8s)
     {
@@ -636,7 +635,6 @@ namespace Neat.Unicode
     /// Counts the number of invalid <see cref="Char8"/> instances.
     /// This method does not validate arguments.
     /// </summary>
-    /// <param name="src8s">The length must not exceed <see cref="MaximumLength8"/>.</param>
     [MethodImpl(Helper.JustOptimize)]
     internal static int CountInvalidChar8s(ref byte src0, int src8s)
     {
@@ -696,8 +694,6 @@ namespace Neat.Unicode
     /// Each invalid instance becomes 3 valid instances.
     /// This method does not validate arguments.
     /// </summary>
-    /// <param name="src8s">The length must not exceed <see cref="MaximumLength8"/>.</param>
-    /// <param name="dst8s">The length must not exceed <see cref="MaximumLength8"/>.</param>
     [MethodImpl(Helper.JustOptimize)]
     internal static void SanitizeChar8s(ref byte src0, int src8s, ref byte dst0, int dst8s)
     {
@@ -793,7 +789,6 @@ namespace Neat.Unicode
     /// This method returns <c>-1</c> if the stream is valid.
     /// This method does not validate arguments.
     /// </summary>
-    /// <param name="src16s">The length must not exceed <see cref="MaximumLength16"/>.</param>
     [MethodImpl(Helper.JustOptimize)]
     internal static int FindFirstInvalidChar16(ref char src0, int src16s)
     {
@@ -825,7 +820,6 @@ namespace Neat.Unicode
     /// Counts the number of invalid <see langword="char"/> instances.
     /// This method does not validate arguments.
     /// </summary>
-    /// <param name="src16s">The length must not exceed <see cref="MaximumLength16"/>.</param>
     [MethodImpl(Helper.JustOptimize)]
     internal static int CountInvalidChar16s(ref char src0, int src16s)
     {
@@ -861,8 +855,6 @@ namespace Neat.Unicode
     /// Each invalid instance becomes 1 valid instance.
     /// This method does not validate arguments.
     /// </summary>
-    /// <param name="src16s">The length must not exceed <see cref="MaximumLength16"/>.</param>
-    /// <param name="dst16s">The length must not exceed <see cref="MaximumLength16"/>.</param>
     [MethodImpl(Helper.JustOptimize)]
     internal static void SanitizeChar16s(ref char src0, int src16s, ref char dst0, int dst16s)
     {
@@ -913,7 +905,6 @@ namespace Neat.Unicode
     /// This method returns <c>-1</c> if the stream is valid.
     /// This method does not validate arguments.
     /// </summary>
-    /// <param name="src32s">The length must not exceed <see cref="MaximumLength32"/>.</param>
     [MethodImpl(Helper.JustOptimize)]
     internal static int FindFirstInvalidChar32(ref int src0, int src32s)
     {
@@ -931,7 +922,6 @@ namespace Neat.Unicode
     /// Counts the number of invalid <see cref="Char32"/> instances.
     /// This method does not validate arguments.
     /// </summary>
-    /// <param name="src32s">The length must not exceed <see cref="MaximumLength32"/>.</param>
     [MethodImpl(Helper.JustOptimize)]
     internal static int CountInvalidChar32s(ref int src0, int src32s)
     {
@@ -951,8 +941,6 @@ namespace Neat.Unicode
     /// Each invalid instance becomes 1 valid instance.
     /// This method does not validate arguments.
     /// </summary>
-    /// <param name="src32s">The length must not exceed <see cref="MaximumLength32"/>.</param>
-    /// <param name="dst32s">The length must not exceed <see cref="MaximumLength32"/>.</param>
     [MethodImpl(Helper.JustOptimize)]
     internal static void SanitizeChar32s(ref int src0, int src32s, ref int dst0, int dst32s)
     {
@@ -984,7 +972,6 @@ namespace Neat.Unicode
     /// Otherwise, <paramref name="countIndex"/> contains the index of the first invalid <see langword="char"/> instance.
     /// This method does not validate arguments.
     /// </summary>
-    /// <param name="src16s">The length must not exceed <see cref="MaximumLength16"/>.</param>
     internal static bool Char16sToChar32sCountStrict(ref char src0, int src16s, out int countIndex)
     {
       int dst32s = 0;
@@ -1019,7 +1006,6 @@ namespace Neat.Unicode
     /// Given UTF-16, computes UTF-32 length, with invalid <see langword="char"/> instances replaced by the UTF-32 encoding of the replacement character.
     /// This method does not validate arguments.
     /// </summary>
-    /// <param name="src16s">The length must not exceed <see cref="MaximumLength16"/>.</param>
     internal static int Char16sToChar32sCountReplace(ref char src0, int src16s)
     {
       int dst32s = 0;
@@ -1040,8 +1026,6 @@ namespace Neat.Unicode
     /// Transforms UTF-16 to UTF-32, with invalid <see langword="char"/> instances replaced by the UTF-32 encoding of the replacement character.
     /// This method does not validate arguments, and will write exactly <paramref name="dst32s"/> elements beginning <paramref name="dst0"/>.
     /// </summary>
-    /// <param name="src16s">The length must not exceed <see cref="MaximumLength16"/>.</param>
-    /// <param name="dst32s">The length must not exceed <see cref="MaximumLength32"/>.</param>
     internal static void Char16sToChar32sTransform(ref char src0, int src16s, ref int dst0, int dst32s)
     {
       int k = 0;
