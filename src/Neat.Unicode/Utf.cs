@@ -978,6 +978,7 @@ namespace Neat.Unicode
     /// Otherwise, <paramref name="countIndex"/> contains the index of the first invalid <see langword="char"/> instance.
     /// This method does not validate arguments.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     internal static bool String16ToString32CountStrict(ref char src0, int src16s, out int countIndex)
     {
       int dst32s = 0;
@@ -1012,6 +1013,7 @@ namespace Neat.Unicode
     /// Given UTF-16, computes UTF-32 length, with invalid <see langword="char"/> instances replaced by the UTF-32 encoding of the replacement character.
     /// This method does not validate arguments.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     internal static int String16ToString32CountReplace(ref char src0, int src16s)
     {
       int dst32s = 0;
@@ -1032,6 +1034,7 @@ namespace Neat.Unicode
     /// Transforms UTF-16 to UTF-32, with invalid <see langword="char"/> instances replaced by the UTF-32 encoding of the replacement character.
     /// This method does not validate arguments, and will write exactly <paramref name="dst32s"/> elements beginning <paramref name="dst0"/>.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     internal static void String16ToString32Transform(ref char src0, int src16s, ref int dst0, int dst32s)
     {
       int k = 0;
