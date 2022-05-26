@@ -192,6 +192,12 @@ namespace Neat.Unicode
     internal const int MaximumLength32 = 0x7FEFFFFF;
     internal const int MaximumLength16 = 0x7FEFFFFF;
     internal const int MaximumLength8 = 0x7FFFFFC7;
+    internal const string String8WouldBeTooLong = "The string in UTF-8 would be too long.";
+    internal const string String16WouldBeTooLong = "The string in UTF-16 would be too long.";
+    internal const string String32WouldBeTooLong = "The string in UTF-32 would be too long.";
+    internal const string String8IsNotValid = "The string in UTF-8 is not valid.";
+    internal const string String16IsNotValid = "The string in UTF-16 is not valid.";
+    internal const string String32IsNotValid = "The string in UTF-32 is not valid.";
 
     #region generic property determination for Char8
 
