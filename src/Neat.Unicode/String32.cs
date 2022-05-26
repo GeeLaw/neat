@@ -26,6 +26,35 @@ namespace Neat.Unicode
       myData = immutableData;
     }
 
+    /// <summary>
+    /// Gets whether the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
+    /// </summary>
+    public bool IsDefault
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      get
+      {
+        return ReferenceEquals(myData, null);
+      }
+    }
+
+    /// <summary>
+    /// Gets whether the instance is <see langword="default"/> (the <see langword="null"/> wrapper) or empty (of <see cref="Length"/> <c>0</c>).
+    /// </summary>
+    public bool IsDefaultOrEmpty
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      get
+      {
+        Char32[] data = myData;
+        return ReferenceEquals(data, null) || data.Length == 0;
+      }
+    }
+
+    /// <summary>
+    /// Gets the number of UTF-32 code points.
+    /// This property cannot be read if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
+    /// </summary>
     public int Length
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -35,6 +64,10 @@ namespace Neat.Unicode
       }
     }
 
+    /// <summary>
+    /// Gets the UTF-32 code point at the specified index.
+    /// This indexer cannot be read if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
+    /// </summary>
     public Char32 this[int index]
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -44,6 +77,10 @@ namespace Neat.Unicode
       }
     }
 
+    /// <summary>
+    /// Gets the number of UTF-32 code points.
+    /// This property cannot be read if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
+    /// </summary>
     int IReadOnlyCollection<Char32>.Count
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -119,12 +156,18 @@ namespace Neat.Unicode
       return Compare(x.myData, y.myData) > 0;
     }
 
+    /// <summary>
+    /// This method can be called even if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public int CompareTo(String32 other)
     {
       return Compare(myData, other.myData);
     }
 
+    /// <summary>
+    /// This method can be called even if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
+    /// </summary>
     [MethodImpl(Helper.JustOptimize)]
     int IComparable.CompareTo(object obj)
     {
@@ -185,12 +228,18 @@ namespace Neat.Unicode
       return !Equals(x.myData, y.myData);
     }
 
+    /// <summary>
+    /// This method can be called even if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public bool Equals(String32 other)
     {
       return Equals(myData, other.myData);
     }
 
+    /// <summary>
+    /// This method can be called even if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
+    /// </summary>
     [MethodImpl(Helper.JustOptimize)]
     public override bool Equals(object obj)
     {
@@ -219,12 +268,19 @@ namespace Neat.Unicode
       return hash ^ x.Length;
     }
 
+    /// <summary>
+    /// This method can be called even if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public override int GetHashCode()
     {
       return ComputeHashCode(myData);
     }
 
+    /// <summary>
+    /// Equivalent to <see cref="ToString16Replace(String32)"/>.
+    /// This method can be called even if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
+    /// </summary>
     public override string ToString()
     {
       throw new NotImplementedException();
@@ -314,6 +370,9 @@ namespace Neat.Unicode
       }
     }
 
+    /// <summary>
+    /// This method cannot be called if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
+    /// </summary>
     [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
     [MethodImpl(Helper.OptimizeInline)]
     public Enumerator GetEnumerator()
@@ -323,24 +382,36 @@ namespace Neat.Unicode
       return new Enumerator(data);
     }
 
+    /// <summary>
+    /// This method cannot be called if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
+    /// </summary>
     [MethodImpl(Helper.JustOptimize)]
     IEnumerator2<Char32> IEnumerable2<Char32>.GetEnumerator()
     {
       return GetEnumerator();
     }
 
+    /// <summary>
+    /// This method cannot be called if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
+    /// </summary>
     [MethodImpl(Helper.JustOptimize)]
     IEnumerator2 IEnumerable2.GetEnumerator()
     {
       return GetEnumerator();
     }
 
+    /// <summary>
+    /// This method cannot be called if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
+    /// </summary>
     [MethodImpl(Helper.JustOptimize)]
     IEnumerator<Char32> IEnumerable<Char32>.GetEnumerator()
     {
       return GetEnumerator();
     }
 
+    /// <summary>
+    /// This method cannot be called if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
+    /// </summary>
     [MethodImpl(Helper.JustOptimize)]
     IEnumerator IEnumerable.GetEnumerator()
     {
