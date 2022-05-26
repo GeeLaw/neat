@@ -354,6 +354,12 @@ namespace Neat.Unicode
     }
 
     [MethodImpl(Helper.OptimizeInline)]
+    internal static bool Char32IsNotSurrogate(int value)
+    {
+      return (value & 0xFFFFF800) != 0xD800;
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
     internal static bool Char32IsHighSurrogate(int value)
     {
       return (value & 0xFFFFFC00) == 0xD800;
@@ -407,11 +413,11 @@ namespace Neat.Unicode
       }
       if (Char32IsBelow0x10000(value))
       {
-        if (Char32IsSurrogate(value))
+        if (Char32IsNotSurrogate(value))
         {
-          goto Invalid;
+          return 3;
         }
-        return 3;
+        goto Invalid;
       }
       if (Char32IsBelow0x110000(value))
       {
@@ -442,11 +448,11 @@ namespace Neat.Unicode
     {
       if (Char32IsBelow0x10000(value))
       {
-        if (Char32IsSurrogate(value))
+        if (Char32IsNotSurrogate(value))
         {
-          goto Invalid;
+          return 1;
         }
-        return 1;
+        goto Invalid;
       }
       if (Char32IsBelow0x110000(value))
       {
