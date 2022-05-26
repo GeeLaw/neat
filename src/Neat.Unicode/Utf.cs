@@ -572,7 +572,7 @@ namespace Neat.Unicode
 
     #endregion validity of Char32 from Char8 (overlong, surrogate, above 0x10FFFF)
 
-    #region Char8 to Char8
+    #region String8 to String8
 
     /// <summary>
     /// Finds the first invalid <see cref="Char8"/> instance.
@@ -784,9 +784,9 @@ namespace Neat.Unicode
       }
     }
 
-    #endregion Char8 to Char8
+    #endregion String8 to String8
 
-    #region Char16 to Char16
+    #region String16 to String16
 
     /// <summary>
     /// Finds the first invalid <see langword="char"/> instance.
@@ -904,9 +904,9 @@ namespace Neat.Unicode
       }
     }
 
-    #endregion Char16 to Char16
+    #endregion String16 to String16
 
-    #region Char32 to Char32
+    #region String32 to String32
 
     /// <summary>
     /// Finds the first invalid <see cref="Char32"/> instance.
@@ -969,13 +969,13 @@ namespace Neat.Unicode
       }
     }
 
-    #endregion Char32 to Char32
+    #endregion String32 to String32
 
-    #region Char8 to Char32
+    #region String8 to String32
 
-    #endregion Char8 to Char32
+    #endregion String8 to String32
 
-    #region Char16 to Char32
+    #region String16 to String32
 
     /// <summary>
     /// Given UTF-16, computes UTF-32 length.
@@ -1077,22 +1077,22 @@ namespace Neat.Unicode
       }
     }
 
-    #endregion Char16 to Char32
+    #endregion String16 to String32
 
-    #region Char32 to Char8
+    #region String32 to String8
 
-    #endregion Char32 to Char8
+    #endregion String32 to String8
 
-    #region Char32 to Char16
+    #region String32 to String16
 
-    #endregion Char32 to Char16
+    #endregion String32 to String16
 
-    #region Char8 to Char16
+    #region String8 to String16
 
-    #endregion Char8 to Char16
+    #endregion String8 to String16
 
-    #region Char16 to Char8
+    #region String16 to String8
 
-    #endregion Char16 to Char8
+    #endregion String16 to String8
   }
 }
