@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -25,6 +26,154 @@ namespace Neat.Unicode
     {
       myData = immutableData;
     }
+
+    #region conversion methods
+
+    [SuppressMessage("Performance", "CA1825", Justification = "Avoid excessive generic instantiations.")]
+    private static readonly Char32[] theEmptyArray = new Char32[0];
+
+    /// <summary>
+    /// Converts <see langword="string"/> to <see cref="String32"/>,
+    /// throwing <see cref="ArgumentException"/> if the <see langword="string"/> is not valid UTF-16.
+    /// A <see langword="null"/> <see langword="string"/> is converted to a <see langword="default"/> <see cref="String32"/> (the <see langword="null"/> wrapper),
+    /// and an empty <see langword="string"/> is converted to a <see cref="String32"/> of length <c>0</c>.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static String32 FromString16Strict(string string16)
+    {
+      if (ReferenceEquals(string16, null))
+      {
+        return default(String32);
+      }
+      int src16s = string16.Length;
+      if (src16s == 0)
+      {
+        return new String32(theEmptyArray);
+      }
+      ref char src0 = ref MemoryMarshal.GetReference(string16.AsSpan());
+      int dst32s;
+      if (!Utf.String16ToString32CountStrict(ref src0, src16s, out dst32s))
+      {
+        throw new ArgumentException(Utf.String16IsNotValid, nameof(string16));
+      }
+      if (dst32s > Utf.MaximumLength32)
+      {
+        throw new OutOfMemoryException(Utf.String32WouldBeTooLong);
+      }
+      Char32[] string32 = new Char32[dst32s];
+      Utf.String16ToString32Transform(ref src0, src16s,
+        ref Unsafe.As<Char32, int>(ref MemoryMarshal.GetArrayDataReference(string32)),
+        dst32s);
+      return new String32(string32);
+    }
+
+    /// <summary>
+    /// Converts <see langword="string"/> to <see cref="String32"/>,
+    /// replacing invalid UTF-16 code units by the replacement character.
+    /// A <see langword="null"/> <see langword="string"/> is converted to a <see langword="default"/> <see cref="String32"/> (the <see langword="null"/> wrapper),
+    /// and an empty <see langword="string"/> is converted to a <see cref="String32"/> of length <c>0</c>.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static String32 FromString16Replace(string string16)
+    {
+      if (ReferenceEquals(string16, null))
+      {
+        return default(String32);
+      }
+      int src16s = string16.Length;
+      if (src16s == 0)
+      {
+        return new String32(theEmptyArray);
+      }
+      ref char src0 = ref MemoryMarshal.GetReference(string16.AsSpan());
+      int dst32s = Utf.String16ToString32CountReplace(ref src0, src16s);
+      if (dst32s > Utf.MaximumLength32)
+      {
+        throw new OutOfMemoryException(Utf.String32WouldBeTooLong);
+      }
+      Char32[] string32 = new Char32[dst32s];
+      Utf.String16ToString32Transform(ref src0, src16s,
+        ref Unsafe.As<Char32, int>(ref MemoryMarshal.GetArrayDataReference(string32)),
+        dst32s);
+      return new String32(string32);
+    }
+
+    /// <summary>
+    /// Converts <see cref="String32"/> to <see langword="string"/>,
+    /// throwing <see cref="ArgumentException"/> if the <see cref="String32"/> is not valid UTF-32.
+    /// A <see langword="default"/> <see cref="String32"/> (the <see langword="null"/> wrapper) is converted to the empty <see langword="string"/>.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    public static string ToString16Strict(String32 string32)
+    {
+      return ToString16StrictImpl(string32.myData);
+    }
+
+    /// <summary>
+    /// Converts <see cref="String32"/> to <see langword="string"/>,
+    /// replacing invalid UTF-32 code points by the replacement character.
+    /// A <see langword="default"/> <see cref="String32"/> (the <see langword="null"/> wrapper) is converted to the empty <see langword="string"/>.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    public static string ToString16Replace(String32 string32)
+    {
+      return ToString16ReplaceImpl(string32.myData);
+    }
+
+    private static readonly SpanAction<char, Char32[]> theToStringCreate = ToStringCreate;
+
+    [MethodImpl(Helper.JustOptimize)]
+    private static void ToStringCreate(Span<char> span, Char32[] arg)
+    {
+      Utf.String32ToString16Transform(
+        ref Unsafe.As<Char32, int>(ref MemoryMarshal.GetArrayDataReference(arg)),
+        arg.Length,
+        ref MemoryMarshal.GetReference(span),
+        span.Length);
+    }
+
+    [MethodImpl(Helper.JustOptimize)]
+    private static string ToString16StrictImpl(Char32[] string32)
+    {
+      int src32s;
+      if (ReferenceEquals(string32, null) || (src32s = string32.Length) == 0)
+      {
+        return "";
+      }
+      long dst16s;
+      if (!Utf.String32ToString16CountStrict(
+        ref Unsafe.As<Char32, int>(ref MemoryMarshal.GetArrayDataReference(string32)),
+        src32s,
+        out dst16s))
+      {
+        throw new ArgumentException(Utf.String32IsNotValid, nameof(string32));
+      }
+      if (dst16s > Utf.MaximumLength16)
+      {
+        throw new OutOfMemoryException(Utf.String16WouldBeTooLong);
+      }
+      return string.Create((int)dst16s, string32, theToStringCreate);
+    }
+
+    [MethodImpl(Helper.JustOptimize)]
+    private static string ToString16ReplaceImpl(Char32[] string32)
+    {
+      int src32s;
+      if (ReferenceEquals(string32, null) || (src32s = string32.Length) == 0)
+      {
+        return "";
+      }
+      long dst16s = Utf.String32ToString16CountReplace(
+        ref Unsafe.As<Char32, int>(ref MemoryMarshal.GetArrayDataReference(string32)),
+        src32s);
+      if (dst16s > Utf.MaximumLength16)
+      {
+        throw new OutOfMemoryException(Utf.String16WouldBeTooLong);
+      }
+      return string.Create((int)dst16s, string32, theToStringCreate);
+    }
+
+    #endregion conversion methods
 
     /// <summary>
     /// Gets whether the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
@@ -281,9 +430,10 @@ namespace Neat.Unicode
     /// Equivalent to <see cref="ToString16Replace(String32)"/>.
     /// This method can be called even if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
     /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
     public override string ToString()
     {
-      throw new NotImplementedException();
+      return ToString16ReplaceImpl(myData);
     }
 
     #endregion Equals, equality operators, IEquatable<String32> members, object members
