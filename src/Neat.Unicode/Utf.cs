@@ -1108,8 +1108,9 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     internal static void String8ToString32Transform(ref byte src0, int src8s, ref int dst0, int dst32s)
     {
+      int k = 0;
       byte lead, cont1, cont2, cont3;
-      for (int i = 0, j, k = 0, value; i != src8s && k != dst32s; ++i, ++k)
+      for (int i = 0, j, value; i != src8s && k != dst32s; ++i, ++k)
       {
         if (Char8Leads1(lead = Unsafe.Add(ref src0, i)))
         {
@@ -1157,6 +1158,10 @@ namespace Neat.Unicode
         i = j;
         Unsafe.Add(ref dst0, k) = value;
         continue;
+      }
+      while (k != dst32s)
+      {
+        Unsafe.Add(ref dst0, k++) = 0;
       }
     }
 
