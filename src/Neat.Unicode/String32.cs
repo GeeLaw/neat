@@ -60,7 +60,7 @@ namespace Neat.Unicode
       {
         throw new OutOfMemoryException(Utf.String32WouldBeTooLong);
       }
-      Char32[] string32 = new Char32[dst32s];
+      Char32[] string32 = GC.AllocateUninitializedArray<Char32>(dst32s, false);
       Utf.String16ToString32Transform(ref src0, src16s,
         ref Unsafe.As<Char32, int>(ref MemoryMarshal.GetArrayDataReference(string32)),
         dst32s);
@@ -91,7 +91,7 @@ namespace Neat.Unicode
       {
         throw new OutOfMemoryException(Utf.String32WouldBeTooLong);
       }
-      Char32[] string32 = new Char32[dst32s];
+      Char32[] string32 = GC.AllocateUninitializedArray<Char32>(dst32s, false);
       Utf.String16ToString32Transform(ref src0, src16s,
         ref Unsafe.As<Char32, int>(ref MemoryMarshal.GetArrayDataReference(string32)),
         dst32s);
