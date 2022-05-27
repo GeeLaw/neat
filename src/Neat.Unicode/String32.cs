@@ -120,6 +120,19 @@ namespace Neat.Unicode
       return ToString16ReplaceImpl(string32.myData);
     }
 
+    private sealed class StringCreateHelper
+    {
+      [MethodImpl(Helper.JustOptimize)]
+      public void Invoke(Span<char> span, Char32[] arg)
+      {
+        Utf.String32ToString16Transform(
+          ref Unsafe.As<Char32, int>(ref MemoryMarshal.GetArrayDataReference(arg)),
+          arg.Length,
+          ref MemoryMarshal.GetReference(span),
+          span.Length);
+      }
+    }
+
     private static readonly SpanAction<char, Char32[]> theToStringCreate = ToStringCreate;
 
     [MethodImpl(Helper.JustOptimize)]
