@@ -389,23 +389,25 @@ namespace Neat.Unicode
       return (uint)value < 0x80u;
     }
 
+    [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of int explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
     internal static bool Char32Is2Char8s(int value)
     {
-      return 0x80u <= (uint)value && (uint)value < 0x800u;
+      return (uint)(value - 0x80) < (uint)(0x800 - 0x80);
     }
 
+    [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of int explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
     internal static bool Char32Is3Char8s(int value)
     {
-      return 0x800u <= (uint)value && (uint)value < 0x10000u
-        && (value & 0xFFFFF800) != 0xD800;
+      return (uint)(value - 0x800) < (uint)(0x10000 - 0x800) && (value & 0xFFFFF800) != 0xD800;
     }
 
+    [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of int explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
     internal static bool Char32Is4Char8s(int value)
     {
-      return 0x10000u <= (uint)value && (uint)value < 0x110000u;
+      return (uint)(value - 0x10000) < (uint)(0x110000 - 0x10000);
     }
 
     [MethodImpl(Helper.JustOptimize)]
@@ -445,10 +447,11 @@ namespace Neat.Unicode
       return (uint)value < 0x10000u && (value & 0xFFFFF800) != 0xD800;
     }
 
+    [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of int explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
     internal static bool Char32Is2Char16s(int value)
     {
-      return 0x10000u <= (uint)value && (uint)value < 0x110000u;
+      return (uint)(value - 0x10000) < (uint)(0x110000 - 0x10000);
     }
 
     [MethodImpl(Helper.JustOptimize)]
@@ -578,10 +581,11 @@ namespace Neat.Unicode
       return 0x800u <= (uint)value && (value & 0xFFFFF800) != 0xD800;
     }
 
+    [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of int explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
     internal static bool Char32From4Char8sIsValid(int value)
     {
-      return 0x10000u <= (uint)value && (uint)value < 0x110000u;
+      return (uint)(value - 0x10000) < (uint)(0x110000 - 0x10000);
     }
 
     #endregion validity of Char32 from Char8 (overlong, surrogate, above 0x10FFFF)
