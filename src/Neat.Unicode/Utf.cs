@@ -989,25 +989,175 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     internal static bool String8ToString32CountStrict(ref byte src0, int src8s, out int countIndex)
     {
-      throw new System.NotImplementedException();
+      int dst32s = 0;
+      byte lead, cont1, cont2, cont3;
+      for (int i = 0, j; i != src8s; ++i, ++dst32s)
+      {
+        if (Char8Leads1(lead = Unsafe.Add(ref src0, i)))
+        {
+          /* Valid1 */
+          continue;
+        }
+        j = i;
+        if (Char8Leads2(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && Char32From2Char8sIsValid(Char8ToChar32Unchecked2(lead, cont1)))
+          {
+            goto Valid2;
+          }
+          goto Invalid;
+        }
+        if (Char8Leads3(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
+            && Char32From3Char8sIsValid(Char8ToChar32Unchecked3(lead, cont1, cont2)))
+          {
+            goto Valid3;
+          }
+          goto Invalid;
+        }
+        if (Char8Leads4(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont3 = Unsafe.Add(ref src0, j))
+            && Char32From4Char8sIsValid(Char8ToChar32Unchecked4(lead, cont1, cont2, cont3)))
+          {
+            goto Valid4;
+          }
+          goto Invalid;
+        }
+      Invalid:
+        countIndex = i;
+        return false;
+      Valid2:
+      Valid3:
+      Valid4:
+        i = j;
+      }
+      countIndex = dst32s;
+      return true;
     }
 
     /// <summary>
     /// Given UTF-8, computes UTF-32 length, with invalid <see cref="Char8"/> instances replaced by the UTF-32 encoding of the replacement character.
     /// This method does not validate arguments.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     internal static int String8ToString32CountReplace(ref byte src0, int src8s)
     {
-      throw new System.NotImplementedException();
+      int dst32s = 0;
+      byte lead, cont1, cont2, cont3;
+      for (int i = 0, j; i != src8s; ++i, ++dst32s)
+      {
+        if (Char8Leads1(lead = Unsafe.Add(ref src0, i)))
+        {
+          /* Valid1 */
+          continue;
+        }
+        j = i;
+        if (Char8Leads2(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && Char32From2Char8sIsValid(Char8ToChar32Unchecked2(lead, cont1)))
+          {
+            goto Valid2;
+          }
+          /* Invalid */
+          continue;
+        }
+        if (Char8Leads3(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
+            && Char32From3Char8sIsValid(Char8ToChar32Unchecked3(lead, cont1, cont2)))
+          {
+            goto Valid3;
+          }
+          /* Invalid */
+          continue;
+        }
+        if (Char8Leads4(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont3 = Unsafe.Add(ref src0, j))
+            && Char32From4Char8sIsValid(Char8ToChar32Unchecked4(lead, cont1, cont2, cont3)))
+          {
+            goto Valid4;
+          }
+          /* Invalid */
+          continue;
+        }
+        /* Invalid */
+        continue;
+      Valid2:
+      Valid3:
+      Valid4:
+        i = j;
+      }
+      return dst32s;
     }
 
     /// <summary>
     /// Transforms UTF-8 to UTF-32, with invalid <see cref="Char8"/> instances replaced by the UTF-32 encoding of the replacement character.
     /// This method does not validate arguments, and will write exactly <paramref name="dst32s"/> elements beginning <paramref name="dst0"/>.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     internal static void String8ToString32Transform(ref byte src0, int src8s, ref int dst0, int dst32s)
     {
-      throw new System.NotImplementedException();
+      byte lead, cont1, cont2, cont3;
+      for (int i = 0, j, k = 0, value; i != src8s && k != dst32s; ++i, ++k)
+      {
+        if (Char8Leads1(lead = Unsafe.Add(ref src0, i)))
+        {
+          /* Valid1 */
+          Unsafe.Add(ref dst0, k) = Char8ToChar32Unchecked1(lead);
+          continue;
+        }
+        j = i;
+        if (Char8Leads2(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && Char32From2Char8sIsValid(value = Char8ToChar32Unchecked2(lead, cont1)))
+          {
+            goto Valid2;
+          }
+          goto Invalid;
+        }
+        if (Char8Leads3(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
+            && Char32From3Char8sIsValid(value = Char8ToChar32Unchecked3(lead, cont1, cont2)))
+          {
+            goto Valid3;
+          }
+          goto Invalid;
+        }
+        if (Char8Leads4(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont3 = Unsafe.Add(ref src0, j))
+            && Char32From4Char8sIsValid(value = Char8ToChar32Unchecked4(lead, cont1, cont2, cont3)))
+          {
+            goto Valid4;
+          }
+          goto Invalid;
+        }
+      Invalid:
+        Unsafe.Add(ref dst0, k) = ReplacementCharacter32;
+        continue;
+      Valid2:
+      Valid3:
+      Valid4:
+        i = j;
+        Unsafe.Add(ref dst0, k) = value;
+        continue;
+      }
     }
 
     #endregion String8 to String32
