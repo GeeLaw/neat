@@ -979,6 +979,37 @@ namespace Neat.Unicode
 
     #region String8 to String32
 
+    /// <summary>
+    /// Given UTF-8, computes UTF-32 length.
+    /// Returns <see langword="true"/> if and only if UTF-8 is valid,
+    /// upon which <paramref name="countIndex"/> contains the number of <see cref="Char32"/> instances needed.
+    /// Otherwise, <paramref name="countIndex"/> contains the index of the first invalid <see cref="Char8"/> instance.
+    /// This method does not validate arguments.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    internal static bool String8ToString32CountStrict(ref byte src0, int src8s, out int countIndex)
+    {
+      throw new System.NotImplementedException();
+    }
+
+    /// <summary>
+    /// Given UTF-8, computes UTF-32 length, with invalid <see cref="Char8"/> instances replaced by the UTF-32 encoding of the replacement character.
+    /// This method does not validate arguments.
+    /// </summary>
+    internal static int String8ToString32CountReplace(ref byte src0, int src8s)
+    {
+      throw new System.NotImplementedException();
+    }
+
+    /// <summary>
+    /// Transforms UTF-8 to UTF-32, with invalid <see cref="Char8"/> instances replaced by the UTF-32 encoding of the replacement character.
+    /// This method does not validate arguments, and will write exactly <paramref name="dst32s"/> elements beginning <paramref name="dst0"/>.
+    /// </summary>
+    internal static void String8ToString32Transform(ref byte src0, int src8s, ref int dst0, int dst32s)
+    {
+      throw new System.NotImplementedException();
+    }
+
     #endregion String8 to String32
 
     #region String16 to String32
@@ -1085,6 +1116,37 @@ namespace Neat.Unicode
     #endregion String16 to String32
 
     #region String32 to String8
+
+    /// <summary>
+    /// Given UTF-32, computes UTF-8 length.
+    /// Returns <see langword="true"/> if and only if UTF-32 is valid,
+    /// upon which <paramref name="countIndex"/> contains the number of <see cref="Char8"/> instances needed.
+    /// Otherwise, <paramref name="countIndex"/> contains the index of the first invalid <see cref="Char32"/> instance.
+    /// This method does not validate arguments.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    internal static bool String32ToString8CountStrict(ref int src0, int src32s, out long countIndex)
+    {
+      throw new System.NotImplementedException();
+    }
+
+    /// <summary>
+    /// Given UTF-32, computes UTF-8 length, with invalid <see cref="Char32"/> instances replaced by the UTF-8 encoding of the replacement character.
+    /// This method does not validate arguments.
+    /// </summary>
+    internal static long String32ToString8CountReplace(ref int src0, int src32s)
+    {
+      throw new System.NotImplementedException();
+    }
+
+    /// <summary>
+    /// Transforms UTF-32 to UTF-8, with invalid <see cref="Char32"/> instances replaced by the UTF-8 encoding of the replacement character.
+    /// This method does not validate arguments, and will write exactly <paramref name="dst8s"/> elements beginning <paramref name="dst0"/>.
+    /// </summary>
+    internal static void String32ToString8Transform(ref int src0, int src32s, ref byte dst0, int dst8s)
+    {
+      throw new System.NotImplementedException();
+    }
 
     #endregion String32 to String8
 
