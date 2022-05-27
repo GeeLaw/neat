@@ -1327,6 +1327,7 @@ namespace Neat.Unicode
     /// Given UTF-32, computes UTF-8 length, with invalid <see cref="Char32"/> instances replaced by the UTF-8 encoding of the replacement character.
     /// This method does not validate arguments.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     internal static long String32ToString8CountReplace(ref int src0, int src32s)
     {
       int valid2s = 0, valid3invalids = 0, valid4s = 0;
@@ -1356,6 +1357,7 @@ namespace Neat.Unicode
     /// Transforms UTF-32 to UTF-8, with invalid <see cref="Char32"/> instances replaced by the UTF-8 encoding of the replacement character.
     /// This method does not validate arguments, and will write exactly <paramref name="dst8s"/> elements beginning <paramref name="dst0"/>.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     internal static void String32ToString8Transform(ref int src0, int src32s, ref byte dst0, int dst8s)
     {
       int k = 0;
