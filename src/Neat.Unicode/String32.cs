@@ -133,17 +133,7 @@ namespace Neat.Unicode
       }
     }
 
-    private static readonly SpanAction<char, Char32[]> theToStringCreate = ToStringCreate;
-
-    [MethodImpl(Helper.JustOptimize)]
-    private static void ToStringCreate(Span<char> span, Char32[] arg)
-    {
-      Utf.String32ToString16Transform(
-        ref Unsafe.As<Char32, int>(ref MemoryMarshal.GetArrayDataReference(arg)),
-        arg.Length,
-        ref MemoryMarshal.GetReference(span),
-        span.Length);
-    }
+    private static readonly SpanAction<char, Char32[]> theStringCreateAction = new StringCreateHelper().Invoke;
 
     [MethodImpl(Helper.JustOptimize)]
     private static string ToString16StrictImpl(Char32[] string32)
@@ -165,7 +155,7 @@ namespace Neat.Unicode
       {
         throw new OutOfMemoryException(Utf.String16WouldBeTooLong);
       }
-      return string.Create((int)dst16s, string32, theToStringCreate);
+      return string.Create((int)dst16s, string32, theStringCreateAction);
     }
 
     [MethodImpl(Helper.JustOptimize)]
@@ -183,7 +173,7 @@ namespace Neat.Unicode
       {
         throw new OutOfMemoryException(Utf.String16WouldBeTooLong);
       }
-      return string.Create((int)dst16s, string32, theToStringCreate);
+      return string.Create((int)dst16s, string32, theStringCreateAction);
     }
 
     #endregion conversion methods
