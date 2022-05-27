@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace Neat.Unicode
@@ -201,10 +202,11 @@ namespace Neat.Unicode
 
     #region generic property determination for Char8
 
+    [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of byte explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
     internal static bool Char8Leads1(byte value)
     {
-      return value < 0x80u;
+      return (uint)value < 0x80u;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
@@ -766,7 +768,7 @@ namespace Neat.Unicode
       Valid3:
         i = j;
       IsReplacement:
-        if (dst8s <= k + 2)
+        if ((uint)dst8s <= (uint)(k + 2))
         {
           break;
         }
@@ -776,7 +778,7 @@ namespace Neat.Unicode
         continue;
       Valid4:
         i = j;
-        if (dst8s <= k + 3)
+        if ((uint)dst8s <= (uint)(k + 3))
         {
           break;
         }
