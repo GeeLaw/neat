@@ -339,6 +339,13 @@ namespace Neat.Unicode
       return (uint)value < 0x110000u;
     }
 
+    [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of int explicit.")]
+    [MethodImpl(Helper.OptimizeInline)]
+    internal static bool Char32IsAbove0x10000AndBelow0x110000(int value)
+    {
+      return (uint)(value - 0x10000) < (uint)(0x110000 - 0x10000);
+    }
+
     #endregion range check for Char32
 
     #region generic property determination for Char32
@@ -1282,7 +1289,38 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     internal static bool String32ToString8CountStrict(ref int src0, int src32s, out long countIndex)
     {
-      throw new System.NotImplementedException();
+      int valid2s = 0, valid3s = 0, valid4s = 0;
+      for (int i = 0, value; i != src32s; ++i)
+      {
+        if (Char32IsBelow0x80(value = Unsafe.Add(ref src0, i)))
+        {
+          continue;
+        }
+        if (Char32IsBelow0x800(value))
+        {
+          ++valid2s;
+          continue;
+        }
+        if (Char32IsBelow0x10000(value))
+        {
+          if (Char32IsNotSurrogate(value))
+          {
+            ++valid3s;
+            continue;
+          }
+          goto Invalid;
+        }
+        if (Char32IsBelow0x110000(value))
+        {
+          ++valid4s;
+          continue;
+        }
+      Invalid:
+        countIndex = i;
+        return false;
+      }
+      countIndex = src32s + (long)valid2s + valid3s * 2L + valid4s * 3L;
+      return true;
     }
 
     /// <summary>
@@ -1291,7 +1329,27 @@ namespace Neat.Unicode
     /// </summary>
     internal static long String32ToString8CountReplace(ref int src0, int src32s)
     {
-      throw new System.NotImplementedException();
+      int valid2s = 0, valid3invalids = 0, valid4s = 0;
+      for (int i = 0, value; i != src32s; ++i)
+      {
+        if (Char32IsBelow0x80(value = Unsafe.Add(ref src0, i)))
+        {
+          continue;
+        }
+        if (Char32IsBelow0x800(value))
+        {
+          ++valid2s;
+          continue;
+        }
+        if (Char32IsAbove0x10000AndBelow0x110000(value))
+        {
+          ++valid4s;
+          continue;
+        }
+        ++valid3invalids;
+        continue;
+      }
+      return src32s + (long)valid2s + valid3invalids * 2L + valid4s * 3L;
     }
 
     /// <summary>
@@ -1300,7 +1358,66 @@ namespace Neat.Unicode
     /// </summary>
     internal static void String32ToString8Transform(ref int src0, int src32s, ref byte dst0, int dst8s)
     {
-      throw new System.NotImplementedException();
+      int k = 0;
+      for (int i = 0, value; i != src32s && k != dst8s; ++i)
+      {
+        if (Char32IsBelow0x80(value = Unsafe.Add(ref src0, i)))
+        {
+          /* Valid1 */
+          Unsafe.Add(ref dst0, k++) = Char32To1Char8UncheckedLead1(value);
+          continue;
+        }
+        if (Char32IsBelow0x800(value))
+        {
+          goto Valid2;
+        }
+        if (Char32IsBelow0x10000(value))
+        {
+          if (Char32IsNotSurrogate(value))
+          {
+            goto Valid3;
+          }
+          goto Invalid;
+        }
+        if (Char32IsBelow0x110000(value))
+        {
+          goto Valid4;
+        }
+      Invalid:
+        value = ReplacementCharacter32;
+        goto Valid3;
+      Valid2:
+        if (dst8s == k + 1)
+        {
+          break;
+        }
+        Unsafe.Add(ref dst0, k++) = Char32To2Char8sUncheckedLead2(value);
+        Unsafe.Add(ref dst0, k++) = Char32To2Char8sUncheckedCont1(value);
+        continue;
+      Valid3:
+        if ((uint)dst8s <= (uint)(k + 2))
+        {
+          break;
+        }
+        Unsafe.Add(ref dst0, k++) = Char32To3Char8sUncheckedLead3(value);
+        Unsafe.Add(ref dst0, k++) = Char32To3Char8sUncheckedCont1(value);
+        Unsafe.Add(ref dst0, k++) = Char32To3Char8sUncheckedCont2(value);
+        continue;
+      Valid4:
+        if ((uint)dst8s <= (uint)(k + 3))
+        {
+          break;
+        }
+        Unsafe.Add(ref dst0, k++) = Char32To4Char8sUncheckedLead4(value);
+        Unsafe.Add(ref dst0, k++) = Char32To4Char8sUncheckedCont1(value);
+        Unsafe.Add(ref dst0, k++) = Char32To4Char8sUncheckedCont2(value);
+        Unsafe.Add(ref dst0, k++) = Char32To4Char8sUncheckedCont3(value);
+        continue;
+      }
+      while (k != dst8s)
+      {
+        Unsafe.Add(ref dst0, k++) = 0;
+      }
     }
 
     #endregion String32 to String8
