@@ -963,9 +963,9 @@ namespace Neat.Unicode
     internal static void SanitizeChar32s(ref int src0, int src32s, ref int dst0, int dst32s)
     {
       int k = 0;
-      for (int i = 0, value; i != src32s && k != dst32s; ++i)
+      for (int i = 0, value; i != src32s && k != dst32s; ++i, ++k)
       {
-        Unsafe.Add(ref dst0, k++) = Char32IsValid(value = Unsafe.Add(ref src0, i))
+        Unsafe.Add(ref dst0, k) = Char32IsValid(value = Unsafe.Add(ref src0, i))
           ? value
           : ReplacementCharacter32;
       }
@@ -1237,7 +1237,7 @@ namespace Neat.Unicode
     {
       int k = 0;
       char first, low;
-      for (int i = 0; i != src16s && k != dst32s; ++i)
+      for (int i = 0; i != src16s && k != dst32s; ++i, ++k)
       {
         if (Char16IsNotSurrogate(first = Unsafe.Add(ref src0, i)))
         {
@@ -1256,10 +1256,10 @@ namespace Neat.Unicode
       Invalid:
         first = ReplacementCharacter16;
       Valid1:
-        Unsafe.Add(ref dst0, k++) = Char16ToChar32Unchecked1(first);
+        Unsafe.Add(ref dst0, k) = Char16ToChar32Unchecked1(first);
         continue;
       Valid2:
-        Unsafe.Add(ref dst0, k++) = Char16ToChar32Unchecked2(first, low);
+        Unsafe.Add(ref dst0, k) = Char16ToChar32Unchecked2(first, low);
         continue;
       }
       while (k != dst32s)
