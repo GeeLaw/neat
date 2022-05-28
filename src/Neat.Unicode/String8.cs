@@ -31,6 +31,11 @@ namespace Neat.Unicode
     }
 
     /// <summary>
+    /// Gets an instance of <see cref="String8"/> of <see cref="Length"/> zero.
+    /// </summary>
+    public static readonly String8 Empty = new String8(Utf.theEmptyChar8s);
+
+    /// <summary>
     /// Gets whether the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
     /// </summary>
     public bool IsDefault

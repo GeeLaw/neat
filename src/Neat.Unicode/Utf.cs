@@ -21,12 +21,12 @@ namespace Neat.Unicode
     public const int MaximumLength16 = 0x7FEFFFFF;
     public const int MaximumLength8 = 0x7FFFFFC7;
 
-    internal const string String8WouldBeTooLong = "The string in UTF-8 would be too long.";
-    internal const string String16WouldBeTooLong = "The string in UTF-16 would be too long.";
-    internal const string String32WouldBeTooLong = "The string in UTF-32 would be too long.";
-    internal const string String8IsNotValid = "The string in UTF-8 is not valid.";
-    internal const string String16IsNotValid = "The string in UTF-16 is not valid.";
-    internal const string String32IsNotValid = "The string in UTF-32 is not valid.";
+    public const string String8WouldBeTooLong = "The string in UTF-8 would be too long.";
+    public const string String16WouldBeTooLong = "The string in UTF-16 would be too long.";
+    public const string String32WouldBeTooLong = "The string in UTF-32 would be too long.";
+    public const string String8IsNotValid = "The string in UTF-8 is not valid.";
+    public const string String16IsNotValid = "The string in UTF-16 is not valid.";
+    public const string String32IsNotValid = "The string in UTF-32 is not valid.";
 
     #region decoding or encoding 1 code point
 
@@ -249,10 +249,10 @@ namespace Neat.Unicode
     private static readonly SpanAction<char, Char32[]> theFromString32Action;
 
     [SuppressMessage("Performance", "CA1825", Justification = "Avoid excessive generic instantiations.")]
-    private static readonly Char8[] theEmptyChar8s = new Char8[0];
+    internal static readonly Char8[] theEmptyChar8s = new Char8[0];
 
     [SuppressMessage("Performance", "CA1825", Justification = "Avoid excessive generic instantiations.")]
-    private static readonly Char32[] theEmptyChar32s = new Char32[0];
+    internal static readonly Char32[] theEmptyChar32s = new Char32[0];
 
     static Utf()
     {

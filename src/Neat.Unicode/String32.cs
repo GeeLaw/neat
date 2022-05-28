@@ -31,6 +31,11 @@ namespace Neat.Unicode
     }
 
     /// <summary>
+    /// Gets an instance of <see cref="String32"/> of <see cref="Length"/> zero.
+    /// </summary>
+    public static readonly String32 Empty = new String32(Utf.theEmptyChar32s);
+
+    /// <summary>
     /// Gets whether the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
     /// </summary>
     public bool IsDefault
