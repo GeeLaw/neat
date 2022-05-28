@@ -244,15 +244,15 @@ namespace Neat.Unicode
       }
     }
 
-    internal static readonly SpanAction<char, Char8[]> theFromString8Action;
-    internal static readonly SpanAction<char, string> theFromString16Action;
-    internal static readonly SpanAction<char, Char32[]> theFromString32Action;
+    private static readonly SpanAction<char, Char8[]> theFromString8Action;
+    private static readonly SpanAction<char, string> theFromString16Action;
+    private static readonly SpanAction<char, Char32[]> theFromString32Action;
 
     [SuppressMessage("Performance", "CA1825", Justification = "Avoid excessive generic instantiations.")]
-    internal static readonly Char8[] theEmptyChar8s = new Char8[0];
+    private static readonly Char8[] theEmptyChar8s = new Char8[0];
 
     [SuppressMessage("Performance", "CA1825", Justification = "Avoid excessive generic instantiations.")]
-    internal static readonly Char32[] theEmptyChar32s = new Char32[0];
+    private static readonly Char32[] theEmptyChar32s = new Char32[0];
 
     static Utf()
     {
