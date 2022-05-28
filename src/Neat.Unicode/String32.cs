@@ -122,6 +122,7 @@ namespace Neat.Unicode
 
     private sealed class StringCreateHelper
     {
+      [SuppressMessage("Performance", "CA1822", Justification = "Closed delegates are more performant.")]
       [MethodImpl(Helper.JustOptimize)]
       public void Invoke(Span<char> span, Char32[] arg)
       {
