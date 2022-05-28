@@ -3,6 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace Neat.Unicode
 {
+  /// <summary>
+  /// Provides high-performance access to UTF.
+  /// </summary>
   public static class UtfUnsafe
   {
     public const int ReplacementCharacter32 = 0xFFFD;
@@ -999,7 +1002,7 @@ namespace Neat.Unicode
     }
 
     /// <summary>
-    /// Replaces invalid <see langword="Char32"/> instances by the UTF-32 encoding of the replacement character.
+    /// Replaces invalid <see cref="Char32"/> instances by the UTF-32 encoding of the replacement character.
     /// Each invalid instance becomes 1 valid instance.
     /// This method does not validate arguments.
     /// </summary>
