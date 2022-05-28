@@ -348,6 +348,24 @@ namespace Neat.Unicode
 
     #endregion range check for Char32
 
+    #region range check for Char16
+
+    [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of char explicit.")]
+    [MethodImpl(Helper.OptimizeInline)]
+    internal static bool Char16IsBelow0x80(char value)
+    {
+      return (uint)value < 0x80u;
+    }
+
+    [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of char explicit.")]
+    [MethodImpl(Helper.OptimizeInline)]
+    internal static bool Char16IsBelow0x800(char value)
+    {
+      return (uint)value < 0x800u;
+    }
+
+    #endregion range check for Char16
+
     #region generic property determination for Char32
 
     [MethodImpl(Helper.OptimizeInline)]
@@ -1734,7 +1752,46 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     internal static bool String16ToString8CountStrict(ref char src0, int src16s, out long countIndex)
     {
-      throw new System.NotImplementedException();
+      int ch1b2s = 0, ch1b3ch2b4s = 0;
+      char first;
+      for (int i = 0; i != src16s; ++i)
+      {
+        if (Char16IsBelow0x80(first = Unsafe.Add(ref src0, i)))
+        {
+          /* Valid1 in UTF-16, Valid1 in UTF-8 */
+          continue;
+        }
+        if (Char16IsBelow0x800(first))
+        {
+          /* Valid1 in UTF-16, Valid2 in UTF-8 */
+          ++ch1b2s;
+          continue;
+        }
+        if (Char16IsNotSurrogate(first))
+        {
+          /* Valid1 in UTF-16, Valid3 in UTF-8 */
+          goto Ch1B3;
+        }
+        if (Char16IsHighSurrogate(first))
+        {
+          if (++i != src16s && Char16IsLowSurrogate(Unsafe.Add(ref src0, i)))
+          {
+            /* Valid2 in UTF-16, Valid4 in UTF-8 */
+            goto Ch2B4;
+          }
+          /* InvalidDecrease */
+          --i;
+        }
+        /* Invalid */
+        countIndex = i;
+        return false;
+      Ch1B3:
+      Ch2B4:
+        ++ch1b3ch2b4s;
+        continue;
+      }
+      countIndex = src16s + (long)ch1b2s + ch1b3ch2b4s * 2L;
+      return true;
     }
 
     /// <summary>
@@ -1744,7 +1801,32 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     internal static long String16ToString8CountReplace(ref char src0, int src16s)
     {
-      throw new System.NotImplementedException();
+      int ch1b2s = 0, ch1b3ch2b4invalids = 0;
+      char first;
+      for (int i = 0; i != src16s; ++i)
+      {
+        if (Char16IsBelow0x80(first = Unsafe.Add(ref src0, i)))
+        {
+          /* Valid1 in UTF-16, Valid1 in UTF-8 */
+          continue;
+        }
+        if (Char16IsBelow0x800(first))
+        {
+          /* Valid1 in UTF-16, Valid2 in UTF-8 */
+          ++ch1b2s;
+          continue;
+        }
+        if (Char16IsHighSurrogate(first)
+          && (++i == src16s || Char16IsNotLowSurrogate(Unsafe.Add(ref src0, i))))
+        {
+          /* InvalidDecrease */
+          --i;
+        }
+        /* Ch1B3, Ch2B4, Invalid (including falling through from InvalidDecrease) */
+        ++ch1b3ch2b4invalids;
+        continue;
+      }
+      return src16s + (long)ch1b2s + ch1b3ch2b4invalids * 2L;
     }
 
     /// <summary>
@@ -1754,7 +1836,74 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     internal static void String16ToString8Transform(ref char src0, int src16s, ref byte dst0, int dst8s)
     {
-      throw new System.NotImplementedException();
+      int k = 0;
+      char first, low;
+      for (int i = 0, value; i != src16s && k != dst8s; ++i)
+      {
+        if (Char16IsBelow0x80(first = Unsafe.Add(ref src0, i)))
+        {
+          /* Valid1 in UTF-16, Valid1 in UTF-8 */
+          Unsafe.Add(ref dst0, k++) = Char32To1Char8UncheckedLead1(Char16ToChar32Unchecked1(first));
+          continue;
+        }
+        if (Char16IsBelow0x800(first))
+        {
+          /* Valid1 in UTF-16, Valid2 in UTF-8 */
+          goto Ch1B2;
+        }
+        if (Char16IsNotSurrogate(first))
+        {
+          /* Valid1 in UTF-16, Valid3 in UTF-8 */
+          goto Ch1B3;
+        }
+        if (Char16IsHighSurrogate(first))
+        {
+          if (++i != src16s && Char16IsLowSurrogate(low = Unsafe.Add(ref src0, i)))
+          {
+            /* Valid2 in UTF-16, Valid4 in UTF-8 */
+            goto Ch2B4;
+          }
+          /* InvalidDecrease */
+          --i;
+        }
+        /* Invalid */
+        first = ReplacementCharacter16;
+        goto Ch1B3;
+      Ch1B2:
+        if (dst8s == k + 1)
+        {
+          break;
+        }
+        value = Char16ToChar32Unchecked1(first);
+        Unsafe.Add(ref dst0, k++) = Char32To2Char8sUncheckedLead2(value);
+        Unsafe.Add(ref dst0, k++) = Char32To2Char8sUncheckedCont1(value);
+        continue;
+      Ch1B3:
+        if ((uint)dst8s <= (uint)(k + 2))
+        {
+          break;
+        }
+        value = Char16ToChar32Unchecked1(first);
+        Unsafe.Add(ref dst0, k++) = Char32To3Char8sUncheckedLead3(value);
+        Unsafe.Add(ref dst0, k++) = Char32To3Char8sUncheckedCont1(value);
+        Unsafe.Add(ref dst0, k++) = Char32To3Char8sUncheckedCont2(value);
+        continue;
+      Ch2B4:
+        if ((uint)dst8s <= (uint)(k + 3))
+        {
+          break;
+        }
+        value = Char16ToChar32Unchecked2(first, low);
+        Unsafe.Add(ref dst0, k++) = Char32To4Char8sUncheckedLead4(value);
+        Unsafe.Add(ref dst0, k++) = Char32To4Char8sUncheckedCont1(value);
+        Unsafe.Add(ref dst0, k++) = Char32To4Char8sUncheckedCont2(value);
+        Unsafe.Add(ref dst0, k++) = Char32To4Char8sUncheckedCont3(value);
+        continue;
+      }
+      while (k != dst8s)
+      {
+        Unsafe.Add(ref dst0, k++) = 0;
+      }
     }
 
     #endregion String16 to String8
