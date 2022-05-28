@@ -1,6 +1,8 @@
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -11,6 +13,7 @@ namespace Neat.Unicode
   /// <summary>
   /// <see cref="String8"/> is binary-compatbile with a reference to an array of <see cref="Char8"/>.
   /// Represents a string encoded in UTF-8, which is not necessarily valid.
+  /// Similar to <see langword="string"/>, the underlying memory of any <see cref="String8"/> must be immutable.
   /// </summary>
   [StructLayout(LayoutKind.Explicit)]
   public readonly struct String8
@@ -308,13 +311,136 @@ namespace Neat.Unicode
 
     /// <summary>
     /// Equivalent to <see cref="Utf.SanitizeString8(String8)"/>.
-    /// This method can be called on the <see langword="null"/> reference.
+    /// This method can be called on the <see langword="null"/> wrapper.
     /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public String8 Sanitize()
     {
       return Utf.SanitizeString8(this);
     }
+
+    #region Create, GetPinnableReference, AsSpan, AsMemory
+
+    /// <summary>
+    /// Creates a new <see cref="String8"/> and initializes it with the specified delegate.
+    /// Similar to <see cref="string.Create{TState}(int, TState, SpanAction{char, TState})"/>.
+    /// </summary>
+    [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of int explicit.")]
+    [MethodImpl(Helper.JustOptimize)]
+    public static String8 Create<TState>(int length, TState state, SpanAction<Char8, TState> action)
+    {
+      if ((uint)length > (uint)Utf.MaximumLength8)
+      {
+        throw new ArgumentOutOfRangeException(nameof(length));
+      }
+      Char8[] data = new Char8[length];
+      action(new Span<Char8>(data), state);
+      return new String8(data);
+    }
+
+    [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [MethodImpl(Helper.OptimizeInline)]
+    public readonly ref Char8 GetPinnableReference()
+    {
+      Char8[] data = myData;
+      int throwIfNull = data.Length;
+      return ref MemoryMarshal.GetArrayDataReference(data);
+    }
+
+    /// <summary>
+    /// This method cannot be called on the <see langword="null"/> wrapper.
+    /// </summary>
+    [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+    [MethodImpl(Helper.OptimizeInline)]
+    public ReadOnlySpan<Char8> AsSpan()
+    {
+      Char8[] data = myData;
+      int throwIfNull = data.Length;
+      return new ReadOnlySpan<Char8>(data);
+    }
+
+    /// <summary>
+    /// This method cannot be called on the <see langword="null"/> wrapper.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public ReadOnlySpan<Char8> AsSpan(int start)
+    {
+      Char8[] data = myData;
+      int dataLength = data.Length;
+      if ((uint)start > (uint)dataLength)
+      {
+        throw new ArgumentOutOfRangeException(nameof(start));
+      }
+      return new ReadOnlySpan<Char8>(data, start, dataLength - start);
+    }
+
+    /// <summary>
+    /// This method cannot be called on the <see langword="null"/> wrapper.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public ReadOnlySpan<Char8> AsSpan(int start, int length)
+    {
+      Char8[] data = myData;
+      int dataLength = data.Length;
+      if ((uint)start > (uint)dataLength)
+      {
+        throw new ArgumentOutOfRangeException(nameof(start));
+      }
+      if ((uint)length > (uint)(dataLength - start))
+      {
+        throw new ArgumentOutOfRangeException(nameof(length));
+      }
+      return new ReadOnlySpan<Char8>(data, start, length);
+    }
+
+    /// <summary>
+    /// This method cannot be called on the <see langword="null"/> wrapper.
+    /// </summary>
+    [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+    [MethodImpl(Helper.OptimizeInline)]
+    public ReadOnlyMemory<Char8> AsMemory()
+    {
+      Char8[] data = myData;
+      int throwIfNull = data.Length;
+      return new ReadOnlyMemory<Char8>(data);
+    }
+
+    /// <summary>
+    /// This method cannot be called on the <see langword="null"/> wrapper.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public ReadOnlyMemory<Char8> AsMemory(int start)
+    {
+      Char8[] data = myData;
+      int dataLength = data.Length;
+      if ((uint)start > (uint)dataLength)
+      {
+        throw new ArgumentOutOfRangeException(nameof(start));
+      }
+      return new ReadOnlyMemory<Char8>(data, start, dataLength - start);
+    }
+
+    /// <summary>
+    /// This method cannot be called on the <see langword="null"/> wrapper.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public ReadOnlyMemory<Char8> AsMemory(int start, int length)
+    {
+      Char8[] data = myData;
+      int dataLength = data.Length;
+      if ((uint)start > (uint)dataLength)
+      {
+        throw new ArgumentOutOfRangeException(nameof(start));
+      }
+      if ((uint)length > (uint)(dataLength - start))
+      {
+        throw new ArgumentOutOfRangeException(nameof(length));
+      }
+      return new ReadOnlyMemory<Char8>(data, start, length);
+    }
+
+    #endregion Create, GetPinnableReference, AsSpan, AsMemory
 
     /// <summary>
     /// Enumerates <see cref="Char8"/> instances in a <see cref="String8"/>.
