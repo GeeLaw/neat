@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Neat.Collections;
@@ -10,6 +12,7 @@ namespace Neat.Unicode
   /// <see cref="Char32"/> is binary-compatible with <see langword="int"/> and <see langword="uint"/>.
   /// An instance of <see cref="Char32"/> is not necessarily a valid Unicode code point.
   /// </summary>
+  [DebuggerDisplay("{DebuggerDisplay(),nq}")]
   [StructLayout(LayoutKind.Explicit, Pack = 4, Size = 4)]
   public readonly struct Char32 : IComparable<Char32>, IComparable, IEquatable<Char32>
   {
@@ -182,6 +185,7 @@ namespace Neat.Unicode
       return Value;
     }
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private static readonly string[] theToStringResults = new string[128]
     {
       "Char32(^@)", "Char32(^A)", "Char32(^B)", "Char32(^C)",
@@ -268,6 +272,7 @@ namespace Neat.Unicode
     /// Returns <see langword="true"/> if and only if the <see cref="Char32"/> instance is a valid Unicode code point.
     /// This means that <see cref="Value"/> is between either <c>0x0</c> and <c>0xD7FF</c> or <c>0xE000</c> and <c>0x10FFFF</c> (all inclusive).
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public bool IsValid
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -285,6 +290,7 @@ namespace Neat.Unicode
     /// Returns <see langword="true"/> if and only if the <see cref="Char32"/> instance can be encoded as a 1-byte sequence in UTF-8.
     /// This means that <see cref="Value"/> is between <c>0x0</c> and <c>0x7F</c> (both inclusive).
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public bool Is1Char8
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -298,6 +304,7 @@ namespace Neat.Unicode
     /// Returns <see langword="true"/> if and only if the <see cref="Char32"/> instance can be encoded as a 2-byte sequence in UTF-8.
     /// This means that <see cref="Value"/> is between <c>0x80</c> and <c>0x7FF</c> (both inclusive).
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public bool Is2Char8s
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -311,6 +318,7 @@ namespace Neat.Unicode
     /// Returns <see langword="true"/> if and only if the <see cref="Char32"/> instance can be encoded as a 3-byte sequence in UTF-8.
     /// This means that <see cref="Value"/> is between either <c>0x800</c> and <c>0xDBFF</c> or <c>0xE000</c> and <c>0xFFFF</c> (all inclusive).
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public bool Is3Char8s
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -324,6 +332,7 @@ namespace Neat.Unicode
     /// Returns <see langword="true"/> if and only if the <see cref="Char32"/> instance can be encoded as a 4-byte sequence in UTF-8.
     /// This means that <see cref="Value"/> is between <c>0x10000</c> and <c>0x10FFFF</c> (both inclusive).
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public bool Is4Char8s
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -354,6 +363,7 @@ namespace Neat.Unicode
     /// Returns <see langword="true"/> if and only if the <see cref="Char32"/> instance is a surrogate code point (which is invalid).
     /// This means that <see cref="Value"/> is between <c>0xD800</c> and <c>0xDFFF</c> (both inclusive).
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public bool IsSurrogate
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -367,6 +377,7 @@ namespace Neat.Unicode
     /// Returns <see langword="true"/> if and only if the <see cref="Char32"/> instance is a high (leading) surrogate code point (which is invalid).
     /// This means that <see cref="Value"/> is between <c>0xD800</c> and <c>0xDBFF</c> (both inclusive).
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public bool IsHighSurrogate
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -380,6 +391,7 @@ namespace Neat.Unicode
     /// Returns <see langword="true"/> if and only if the <see cref="Char32"/> instance is a low (leading) surrogate code point (which is invalid).
     /// This means that <see cref="Value"/> is between <c>0xDC00</c> and <c>0xDFFF</c> (both inclusive).
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public bool IsLowSurrogate
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -393,6 +405,7 @@ namespace Neat.Unicode
     /// Returns <see langword="true"/> if and only if the <see cref="Char32"/> instance can be encoded as one code unit in UTF-16.
     /// This means that <see cref="Value"/> is between either <c>0x0</c> and <c>0xD7FF</c> or <c>0xE000</c> and <c>0xFFFF</c> (all inclusive).
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public bool Is1Char16
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -406,6 +419,7 @@ namespace Neat.Unicode
     /// Returns <see langword="true"/> if and only if the <see cref="Char32"/> instance can be encoded as two code units in UTF-16.
     /// This means that <see cref="Value"/> is between <c>0x10000</c> and <c>0x10FFFF</c> (both inclusive).
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public bool Is2Char16s
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -455,5 +469,57 @@ namespace Neat.Unicode
         return obj.Value;
       }
     }
+
+    #region debugging
+
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    private static readonly string[] theDebuggerDisplayResults = new string[128]
+    {
+      "0 Char32(^@)", "1 Char32(^A)", "2 Char32(^B)", "3 Char32(^C)",
+      "4 Char32(^D)", "5 Char32(^E)", "6 Char32(^F)", "7 Char32(^G)",
+      "8 Char32(^H)", "9 Char32(^I)", "10 Char32(^J)", "11 Char32(^K)",
+      "12 Char32(^L)", "13 Char32(^M)", "14 Char32(^N)", "15 Char32(^O)",
+      "16 Char32(^P)", "17 Char32(^Q)", "18 Char32(^R)", "19 Char32(^S)",
+      "20 Char32(^T)", "21 Char32(^U)", "22 Char32(^V)", "23 Char32(^W)",
+      "24 Char32(^X)", "25 Char32(^Y)", "26 Char32(^Z)", "27 Char32(^[)",
+      "28 Char32(^\\)", "29 Char32(^])", "30 Char32(^^)", "31 Char32(^_)",
+      "32 ' '", "33 '!'", "34 '\"'", "35 '#'", "36 '$'", "37 '%'", "38 '&'", "39 '\\''",
+      "40 '('", "41 ')'", "42 '*'", "43 '+'", "44 ','", "45 '-'", "46 '.'", "47 '/'",
+      "48 '0'", "49 '1'", "50 '2'", "51 '3'", "52 '4'", "53 '5'", "54 '6'", "55 '7'",
+      "56 '8'", "57 '9'", "58 ':'", "59 ';'", "60 '<'", "61 '='", "62 '>'", "63 '?'",
+      "64 '@'", "65 'A'", "66 'B'", "67 'C'", "68 'D'", "69 'E'", "70 'F'", "71 'G'",
+      "72 'H'", "73 'I'", "74 'J'", "75 'K'", "76 'L'", "77 'M'", "78 'N'", "79 'O'",
+      "80 'P'", "81 'Q'", "82 'R'", "83 'S'", "84 'T'", "85 'U'", "86 'V'", "87 'W'",
+      "88 'X'", "89 'Y'", "90 'Z'", "91 '['", "92 '\\'", "93 ']'", "94 '^'", "95 '_'",
+      "96 '`'", "97 'a'", "98 'b'", "99 'c'", "100 'd'", "101 'e'", "102 'f'", "103 'g'",
+      "104 'h'", "105 'i'", "106 'j'", "107 'k'", "108 'l'", "109 'm'", "110 'n'", "111 'o'",
+      "112 'p'", "113 'q'", "114 'r'", "115 's'", "116 't'", "117 'u'", "118 'v'", "119 'w'",
+      "120 'x'", "121 'y'", "122 'z'", "123 '{'", "124 '|'", "125 '}'", "126 '~'", "127 Char32(^?)"
+    };
+
+    private string DebuggerDisplay()
+    {
+      int value = Value;
+      if (UtfUnsafe.Char32IsBelow0x80(value))
+      {
+        return theDebuggerDisplayResults[value];
+      }
+      string toString = GetString(value);
+      if (toString.Length < 6)
+      {
+        return value.ToString(CultureInfo.InvariantCulture) + " '" + toString + "'";
+      }
+      if (UtfUnsafe.Char32IsHighSurrogate(value))
+      {
+        return value.ToString(CultureInfo.InvariantCulture) + " " + toString + " <high surrogate>";
+      }
+      if (UtfUnsafe.Char32IsLowSurrogate(value))
+      {
+        return value.ToString(CultureInfo.InvariantCulture) + " " + toString + " <low surrogate>";
+      }
+      return value.ToString(CultureInfo.InvariantCulture) + " " + toString + " <too large>";
+    }
+
+    #endregion debugging
   }
 }

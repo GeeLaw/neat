@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -15,6 +16,7 @@ namespace Neat.Unicode
   /// Represents a string encoded in UTF-32, which is not necessarily valid.
   /// Similar to <see langword="string"/>, the underlying memory of any <see cref="String32"/> must be immutable.
   /// </summary>
+  [DebuggerDisplay("{ToString(),nq}")]
   [StructLayout(LayoutKind.Explicit)]
   public readonly struct String32
     : IComparable<String32>, IComparable, IEquatable<String32>,
@@ -36,6 +38,7 @@ namespace Neat.Unicode
     /// <summary>
     /// Gets an instance of <see cref="String32"/> of <see cref="Length"/> zero.
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public static readonly String32 Empty = new String32(Utf.theEmptyChar32s);
 
     /// <summary>
@@ -93,6 +96,7 @@ namespace Neat.Unicode
     /// Gets the number of UTF-32 code points.
     /// This property cannot be read if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     int IReadOnlyCollection<Char32>.Count
     {
       [MethodImpl(Helper.OptimizeInline)]

@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -15,6 +16,7 @@ namespace Neat.Unicode
   /// Represents a string encoded in UTF-8, which is not necessarily valid.
   /// Similar to <see langword="string"/>, the underlying memory of any <see cref="String8"/> must be immutable.
   /// </summary>
+  [DebuggerDisplay("{ToString(),nq}")]
   [StructLayout(LayoutKind.Explicit)]
   public readonly struct String8
     : IComparable<String8>, IComparable, IEquatable<String8>,
@@ -36,6 +38,7 @@ namespace Neat.Unicode
     /// <summary>
     /// Gets an instance of <see cref="String8"/> of <see cref="Length"/> zero.
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public static readonly String8 Empty = new String8(Utf.theEmptyChar8s);
 
     /// <summary>
@@ -93,6 +96,7 @@ namespace Neat.Unicode
     /// Gets the number of UTF-8 bytes.
     /// This property cannot be read if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     int IReadOnlyCollection<Char8>.Count
     {
       [MethodImpl(Helper.OptimizeInline)]
