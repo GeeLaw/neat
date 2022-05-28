@@ -827,13 +827,13 @@ namespace Neat.Unicode
         }
         if (Char16IsHighSurrogate(first))
         {
-          if (++i == src16s || Char16IsNotLowSurrogate(Unsafe.Add(ref src0, i)))
+          if (++i != src16s && Char16IsLowSurrogate(Unsafe.Add(ref src0, i)))
           {
-            /* InvalidDecrease */
-            return --i;
+            /* Valid2 */
+            continue;
           }
-          /* Valid2 */
-          continue;
+          /* InvalidDecrease */
+          return --i;
         }
         /* Invalid */
         return i;
@@ -859,18 +859,16 @@ namespace Neat.Unicode
         }
         if (Char16IsHighSurrogate(first))
         {
-          if (++i == src16s || Char16IsNotLowSurrogate(Unsafe.Add(ref src0, i)))
+          if (++i != src16s && Char16IsLowSurrogate(Unsafe.Add(ref src0, i)))
           {
-            /* InvalidDecrease */
-            --i;
-            goto Invalid;
+            /* Valid2 */
+            continue;
           }
-          /* Valid2 */
-          continue;
+          /* InvalidDecrease */
+          --i;
         }
-      Invalid:
+        /* Invalid */
         ++invalids;
-        continue;
       }
       return invalids;
     }
@@ -893,15 +891,14 @@ namespace Neat.Unicode
         }
         if (Char16IsHighSurrogate(first))
         {
-          if (++i == src16s || Char16IsNotLowSurrogate(low = Unsafe.Add(ref src0, i)))
+          if (++i != src16s && Char16IsLowSurrogate(low = Unsafe.Add(ref src0, i)))
           {
-            /* InvalidDecrease */
-            --i;
-            goto Invalid;
+            goto Valid2;
           }
-          goto Valid2;
+          /* InvalidDecrease */
+          --i;
         }
-      Invalid:
+        /* Invalid */
         first = ReplacementCharacter16;
       Valid1:
         Unsafe.Add(ref dst0, k++) = first;
@@ -1197,16 +1194,15 @@ namespace Neat.Unicode
         }
         if (Char16IsHighSurrogate(first))
         {
-          if (++i == src16s || Char16IsNotLowSurrogate(Unsafe.Add(ref src0, i)))
+          if (++i != src16s && Char16IsLowSurrogate(Unsafe.Add(ref src0, i)))
           {
-            /* InvalidDecrease */
-            --i;
-            goto Invalid;
+            /* Valid2 */
+            continue;
           }
-          /* Valid2 */
-          continue;
+          /* InvalidDecrease */
+          --i;
         }
-      Invalid:
+        /* Invalid */
         countIndex = i;
         return false;
       }
@@ -1252,15 +1248,14 @@ namespace Neat.Unicode
         }
         if (Char16IsHighSurrogate(first))
         {
-          if (++i == src16s || Char16IsNotLowSurrogate(low = Unsafe.Add(ref src0, i)))
+          if (++i != src16s && Char16IsLowSurrogate(low = Unsafe.Add(ref src0, i)))
           {
-            /* InvalidDecrease */
-            --i;
-            goto Invalid;
+            goto Valid2;
           }
-          goto Valid2;
+          /* InvalidDecrease */
+          --i;
         }
-      Invalid:
+        /* Invalid */
         first = ReplacementCharacter16;
       Valid1:
         Unsafe.Add(ref dst0, k) = Char16ToChar32Unchecked1(first);
