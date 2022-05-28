@@ -15,7 +15,7 @@ namespace Neat.Unicode
       IEnumerable2<Char8, String8.Enumerator>, IReadOnlyList<Char8>
   {
     [FieldOffset(0)]
-    private readonly Char8[] myData;
+    internal readonly Char8[] myData;
 
     /// <summary>
     /// Initializes a new instance of <see cref="String8"/>.

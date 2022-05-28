@@ -15,7 +15,7 @@ namespace Neat.Unicode
       IEnumerable2<Char32, String32.Enumerator>, IReadOnlyList<Char32>
   {
     [FieldOffset(0)]
-    private readonly Char32[] myData;
+    internal readonly Char32[] myData;
 
     /// <summary>
     /// Initializes a new instance of <see cref="String32"/>.
