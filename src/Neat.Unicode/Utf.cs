@@ -1539,7 +1539,58 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     internal static bool String8ToString16CountStrict(ref byte src0, int src8s, out int countIndex)
     {
-      throw new System.NotImplementedException();
+      int dst16s = 0;
+      byte lead, cont1, cont2, cont3;
+      for (int i = 0, j; i != src8s; ++i, ++dst16s)
+      {
+        if (Char8Leads1(lead = Unsafe.Add(ref src0, i)))
+        {
+          /* Valid1 */
+          continue;
+        }
+        j = i;
+        if (Char8Leads2(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && Char32From2Char8sIsValid(Char8ToChar32Unchecked2(lead, cont1)))
+          {
+            goto Valid2;
+          }
+          goto Invalid;
+        }
+        if (Char8Leads3(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
+            && Char32From3Char8sIsValid(Char8ToChar32Unchecked3(lead, cont1, cont2)))
+          {
+            goto Valid3;
+          }
+          goto Invalid;
+        }
+        if (Char8Leads4(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont3 = Unsafe.Add(ref src0, j))
+            && Char32From4Char8sIsValid(Char8ToChar32Unchecked4(lead, cont1, cont2, cont3)))
+          {
+            goto Valid4;
+          }
+          goto Invalid;
+        }
+      Invalid:
+        countIndex = i;
+        return false;
+      Valid4:
+        ++dst16s;
+      Valid2:
+      Valid3:
+        i = j;
+        continue;
+      }
+      countIndex = dst16s;
+      return true;
     }
 
     /// <summary>
@@ -1549,7 +1600,56 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     internal static int String8ToString16CountReplace(ref byte src0, int src8s)
     {
-      throw new System.NotImplementedException();
+      int dst16s = 0;
+      byte lead, cont1, cont2, cont3;
+      for (int i = 0, j; i != src8s; ++i, ++dst16s)
+      {
+        if (Char8Leads1(lead = Unsafe.Add(ref src0, i)))
+        {
+          /* Valid1 */
+          continue;
+        }
+        j = i;
+        if (Char8Leads2(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && Char32From2Char8sIsValid(Char8ToChar32Unchecked2(lead, cont1)))
+          {
+            goto Valid2;
+          }
+          goto Invalid;
+        }
+        if (Char8Leads3(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
+            && Char32From3Char8sIsValid(Char8ToChar32Unchecked3(lead, cont1, cont2)))
+          {
+            goto Valid3;
+          }
+          goto Invalid;
+        }
+        if (Char8Leads4(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont3 = Unsafe.Add(ref src0, j))
+            && Char32From4Char8sIsValid(Char8ToChar32Unchecked4(lead, cont1, cont2, cont3)))
+          {
+            goto Valid4;
+          }
+          goto Invalid;
+        }
+      Invalid:
+        continue;
+      Valid4:
+        ++dst16s;
+      Valid2:
+      Valid3:
+        i = j;
+        continue;
+      }
+      return dst16s;
     }
 
     /// <summary>
@@ -1559,7 +1659,70 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     internal static void String8ToString16Transform(ref byte src0, int src8s, ref char dst0, int dst16s)
     {
-      throw new System.NotImplementedException();
+      int k = 0;
+      byte lead, cont1, cont2, cont3;
+      for (int i = 0, j, value; i != src8s && k != dst16s; ++i)
+      {
+        if (Char8Leads1(lead = Unsafe.Add(ref src0, i)))
+        {
+          /* Valid1 */
+          Unsafe.Add(ref dst0, k++) = Char32To1Char16Unchecked(Char8ToChar32Unchecked1(lead));
+          continue;
+        }
+        j = i;
+        if (Char8Leads2(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && Char32From2Char8sIsValid(value = Char8ToChar32Unchecked2(lead, cont1)))
+          {
+            goto Valid2;
+          }
+          goto Invalid;
+        }
+        if (Char8Leads3(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
+            && Char32From3Char8sIsValid(value = Char8ToChar32Unchecked3(lead, cont1, cont2)))
+          {
+            goto Valid3;
+          }
+          goto Invalid;
+        }
+        if (Char8Leads4(lead))
+        {
+          if (++j != src8s && Char8Continues(cont1 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont2 = Unsafe.Add(ref src0, j))
+            && ++j != src8s && Char8Continues(cont3 = Unsafe.Add(ref src0, j))
+            && Char32From4Char8sIsValid(value = Char8ToChar32Unchecked4(lead, cont1, cont2, cont3)))
+          {
+            goto Valid4;
+          }
+          goto Invalid;
+        }
+      Invalid:
+        Unsafe.Add(ref dst0, k++) = ReplacementCharacter16;
+        continue;
+      Valid2:
+      Valid3:
+        i = j;
+        Unsafe.Add(ref dst0, k++) = Char32To1Char16Unchecked(value);
+        continue;
+      Valid4:
+        if (dst16s == k + 1)
+        {
+          break;
+        }
+        i = j;
+        value = Char32To2Char16sUncheckedPrepare(value);
+        Unsafe.Add(ref dst0, k++) = Char32PreparedTo2Char16sUncheckedHigh(value);
+        Unsafe.Add(ref dst0, k++) = Char32PreparedTo2Char16sUncheckedLow(value);
+        continue;
+      }
+      while (k != dst16s)
+      {
+        Unsafe.Add(ref dst0, k++) = (char)0;
+      }
     }
 
     #endregion String8 to String16
