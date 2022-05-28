@@ -22,7 +22,7 @@ namespace Neat.Unicode
     }
 
     /// <summary>
-    /// Gets whether the instance is the <see langword="null"/> reference or empty (of <see cref="string.Length"/> <c>0</c>).
+    /// Gets whether the instance is the <see langword="null"/> reference or empty (of <see cref="string.Length"/> zero).
     /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool IsDefaultOrEmpty(this string string16)

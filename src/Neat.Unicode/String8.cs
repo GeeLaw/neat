@@ -48,7 +48,7 @@ namespace Neat.Unicode
     }
 
     /// <summary>
-    /// Gets whether the instance is <see langword="default"/> (the <see langword="null"/> wrapper) or empty (of <see cref="Length"/> <c>0</c>).
+    /// Gets whether the instance is <see langword="default"/> (the <see langword="null"/> wrapper) or empty (of <see cref="Length"/> zero).
     /// </summary>
     public bool IsDefaultOrEmpty
     {
