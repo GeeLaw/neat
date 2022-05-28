@@ -249,7 +249,7 @@ namespace Neat.Unicode
       for (int i = 16; i != 8; --i)
       {
         char18[i] = GetHexit(value & 0xF);
-        value >>= 1;
+        value >>= 4;
       }
       return new string(char18, 0, 18);
     }
