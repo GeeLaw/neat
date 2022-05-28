@@ -1529,9 +1529,75 @@ namespace Neat.Unicode
 
     #region String8 to String16
 
+    /// <summary>
+    /// Given UTF-8, computes UTF-16 length.
+    /// Returns <see langword="true"/> if and only if UTF-8 is valid,
+    /// upon which <paramref name="countIndex"/> contains the number of <see langword="char"/> instances needed.
+    /// Otherwise, <paramref name="countIndex"/> contains the index of the first invalid <see cref="Char8"/> instance.
+    /// This method does not validate arguments.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    internal static bool String8ToString16CountStrict(ref byte src0, int src8s, out int countIndex)
+    {
+      throw new System.NotImplementedException();
+    }
+
+    /// <summary>
+    /// Given UTF-8, computes UTF-16 length, with invalid <see cref="Char8"/> instances replaced by the UTF-16 encoding of the replacement character.
+    /// This method does not validate arguments.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    internal static int String8ToString16CountReplace(ref byte src0, int src8s)
+    {
+      throw new System.NotImplementedException();
+    }
+
+    /// <summary>
+    /// Transforms UTF-8 to UTF-16, with invalid <see cref="Char8"/> instances replaced by the UTF-16 encoding of the replacement character.
+    /// This method does not validate arguments, and will write exactly <paramref name="dst16s"/> elements beginning <paramref name="dst0"/>.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    internal static void String8ToString16Transform(ref byte src0, int src8s, ref char dst0, int dst16s)
+    {
+      throw new System.NotImplementedException();
+    }
+
     #endregion String8 to String16
 
     #region String16 to String8
+
+    /// <summary>
+    /// Given UTF-16, computes UTF-8 length.
+    /// Returns <see langword="true"/> if and only if UTF-16 is valid,
+    /// upon which <paramref name="countIndex"/> contains the number of <see cref="Char8"/> instances needed.
+    /// Otherwise, <paramref name="countIndex"/> contains the index of the first invalid <see langword="char"/> instance.
+    /// This method does not validate arguments.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    internal static bool String16ToString8CountStrict(ref char src0, int src16s, out long countIndex)
+    {
+      throw new System.NotImplementedException();
+    }
+
+    /// <summary>
+    /// Given UTF-16, computes UTF-8 length, with invalid <see langword="char"/> instances replaced by the UTF-8 encoding of the replacement character.
+    /// This method does not validate arguments.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    internal static long String16ToString8CountReplace(ref char src0, int src16s)
+    {
+      throw new System.NotImplementedException();
+    }
+
+    /// <summary>
+    /// Transforms UTF-16 to UTF-8, with invalid <see langword="char"/> instances replaced by the UTF-8 encoding of the replacement character.
+    /// This method does not validate arguments, and will write exactly <paramref name="dst8s"/> elements beginning <paramref name="dst0"/>.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    internal static void String16ToString8Transform(ref char src0, int src16s, ref byte dst0, int dst8s)
+    {
+      throw new System.NotImplementedException();
+    }
 
     #endregion String16 to String8
   }
