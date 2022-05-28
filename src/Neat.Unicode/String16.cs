@@ -40,17 +40,6 @@ namespace Neat.Unicode
     }
 
     /// <summary>
-    /// This method cannot be called if the instance is <see langword="default"/> (the <see langword="null"/> reference).
-    /// </summary>
-    [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
-    [MethodImpl(Helper.OptimizeInline)]
-    public static Enumerator GetEnumerator2(this string string16)
-    {
-      int throwIfNull = string16.Length;
-      return new Enumerator(string16);
-    }
-
-    /// <summary>
     /// Enumerates <see langword="char"/> instances in <see langword="string"/>.
     /// </summary>
     public struct Enumerator : IEnumerator2<char>
@@ -130,6 +119,17 @@ namespace Neat.Unicode
       void IDisposable.Dispose()
       {
       }
+    }
+
+    /// <summary>
+    /// This method cannot be called if the instance is <see langword="default"/> (the <see langword="null"/> reference).
+    /// </summary>
+    [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+    [MethodImpl(Helper.OptimizeInline)]
+    public static Enumerator GetEnumerator2(this string string16)
+    {
+      int throwIfNull = string16.Length;
+      return new Enumerator(string16);
     }
   }
 }

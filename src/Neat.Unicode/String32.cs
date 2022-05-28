@@ -517,6 +517,8 @@ namespace Neat.Unicode
       }
     }
 
+    #region GetEnumerator
+
     /// <summary>
     /// This method cannot be called if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
     /// </summary>
@@ -564,5 +566,7 @@ namespace Neat.Unicode
     {
       return GetEnumerator();
     }
+
+    #endregion GetEnumerator
   }
 }
