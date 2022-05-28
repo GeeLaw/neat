@@ -216,23 +216,23 @@ namespace Neat.Unicode
     private static unsafe string GetString(int value)
     {
       char* char18 = stackalloc char[18];
-      if (Utf.Char32IsBelow0x80(value))
+      if (UtfUnsafe.Char32IsBelow0x80(value))
       {
         return theToStringResults[value];
       }
-      if (Utf.Char32IsBelow0x10000(value))
+      if (UtfUnsafe.Char32IsBelow0x10000(value))
       {
-        if (Utf.Char32IsSurrogate(value))
+        if (UtfUnsafe.Char32IsSurrogate(value))
         {
           goto NotValidCodepoint;
         }
-        return new string(Utf.Char32To1Char16Unchecked(value), 1);
+        return new string(UtfUnsafe.Char32To1Char16Unchecked(value), 1);
       }
-      if (Utf.Char32IsBelow0x110000(value))
+      if (UtfUnsafe.Char32IsBelow0x110000(value))
       {
-        value = Utf.Char32To2Char16sUncheckedPrepare(value);
-        char18[0] = Utf.Char32PreparedTo2Char16sUncheckedHigh(value);
-        char18[1] = Utf.Char32PreparedTo2Char16sUncheckedLow(value);
+        value = UtfUnsafe.Char32To2Char16sUncheckedPrepare(value);
+        char18[0] = UtfUnsafe.Char32PreparedTo2Char16sUncheckedHigh(value);
+        char18[1] = UtfUnsafe.Char32PreparedTo2Char16sUncheckedLow(value);
         return new string(char18, 0, 2);
       }
     NotValidCodepoint:
@@ -273,7 +273,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return Utf.Char32IsValid(Value);
+        return UtfUnsafe.Char32IsValid(Value);
       }
     }
 
@@ -290,7 +290,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return Utf.Char32Is1Char8(Value);
+        return UtfUnsafe.Char32Is1Char8(Value);
       }
     }
 
@@ -303,7 +303,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return Utf.Char32Is2Char8s(Value);
+        return UtfUnsafe.Char32Is2Char8s(Value);
       }
     }
 
@@ -316,7 +316,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return Utf.Char32Is3Char8s(Value);
+        return UtfUnsafe.Char32Is3Char8s(Value);
       }
     }
 
@@ -329,7 +329,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return Utf.Char32Is4Char8s(Value);
+        return UtfUnsafe.Char32Is4Char8s(Value);
       }
     }
 
@@ -342,7 +342,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return Utf.Char32LengthInChar8s(Value);
+        return UtfUnsafe.Char32LengthInChar8s(Value);
       }
     }
 
@@ -359,7 +359,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return Utf.Char32IsSurrogate(Value);
+        return UtfUnsafe.Char32IsSurrogate(Value);
       }
     }
 
@@ -372,7 +372,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return Utf.Char32IsHighSurrogate(Value);
+        return UtfUnsafe.Char32IsHighSurrogate(Value);
       }
     }
 
@@ -385,7 +385,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return Utf.Char32IsLowSurrogate(Value);
+        return UtfUnsafe.Char32IsLowSurrogate(Value);
       }
     }
 
@@ -398,7 +398,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return Utf.Char32Is1Char16(Value);
+        return UtfUnsafe.Char32Is1Char16(Value);
       }
     }
 
@@ -411,7 +411,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return Utf.Char32Is2Char16s(Value);
+        return UtfUnsafe.Char32Is2Char16s(Value);
       }
     }
 
@@ -424,7 +424,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return Utf.Char32LengthInChar16s(Value);
+        return UtfUnsafe.Char32LengthInChar16s(Value);
       }
     }
 

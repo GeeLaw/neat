@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace Neat.Unicode
 {
-  public static class Utf
+  public static class UtfUnsafe
   {
     #region public methods for decoding or encoding 1 code point
 

@@ -254,7 +254,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return Utf.Char8Leads1(Value);
+        return UtfUnsafe.Char8Leads1(Value);
       }
     }
 
@@ -268,7 +268,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return Utf.Char8Continues(Value);
+        return UtfUnsafe.Char8Continues(Value);
       }
     }
 
@@ -284,7 +284,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return Utf.Char8Leads2(Value);
+        return UtfUnsafe.Char8Leads2(Value);
       }
     }
 
@@ -298,7 +298,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return Utf.Char8Leads3(Value);
+        return UtfUnsafe.Char8Leads3(Value);
       }
     }
 
@@ -314,7 +314,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return Utf.Char8Leads4(Value);
+        return UtfUnsafe.Char8Leads4(Value);
       }
     }
 

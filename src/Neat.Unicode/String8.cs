@@ -52,16 +52,16 @@ namespace Neat.Unicode
       }
       ref char src0 = ref MemoryMarshal.GetReference(string16.AsSpan());
       long dst8s;
-      if (!Utf.String16ToString8CountStrict(ref src0, src16s, out dst8s))
+      if (!UtfUnsafe.String16ToString8CountStrict(ref src0, src16s, out dst8s))
       {
-        throw new ArgumentException(Utf.String16IsNotValid, nameof(string16));
+        throw new ArgumentException(UtfUnsafe.String16IsNotValid, nameof(string16));
       }
-      if (dst8s > Utf.MaximumLength8)
+      if (dst8s > UtfUnsafe.MaximumLength8)
       {
-        throw new OutOfMemoryException(Utf.String8WouldBeTooLong);
+        throw new OutOfMemoryException(UtfUnsafe.String8WouldBeTooLong);
       }
       Char8[] string8 = GC.AllocateUninitializedArray<Char8>((int)dst8s, false);
-      Utf.String16ToString8Transform(ref src0, src16s,
+      UtfUnsafe.String16ToString8Transform(ref src0, src16s,
         ref Unsafe.As<Char8, byte>(ref MemoryMarshal.GetArrayDataReference(string8)),
         (int)dst8s);
       return new String8(string8);
@@ -86,13 +86,13 @@ namespace Neat.Unicode
         return new String8(theEmptyArray);
       }
       ref char src0 = ref MemoryMarshal.GetReference(string16.AsSpan());
-      long dst8s = Utf.String16ToString8CountReplace(ref src0, src16s);
-      if (dst8s > Utf.MaximumLength8)
+      long dst8s = UtfUnsafe.String16ToString8CountReplace(ref src0, src16s);
+      if (dst8s > UtfUnsafe.MaximumLength8)
       {
-        throw new OutOfMemoryException(Utf.String8WouldBeTooLong);
+        throw new OutOfMemoryException(UtfUnsafe.String8WouldBeTooLong);
       }
       Char8[] string8 = GC.AllocateUninitializedArray<Char8>((int)dst8s, false);
-      Utf.String16ToString8Transform(ref src0, src16s,
+      UtfUnsafe.String16ToString8Transform(ref src0, src16s,
         ref Unsafe.As<Char8, byte>(ref MemoryMarshal.GetArrayDataReference(string8)),
         (int)dst8s);
       return new String8(string8);
@@ -126,7 +126,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.JustOptimize)]
       public void Invoke(Span<char> span, Char8[] arg)
       {
-        Utf.String8ToString16Transform(
+        UtfUnsafe.String8ToString16Transform(
           ref Unsafe.As<Char8, byte>(ref MemoryMarshal.GetArrayDataReference(arg)),
           arg.Length,
           ref MemoryMarshal.GetReference(span),
@@ -145,16 +145,16 @@ namespace Neat.Unicode
         return "";
       }
       int dst16s;
-      if (!Utf.String8ToString16CountStrict(
+      if (!UtfUnsafe.String8ToString16CountStrict(
         ref Unsafe.As<Char8, byte>(ref MemoryMarshal.GetArrayDataReference(string8)),
         src8s,
         out dst16s))
       {
-        throw new ArgumentException(Utf.String8IsNotValid, nameof(string8));
+        throw new ArgumentException(UtfUnsafe.String8IsNotValid, nameof(string8));
       }
-      if (dst16s > Utf.MaximumLength16)
+      if (dst16s > UtfUnsafe.MaximumLength16)
       {
-        throw new OutOfMemoryException(Utf.String16WouldBeTooLong);
+        throw new OutOfMemoryException(UtfUnsafe.String16WouldBeTooLong);
       }
       return string.Create(dst16s, string8, theStringCreateAction);
     }
@@ -167,12 +167,12 @@ namespace Neat.Unicode
       {
         return "";
       }
-      int dst16s = Utf.String8ToString16CountReplace(
+      int dst16s = UtfUnsafe.String8ToString16CountReplace(
         ref Unsafe.As<Char8, byte>(ref MemoryMarshal.GetArrayDataReference(string8)),
         src8s);
-      if (dst16s > Utf.MaximumLength16)
+      if (dst16s > UtfUnsafe.MaximumLength16)
       {
-        throw new OutOfMemoryException(Utf.String16WouldBeTooLong);
+        throw new OutOfMemoryException(UtfUnsafe.String16WouldBeTooLong);
       }
       return string.Create(dst16s, string8, theStringCreateAction);
     }

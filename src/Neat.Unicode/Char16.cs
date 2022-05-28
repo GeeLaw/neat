@@ -14,7 +14,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.OptimizeInline)]
     public static bool IsSurrogate(this char char16)
     {
-      return Utf.Char16IsSurrogate(char16);
+      return UtfUnsafe.Char16IsSurrogate(char16);
     }
 
     /// <summary>
@@ -24,7 +24,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.OptimizeInline)]
     public static bool IsHighSurrogate(this char char16)
     {
-      return Utf.Char16IsHighSurrogate(char16);
+      return UtfUnsafe.Char16IsHighSurrogate(char16);
     }
 
     /// <summary>
@@ -34,7 +34,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.OptimizeInline)]
     public static bool IsLowSurrogate(this char char16)
     {
-      return Utf.Char16IsLowSurrogate(char16);
+      return UtfUnsafe.Char16IsLowSurrogate(char16);
     }
   }
 }
