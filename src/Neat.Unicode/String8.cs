@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Neat.Collections;
@@ -449,28 +450,58 @@ namespace Neat.Unicode
     /// <summary>
     /// Enumerates <see cref="Char8"/> instances in a <see cref="String8"/>.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplay(),nq}")]
     public struct Enumerator : IEnumerator2<Char8>
     {
       [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
       private Char8[] myData;
+
       private int myIndex;
+
+#if DEBUG
+      private bool myDisposed;
+#endif
+
+      private string DebuggerDisplay()
+      {
+        return "Index = " + myIndex.ToString(CultureInfo.InvariantCulture)
+#if DEBUG
+          + (myDisposed ? ", Disposed = True" : ", Disposed = False")
+#endif
+          ;
+      }
 
       [MethodImpl(Helper.OptimizeInline)]
       internal Enumerator(Char8[] data)
       {
         myData = data;
         myIndex = -1;
+#if DEBUG
+        myDisposed = false;
+#endif
       }
 
       [MethodImpl(Helper.OptimizeInline)]
       void IEnumerator.Reset()
       {
+#if DEBUG
+        if (myDisposed)
+        {
+          throw new ObjectDisposedException("Neat.Unicode.String8.Enumerator");
+        }
+#endif
         myIndex = -1;
       }
 
       [MethodImpl(Helper.OptimizeInline)]
       public bool MoveNext(out Char8 item)
       {
+#if DEBUG
+        if (myDisposed)
+        {
+          throw new ObjectDisposedException("Neat.Unicode.String8.Enumerator");
+        }
+#endif
         Char8[] data = myData;
         int index = myIndex;
         myIndex = ++index;
@@ -479,6 +510,9 @@ namespace Neat.Unicode
           item = data[index];
           return true;
         }
+#if DEBUG
+        myDisposed = true;
+#endif
         item = default(Char8);
         return false;
       }
@@ -486,6 +520,12 @@ namespace Neat.Unicode
       [MethodImpl(Helper.JustOptimize)]
       bool IEnumerator2.MoveNext(out object item)
       {
+#if DEBUG
+        if (myDisposed)
+        {
+          throw new ObjectDisposedException("Neat.Unicode.String8.Enumerator");
+        }
+#endif
         Char8[] data = myData;
         int index = myIndex;
         myIndex = ++index;
@@ -494,6 +534,9 @@ namespace Neat.Unicode
           item = data[index];
           return true;
         }
+#if DEBUG
+        myDisposed = true;
+#endif
         item = null;
         return false;
       }
@@ -501,6 +544,12 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       public bool MoveNext()
       {
+#if DEBUG
+        if (myDisposed)
+        {
+          throw new ObjectDisposedException("Neat.Unicode.String8.Enumerator");
+        }
+#endif
         return ++myIndex < myData.Length;
       }
 
@@ -509,6 +558,12 @@ namespace Neat.Unicode
         [MethodImpl(Helper.OptimizeInline)]
         get
         {
+#if DEBUG
+          if (myDisposed)
+          {
+            throw new ObjectDisposedException("Neat.Unicode.String8.Enumerator");
+          }
+#endif
           return myData[myIndex];
         }
       }
@@ -518,6 +573,12 @@ namespace Neat.Unicode
         [MethodImpl(Helper.JustOptimize)]
         get
         {
+#if DEBUG
+          if (myDisposed)
+          {
+            throw new ObjectDisposedException("Neat.Unicode.String8.Enumerator");
+          }
+#endif
           return myData[myIndex];
         }
       }
@@ -525,6 +586,9 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       void IDisposable.Dispose()
       {
+#if DEBUG
+        myDisposed = true;
+#endif
       }
     }
 
