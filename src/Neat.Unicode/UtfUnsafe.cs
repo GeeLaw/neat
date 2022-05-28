@@ -23,6 +23,10 @@ namespace Neat.Unicode
 
     #region generic property determination for Char8
 
+    /// <summary>
+    /// Determines whether the byte is a leading byte of 1-byte UTF-8 sequence,
+    /// without considering overlong seuqences, surrogate code points, or values above <c>0x10FFFF</c>.
+    /// </summary>
     [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of byte explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char8Leads1(byte value)
@@ -30,24 +34,40 @@ namespace Neat.Unicode
       return (uint)value < 0x80u;
     }
 
+    /// <summary>
+    /// Determines whether the byte is a continuation of any-length UTF-8 sequence,
+    /// without considering overlong seuqences, surrogate code points, or values above <c>0x10FFFF</c>.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char8Continues(byte value)
     {
       return (value & 0xC0) == 0x80;
     }
 
+    /// <summary>
+    /// Determines whether the byte is a leading byte of 2-byte UTF-8 sequence,
+    /// without considering overlong seuqences, surrogate code points, or values above <c>0x10FFFF</c>.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char8Leads2(byte value)
     {
       return (value & 0xE0) == 0xC0;
     }
 
+    /// <summary>
+    /// Determines whether the byte is a leading byte of 3-byte UTF-8 sequence,
+    /// without considering overlong seuqences, surrogate code points, or values above <c>0x10FFFF</c>.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char8Leads3(byte value)
     {
       return (value & 0xF0) == 0xE0;
     }
 
+    /// <summary>
+    /// Determines whether the byte is a leading byte of 4-byte UTF-8 sequence,
+    /// without considering overlong seuqences, surrogate code points, or values above <c>0x10FFFF</c>.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char8Leads4(byte value)
     {
@@ -58,24 +78,40 @@ namespace Neat.Unicode
 
     #region Char8 to Char32
 
+    /// <summary>
+    /// Converts a 1-byte UTF-8 sequence to a UTF-32 code point,
+    /// without performing any check.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static int Char8ToChar32Unchecked1(byte lead1)
     {
       return lead1;
     }
 
+    /// <summary>
+    /// Converts a 2-byte UTF-8 sequence to a UTF-32 code point,
+    /// without performing any check.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static int Char8ToChar32Unchecked2(byte lead2, byte cont1)
     {
       return ((lead2 & 0x1F) << 6) | (cont1 & 0x3F);
     }
 
+    /// <summary>
+    /// Converts a 3-byte UTF-8 sequence to a UTF-32 code point,
+    /// without performing any check.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static int Char8ToChar32Unchecked3(byte lead3, byte cont1, byte cont2)
     {
       return ((lead3 & 0x0F) << 12) | ((cont1 & 0x3F) << 6) | (cont2 & 0x3F);
     }
 
+    /// <summary>
+    /// Converts a 4-byte UTF-8 sequence to a UTF-32 code point,
+    /// without performing any check.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static int Char8ToChar32Unchecked4(byte lead4, byte cont1, byte cont2, byte cont3)
     {
@@ -86,30 +122,45 @@ namespace Neat.Unicode
 
     #region generic property determination for Char16
 
+    /// <summary>
+    /// Determines whether the UTF-16 code unit is a surrogate code unit.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char16IsSurrogate(char value)
     {
       return (value & 0xFFFFF800) == 0xD800;
     }
 
+    /// <summary>
+    /// Determines whether the UTF-16 code unit is not a surrogate code unit.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char16IsNotSurrogate(char value)
     {
       return (value & 0xFFFFF800) != 0xD800;
     }
 
+    /// <summary>
+    /// Determines whether the UTF-16 code unit is a high surrogate code unit.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char16IsHighSurrogate(char value)
     {
       return (value & 0xFFFFFC00) == 0xD800;
     }
 
+    /// <summary>
+    /// Determines whether the UTF-16 code unit is a low surrogate code unit.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char16IsLowSurrogate(char value)
     {
       return (value & 0xFFFFFC00) == 0xDC00;
     }
 
+    /// <summary>
+    /// Determines whether the UTF-16 code unit is a not low surrogate code unit.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char16IsNotLowSurrogate(char value)
     {
@@ -120,12 +171,20 @@ namespace Neat.Unicode
 
     #region Char16 to Char32
 
+    /// <summary>
+    /// Converts a 1-unit UTF-16 sequence to a UTF-32 code point,
+    /// without performing any check.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static int Char16ToChar32Unchecked1(char value)
     {
       return value;
     }
 
+    /// <summary>
+    /// Converts a 2-unit UTF-16 sequence to a UTF-32 code point,
+    /// without performing any check.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static int Char16ToChar32Unchecked2(char high, char low)
     {
@@ -136,30 +195,52 @@ namespace Neat.Unicode
 
     #region range check for Char32
 
+    /// <summary>
+    /// Determines whether the UTF-32 code point is below <c>0x80</c> (exclusive).
+    /// Code points in this range are always valid, 1 byte in UTF-8, and 1 code unit in UTF-16.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char32IsBelow0x80(int value)
     {
       return (uint)value < 0x80u;
     }
 
+    /// <summary>
+    /// Determines whether the UTF-32 code point is below <c>0x800</c> (exclusive).
+    /// Code points in this range are always valid, at most 2 bytes in UTF-8, and 1 code unit in UTF-16.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char32IsBelow0x800(int value)
     {
       return (uint)value < 0x800u;
     }
 
+    /// <summary>
+    /// Determines whether the UTF-32 code point is below <c>0x10000</c> (exclusive).
+    /// Code points in this range are not always valid (surrogate code points).
+    /// Valid code points are at most 3 bytes in UTF-8 and 1 code unit in UTF-16.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char32IsBelow0x10000(int value)
     {
       return (uint)value < 0x10000u;
     }
 
+    /// <summary>
+    /// Determines whether the UTF-32 code point is below <c>0x110000</c> (exclusive).
+    /// Code points in this range are not always valid (surrogate code points).
+    /// Valid code points are at most 4 bytes in UTF-8 and 2 code units in UTF-16.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char32IsBelow0x110000(int value)
     {
       return (uint)value < 0x110000u;
     }
 
+    /// <summary>
+    /// Determines whether the UTF-32 code point is above <c>0x10000</c> (inclusive) below <c>0x110000</c> (exclusive).
+    /// Code points in this range are always valid, 4 bytes in UTF-8, and 2 code units in UTF-16.
+    /// </summary>
     [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of int explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char32IsAbove0x10000AndBelow0x110000(int value)
@@ -171,6 +252,10 @@ namespace Neat.Unicode
 
     #region range check for Char16
 
+    /// <summary>
+    /// Determines whether the UTF-16 code unit is below <c>0x80</c> (exclusive).
+    /// Code units in this range are always valid, 1 byte in UTF-8, and 1 code unit in UTF-16.
+    /// </summary>
     [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of char explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char16IsBelow0x80(char value)
@@ -178,6 +263,10 @@ namespace Neat.Unicode
       return (uint)value < 0x80u;
     }
 
+    /// <summary>
+    /// Determines whether the UTF-16 code unit is below <c>0x80</c> (exclusive).
+    /// Code units in this range are always valid, at most 2 bytes in UTF-8, and 1 code unit in UTF-16.
+    /// </summary>
     [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of char explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char16IsBelow0x800(char value)
@@ -189,36 +278,54 @@ namespace Neat.Unicode
 
     #region generic property determination for Char32
 
+    /// <summary>
+    /// Determines whether a UTF-32 code point is valid.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char32IsValid(int value)
     {
       return (uint)value < 0x110000u && (value & 0xFFFFF800) != 0xD800;
     }
 
+    /// <summary>
+    /// Determines whether a UTF-32 code point is not valid.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char32IsNotValid(int value)
     {
       return (uint)value >= 0x110000u || (value & 0xFFFFF800) == 0xD800;
     }
 
+    /// <summary>
+    /// Determines whether a UTF-32 code point is a surrogate code point.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char32IsSurrogate(int value)
     {
       return (value & 0xFFFFF800) == 0xD800;
     }
 
+    /// <summary>
+    /// Determines whether a UTF-32 code point is not a surrogate code point.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char32IsNotSurrogate(int value)
     {
       return (value & 0xFFFFF800) != 0xD800;
     }
 
+    /// <summary>
+    /// Determines whether a UTF-32 code point is not a high surrogate code point.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char32IsHighSurrogate(int value)
     {
       return (value & 0xFFFFFC00) == 0xD800;
     }
 
+    /// <summary>
+    /// Determines whether a UTF-32 code point is not a low surrogate code point.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char32IsLowSurrogate(int value)
     {
@@ -229,12 +336,18 @@ namespace Neat.Unicode
 
     #region generic encoding length counting for Char32 in Char8s
 
+    /// <summary>
+    /// Determines whether a UTF-32 code point is 1 byte in UTF-8.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char32Is1Char8(int value)
     {
       return (uint)value < 0x80u;
     }
 
+    /// <summary>
+    /// Determines whether a UTF-32 code point is 2 bytes in UTF-8.
+    /// </summary>
     [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of int explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char32Is2Char8s(int value)
@@ -242,6 +355,9 @@ namespace Neat.Unicode
       return (uint)(value - 0x80) < (uint)(0x800 - 0x80);
     }
 
+    /// <summary>
+    /// Determines whether a UTF-32 code point is 3 bytes in UTF-8.
+    /// </summary>
     [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of int explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char32Is3Char8s(int value)
@@ -249,6 +365,9 @@ namespace Neat.Unicode
       return (uint)(value - 0x800) < (uint)(0x10000 - 0x800) && (value & 0xFFFFF800) != 0xD800;
     }
 
+    /// <summary>
+    /// Determines whether a UTF-32 code point is 4 bytes in UTF-8.
+    /// </summary>
     [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of int explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char32Is4Char8s(int value)
@@ -256,6 +375,10 @@ namespace Neat.Unicode
       return (uint)(value - 0x10000) < (uint)(0x110000 - 0x10000);
     }
 
+    /// <summary>
+    /// Given a UTF-32 code point, determines the number of bytes in UTF-8.
+    /// Returns <c>-1</c> if the code point is not valid.
+    /// </summary>
     [MethodImpl(Helper.JustOptimize)]
     public static int Char32LengthInChar8s(int value)
     {
@@ -287,12 +410,18 @@ namespace Neat.Unicode
 
     #region generic encoding length counting for Char32 in Char16s
 
+    /// <summary>
+    /// Determines whether a UTF-32 code point is 1 code unit in UTF-16.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char32Is1Char16(int value)
     {
       return (uint)value < 0x10000u && (value & 0xFFFFF800) != 0xD800;
     }
 
+    /// <summary>
+    /// Determines whether a UTF-32 code point is 2 code units in UTF-16.
+    /// </summary>
     [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of int explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char32Is2Char16s(int value)
@@ -300,6 +429,10 @@ namespace Neat.Unicode
       return (uint)(value - 0x10000) < (uint)(0x110000 - 0x10000);
     }
 
+    /// <summary>
+    /// Given a UTF-32 code point, determines the number of code units in UTF-16.
+    /// Returns <c>-1</c> if the code point is not valid.
+    /// </summary>
     [MethodImpl(Helper.JustOptimize)]
     public static int Char32LengthInChar16s(int value)
     {
@@ -323,60 +456,100 @@ namespace Neat.Unicode
 
     #region Char32 to Char8
 
+    /// <summary>
+    /// Given a UTF-32 code point, computes the leading byte in its 1-byte UTF-8 sequence,
+    /// without performing any check.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static byte Char32To1Char8UncheckedLead1(int value)
     {
       return (byte)value;
     }
 
+    /// <summary>
+    /// Given a UTF-32 code point, computes the leading byte in its 2-byte UTF-8 sequence,
+    /// without performing any check.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static byte Char32To2Char8sUncheckedLead2(int value)
     {
       return (byte)((value >> 6) | 0xC0);
     }
 
+    /// <summary>
+    /// Given a UTF-32 code point, computes the first continuation byte in its 2-byte UTF-8 sequence,
+    /// without performing any check.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static byte Char32To2Char8sUncheckedCont1(int value)
     {
       return (byte)((value & 0x3F) | 0x80);
     }
 
+    /// <summary>
+    /// Given a UTF-32 code point, computes the leading byte in its 3-byte UTF-8 sequence,
+    /// without performing any check.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static byte Char32To3Char8sUncheckedLead3(int value)
     {
       return (byte)((value >> 12) | 0xE0);
     }
 
+    /// <summary>
+    /// Given a UTF-32 code point, computes the first continuation byte in its 3-byte UTF-8 sequence,
+    /// without performing any check.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static byte Char32To3Char8sUncheckedCont1(int value)
     {
       return (byte)(((value >> 6) & 0x3F) | 0x80);
     }
 
+    /// <summary>
+    /// Given a UTF-32 code point, computes the second continuation byte in its 3-byte UTF-8 sequence,
+    /// without performing any check.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static byte Char32To3Char8sUncheckedCont2(int value)
     {
       return (byte)((value & 0x3F) | 0x80);
     }
 
+    /// <summary>
+    /// Given a UTF-32 code point, computes the leading byte in its 4-byte UTF-8 sequence,
+    /// without performing any check.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static byte Char32To4Char8sUncheckedLead4(int value)
     {
       return (byte)((value >> 18) | 0xF0);
     }
 
+    /// <summary>
+    /// Given a UTF-32 code point, computes the first continuation byte in its 4-byte UTF-8 sequence,
+    /// without performing any check.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static byte Char32To4Char8sUncheckedCont1(int value)
     {
       return (byte)(((value >> 12) & 0x3F) | 0x80);
     }
 
+    /// <summary>
+    /// Given a UTF-32 code point, computes the second continuation byte in its 4-byte UTF-8 sequence,
+    /// without performing any check.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static byte Char32To4Char8sUncheckedCont2(int value)
     {
       return (byte)(((value >> 6) & 0x3F) | 0x80);
     }
 
+    /// <summary>
+    /// Given a UTF-32 code point, computes the third continuation byte in its 4-byte UTF-8 sequence,
+    /// without performing any check.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static byte Char32To4Char8sUncheckedCont3(int value)
     {
@@ -387,24 +560,40 @@ namespace Neat.Unicode
 
     #region Char32 to Char16
 
+    /// <summary>
+    /// Given a UTF-32 code point, computes the code unit in its 1-unit UTF-16 sequence,
+    /// without performing any check.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static char Char32To1Char16Unchecked(int value)
     {
       return (char)value;
     }
 
+    /// <summary>
+    /// Given a UTF-32 code point, prepares it for computing its 2-unit UTF-16 sequence,
+    /// without performing any check.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static int Char32To2Char16sUncheckedPrepare(int value)
     {
       return value - 0x10000;
     }
 
+    /// <summary>
+    /// Given a prepared UTF-32 code point, computes the high surrogate in its 2-unit UTF-16 sequence,
+    /// without performing any check.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static char Char32PreparedTo2Char16sUncheckedHigh(int prepared)
     {
       return (char)((prepared >> 10) | 0xD800);
     }
 
+    /// <summary>
+    /// Given a prepared UTF-32 code point, computes the low surrogate in its 2-unit UTF-16 sequence,
+    /// without performing any check.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static char Char32PreparedTo2Char16sUncheckedLow(int prepared)
     {
@@ -415,18 +604,30 @@ namespace Neat.Unicode
 
     #region validity of Char32 from Char8 (overlong, surrogate, above 0x10FFFF)
 
+    /// <summary>
+    /// Verifies whether a UTF-32 code point obtained from <see cref="Char8ToChar32Unchecked2(byte, byte)"/> is valid
+    /// (forbids overlong sequences, surrogate code points, and values exceeding <c>0x10FFFF</c>).
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char32From2Char8sIsValid(int value)
     {
       return 0x80u <= (uint)value;
     }
 
+    /// <summary>
+    /// Verifies whether a UTF-32 code point obtained from <see cref="Char8ToChar32Unchecked3(byte, byte, byte)"/> is valid
+    /// (forbids overlong sequences, surrogate code points, and values exceeding <c>0x10FFFF</c>).
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char32From3Char8sIsValid(int value)
     {
       return 0x800u <= (uint)value && (value & 0xFFFFF800) != 0xD800;
     }
 
+    /// <summary>
+    /// Verifies whether a UTF-32 code point obtained from <see cref="Char8ToChar32Unchecked4(byte, byte, byte, byte)"/> is valid
+    /// (forbids overlong sequences, surrogate code points, and values exceeding <c>0x10FFFF</c>).
+    /// </summary>
     [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of int explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Char32From4Char8sIsValid(int value)
