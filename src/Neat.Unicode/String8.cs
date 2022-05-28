@@ -1,5 +1,4 @@
 using System;
-using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -9,6 +8,10 @@ using Neat.Collections;
 
 namespace Neat.Unicode
 {
+  /// <summary>
+  /// <see cref="String8"/> is binary-compatbile with a reference to an array of <see cref="Char8"/>.
+  /// Represents a string encoded in UTF-8, which is not necessarily valid.
+  /// </summary>
   [StructLayout(LayoutKind.Explicit)]
   public readonly struct String8
     : IComparable<String8>, IComparable, IEquatable<String8>,
@@ -26,158 +29,6 @@ namespace Neat.Unicode
     {
       myData = immutableData;
     }
-
-    #region conversion methods
-
-    [SuppressMessage("Performance", "CA1825", Justification = "Avoid excessive generic instantiations.")]
-    private static readonly Char8[] theEmptyArray = new Char8[0];
-
-    /// <summary>
-    /// Converts <see langword="string"/> to <see cref="String8"/>,
-    /// throwing <see cref="ArgumentException"/> if the <see langword="string"/> is not valid UTF-16.
-    /// A <see langword="null"/> <see langword="string"/> is converted to a <see langword="default"/> <see cref="String8"/> (the <see langword="null"/> wrapper),
-    /// and an empty <see langword="string"/> is converted to a <see cref="String8"/> of length <c>0</c>.
-    /// </summary>
-    [MethodImpl(Helper.JustOptimize)]
-    public static String8 FromString16Strict(string string16)
-    {
-      if (ReferenceEquals(string16, null))
-      {
-        return default(String8);
-      }
-      int src16s = string16.Length;
-      if (src16s == 0)
-      {
-        return new String8(theEmptyArray);
-      }
-      ref char src0 = ref MemoryMarshal.GetReference(string16.AsSpan());
-      long dst8s;
-      if (!UtfUnsafe.String16ToString8CountStrict(ref src0, src16s, out dst8s))
-      {
-        throw new ArgumentException(UtfUnsafe.String16IsNotValid, nameof(string16));
-      }
-      if (dst8s > UtfUnsafe.MaximumLength8)
-      {
-        throw new OutOfMemoryException(UtfUnsafe.String8WouldBeTooLong);
-      }
-      Char8[] string8 = GC.AllocateUninitializedArray<Char8>((int)dst8s, false);
-      UtfUnsafe.String16ToString8Transform(ref src0, src16s,
-        ref Unsafe.As<Char8, byte>(ref MemoryMarshal.GetArrayDataReference(string8)),
-        (int)dst8s);
-      return new String8(string8);
-    }
-
-    /// <summary>
-    /// Converts <see langword="string"/> to <see cref="String8"/>,
-    /// replacing invalid UTF-16 code units by the replacement character.
-    /// A <see langword="null"/> <see langword="string"/> is converted to a <see langword="default"/> <see cref="String8"/> (the <see langword="null"/> wrapper),
-    /// and an empty <see langword="string"/> is converted to a <see cref="String8"/> of length <c>0</c>.
-    /// </summary>
-    [MethodImpl(Helper.JustOptimize)]
-    public static String8 FromString16Replace(string string16)
-    {
-      if (ReferenceEquals(string16, null))
-      {
-        return default(String8);
-      }
-      int src16s = string16.Length;
-      if (src16s == 0)
-      {
-        return new String8(theEmptyArray);
-      }
-      ref char src0 = ref MemoryMarshal.GetReference(string16.AsSpan());
-      long dst8s = UtfUnsafe.String16ToString8CountReplace(ref src0, src16s);
-      if (dst8s > UtfUnsafe.MaximumLength8)
-      {
-        throw new OutOfMemoryException(UtfUnsafe.String8WouldBeTooLong);
-      }
-      Char8[] string8 = GC.AllocateUninitializedArray<Char8>((int)dst8s, false);
-      UtfUnsafe.String16ToString8Transform(ref src0, src16s,
-        ref Unsafe.As<Char8, byte>(ref MemoryMarshal.GetArrayDataReference(string8)),
-        (int)dst8s);
-      return new String8(string8);
-    }
-
-    /// <summary>
-    /// Converts <see cref="String8"/> to <see langword="string"/>,
-    /// throwing <see cref="ArgumentException"/> if the <see cref="String8"/> is not valid UTF-8.
-    /// A <see langword="default"/> <see cref="String8"/> (the <see langword="null"/> wrapper) is converted to the empty <see langword="string"/>.
-    /// </summary>
-    [MethodImpl(Helper.OptimizeInline)]
-    public static string ToString16Strict(String8 string8)
-    {
-      return ToString16StrictImpl(string8.myData);
-    }
-
-    /// <summary>
-    /// Converts <see cref="String8"/> to <see langword="string"/>,
-    /// replacing invalid UTF-8 bytes by the replacement character.
-    /// A <see langword="default"/> <see cref="String8"/> (the <see langword="null"/> wrapper) is converted to the empty <see langword="string"/>.
-    /// </summary>
-    [MethodImpl(Helper.OptimizeInline)]
-    public static string ToString16Replace(String8 string8)
-    {
-      return ToString16ReplaceImpl(string8.myData);
-    }
-
-    private sealed class StringCreateHelper
-    {
-      [SuppressMessage("Performance", "CA1822", Justification = "Closed delegates are more performant.")]
-      [MethodImpl(Helper.JustOptimize)]
-      public void Invoke(Span<char> span, Char8[] arg)
-      {
-        UtfUnsafe.String8ToString16Transform(
-          ref Unsafe.As<Char8, byte>(ref MemoryMarshal.GetArrayDataReference(arg)),
-          arg.Length,
-          ref MemoryMarshal.GetReference(span),
-          span.Length);
-      }
-    }
-
-    private static readonly SpanAction<char, Char8[]> theStringCreateAction = new StringCreateHelper().Invoke;
-
-    [MethodImpl(Helper.JustOptimize)]
-    private static string ToString16StrictImpl(Char8[] string8)
-    {
-      int src8s;
-      if (ReferenceEquals(string8, null) || (src8s = string8.Length) == 0)
-      {
-        return "";
-      }
-      int dst16s;
-      if (!UtfUnsafe.String8ToString16CountStrict(
-        ref Unsafe.As<Char8, byte>(ref MemoryMarshal.GetArrayDataReference(string8)),
-        src8s,
-        out dst16s))
-      {
-        throw new ArgumentException(UtfUnsafe.String8IsNotValid, nameof(string8));
-      }
-      if (dst16s > UtfUnsafe.MaximumLength16)
-      {
-        throw new OutOfMemoryException(UtfUnsafe.String16WouldBeTooLong);
-      }
-      return string.Create(dst16s, string8, theStringCreateAction);
-    }
-
-    [MethodImpl(Helper.JustOptimize)]
-    private static string ToString16ReplaceImpl(Char8[] string8)
-    {
-      int src8s;
-      if (ReferenceEquals(string8, null) || (src8s = string8.Length) == 0)
-      {
-        return "";
-      }
-      int dst16s = UtfUnsafe.String8ToString16CountReplace(
-        ref Unsafe.As<Char8, byte>(ref MemoryMarshal.GetArrayDataReference(string8)),
-        src8s);
-      if (dst16s > UtfUnsafe.MaximumLength16)
-      {
-        throw new OutOfMemoryException(UtfUnsafe.String16WouldBeTooLong);
-      }
-      return string.Create(dst16s, string8, theStringCreateAction);
-    }
-
-    #endregion conversion methods
 
     /// <summary>
     /// Gets whether the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
@@ -439,15 +290,26 @@ namespace Neat.Unicode
     }
 
     /// <summary>
-    /// Equivalent to <see cref="ToString16Replace(String8)"/>.
-    /// This method can be called even if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
+    /// Equivalent to <see cref="Utf.String8ToString16Replace(String8)"/>.
+    /// This method can be called even if the instance is <see langword="default"/> (the <see langword="null"/> wrapper),
+    /// in which case it returns <see langword="null"/>.
     /// </summary>
     public override string ToString()
     {
-      return ToString16ReplaceImpl(myData);
+      return Utf.String8ToString16Replace(this);
     }
 
     #endregion Equals, equality operators, IEquatable<String8> members, object members
+
+    /// <summary>
+    /// Equivalent to <see cref="Utf.SanitizeString8(String8)"/>.
+    /// This method can be called on the <see langword="null"/> reference.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    public String8 Sanitize()
+    {
+      return Utf.SanitizeString8(this);
+    }
 
     /// <summary>
     /// Enumerates <see cref="Char8"/> instances in a <see cref="String8"/>.
