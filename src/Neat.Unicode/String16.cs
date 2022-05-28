@@ -131,5 +131,30 @@ namespace Neat.Unicode
       int throwIfNull = string16.Length;
       return new Enumerator(string16);
     }
+
+    /// <summary>
+    /// Standard implementation of <see cref="IComparer{T}"/> and <see cref="IEqualityComparer2{T}"/> for <see langword="string"/>.
+    /// The comparison is ordinal.
+    /// </summary>
+    public struct Comparer : IComparer<string>, IEqualityComparer2<string>
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      public int Compare(string x, string y)
+      {
+        return string.CompareOrdinal(x, y);
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public bool Equals(string x, string y)
+      {
+        return string.Equals(x, y);
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public int GetHashCode(string obj)
+      {
+        return ReferenceEquals(obj, null) ? 0 : obj.GetHashCode();
+      }
+    }
   }
 }

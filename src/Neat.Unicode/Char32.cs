@@ -432,6 +432,7 @@ namespace Neat.Unicode
 
     /// <summary>
     /// Standard implementation of <see cref="IComparer{T}"/> and <see cref="IEqualityComparer2{T}"/> for <see cref="Char32"/>.
+    /// The comparison is ordinal.
     /// </summary>
     public struct Comparer : IComparer<Char32>, IEqualityComparer2<Char32>
     {

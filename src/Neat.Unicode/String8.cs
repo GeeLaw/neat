@@ -575,5 +575,30 @@ namespace Neat.Unicode
     }
 
     #endregion GetEnumerator
+
+    /// <summary>
+    /// Standard implementation of <see cref="IComparer{T}"/> and <see cref="IEqualityComparer2{T}"/> for <see cref="String8"/>.
+    /// The comparison is ordinal.
+    /// </summary>
+    public struct Comparer : IComparer<String8>, IEqualityComparer2<String8>
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      public int Compare(String8 x, String8 y)
+      {
+        return CompareImpl(x.myData, y.myData);
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public bool Equals(String8 x, String8 y)
+      {
+        return EqualsImpl(x.myData, y.myData);
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public int GetHashCode(String8 obj)
+      {
+        return GetHashCodeImpl(obj.myData);
+      }
+    }
   }
 }

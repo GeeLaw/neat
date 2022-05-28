@@ -568,5 +568,30 @@ namespace Neat.Unicode
     }
 
     #endregion GetEnumerator
+
+    /// <summary>
+    /// Standard implementation of <see cref="IComparer{T}"/> and <see cref="IEqualityComparer2{T}"/> for <see cref="String32"/>.
+    /// The comparison is ordinal.
+    /// </summary>
+    public struct Comparer : IComparer<String32>, IEqualityComparer2<String32>
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      public int Compare(String32 x, String32 y)
+      {
+        return CompareImpl(x.myData, y.myData);
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public bool Equals(String32 x, String32 y)
+      {
+        return EqualsImpl(x.myData, y.myData);
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public int GetHashCode(String32 obj)
+      {
+        return GetHashCodeImpl(obj.myData);
+      }
+    }
   }
 }
