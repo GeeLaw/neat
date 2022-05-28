@@ -162,6 +162,13 @@ namespace Neat.Unicode
         }
       }
 
+      /// <summary>
+      /// This property is hidden in the debugging view to work around
+      /// <a href="https://developercommunity.visualstudio.com/t/Inspecting-a-property-returning-a-field/10056308">this bug of Visual Studio</a>.
+      /// (Although the program will not crash as <see langword="char"/> is a primitive type recoginized by Visual Studio,
+      /// this property is still hidden for uniformity with <see cref="String8.Enumerator"/> and <see cref="String32.Enumerator"/>.)
+      /// </summary>
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
       object IEnumerator.Current
       {
         [MethodImpl(Helper.JustOptimize)]

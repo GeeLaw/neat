@@ -561,6 +561,11 @@ namespace Neat.Unicode
         }
       }
 
+      /// <summary>
+      /// This property is hidden in the debugging view to work around
+      /// <a href="https://developercommunity.visualstudio.com/t/Inspecting-a-property-returning-a-field/10056308">this bug of Visual Studio</a>.
+      /// </summary>
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
       object IEnumerator.Current
       {
         [MethodImpl(Helper.JustOptimize)]
