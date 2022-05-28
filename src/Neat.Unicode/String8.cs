@@ -247,7 +247,7 @@ namespace Neat.Unicode
 
     [SuppressMessage("Style", "IDE0004", Justification = "Avoid mistaking it for mod-256 subtraction.")]
     [MethodImpl(Helper.JustOptimize)]
-    private static int Compare(Char8[] x, Char8[] y)
+    private static int CompareImpl(Char8[] x, Char8[] y)
     {
       if (ReferenceEquals(x, y))
       {
@@ -278,31 +278,31 @@ namespace Neat.Unicode
     [MethodImpl(Helper.OptimizeInline)]
     public static int Compare(String8 x, String8 y)
     {
-      return Compare(x.myData, y.myData);
+      return CompareImpl(x.myData, y.myData);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
     public static bool operator <=(String8 x, String8 y)
     {
-      return Compare(x.myData, y.myData) <= 0;
+      return CompareImpl(x.myData, y.myData) <= 0;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
     public static bool operator >=(String8 x, String8 y)
     {
-      return Compare(x.myData, y.myData) >= 0;
+      return CompareImpl(x.myData, y.myData) >= 0;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
     public static bool operator <(String8 x, String8 y)
     {
-      return Compare(x.myData, y.myData) < 0;
+      return CompareImpl(x.myData, y.myData) < 0;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
     public static bool operator >(String8 x, String8 y)
     {
-      return Compare(x.myData, y.myData) > 0;
+      return CompareImpl(x.myData, y.myData) > 0;
     }
 
     /// <summary>
@@ -311,7 +311,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.OptimizeInline)]
     public int CompareTo(String8 other)
     {
-      return Compare(myData, other.myData);
+      return CompareImpl(myData, other.myData);
     }
 
     /// <summary>
@@ -323,7 +323,7 @@ namespace Neat.Unicode
       return ReferenceEquals(obj, null)
         ? 1
         : obj is String8 other
-        ? Compare(myData, other.myData)
+        ? CompareImpl(myData, other.myData)
         : throw new ArgumentException("The argument '" + nameof(obj) + "' must be Neat.Unicode.String8 or null.", nameof(obj));
     }
 
@@ -332,7 +332,7 @@ namespace Neat.Unicode
     #region Equals, equality operators, IEquatable<String8> members, object members
 
     [MethodImpl(Helper.JustOptimize)]
-    private static bool Equals(Char8[] x, Char8[] y)
+    private static bool EqualsImpl(Char8[] x, Char8[] y)
     {
       if (ReferenceEquals(x, y))
       {
@@ -381,19 +381,19 @@ namespace Neat.Unicode
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Equals(String8 x, String8 y)
     {
-      return Equals(x.myData, y.myData);
+      return EqualsImpl(x.myData, y.myData);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
     public static bool operator ==(String8 x, String8 y)
     {
-      return Equals(x.myData, y.myData);
+      return EqualsImpl(x.myData, y.myData);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
     public static bool operator !=(String8 x, String8 y)
     {
-      return !Equals(x.myData, y.myData);
+      return !EqualsImpl(x.myData, y.myData);
     }
 
     /// <summary>
@@ -402,7 +402,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.OptimizeInline)]
     public bool Equals(String8 other)
     {
-      return Equals(myData, other.myData);
+      return EqualsImpl(myData, other.myData);
     }
 
     /// <summary>
@@ -411,11 +411,11 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     public override bool Equals(object obj)
     {
-      return (obj is String8 other) && Equals(myData, other.myData);
+      return (obj is String8 other) && EqualsImpl(myData, other.myData);
     }
 
     [MethodImpl(Helper.JustOptimize)]
-    private static int ComputeHashCode(Char8[] x)
+    private static int GetHashCodeImpl(Char8[] x)
     {
       if (ReferenceEquals(x, null))
       {
@@ -435,7 +435,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.OptimizeInline)]
     public override int GetHashCode()
     {
-      return ComputeHashCode(myData);
+      return GetHashCodeImpl(myData);
     }
 
     /// <summary>

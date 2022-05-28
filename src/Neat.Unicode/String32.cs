@@ -246,7 +246,7 @@ namespace Neat.Unicode
     #region Compare, order operators, IComparable<String32> members, IComparable members
 
     [MethodImpl(Helper.JustOptimize)]
-    private static int Compare(Char32[] x, Char32[] y)
+    private static int CompareImpl(Char32[] x, Char32[] y)
     {
       if (ReferenceEquals(x, y))
       {
@@ -282,31 +282,31 @@ namespace Neat.Unicode
     [MethodImpl(Helper.OptimizeInline)]
     public static int Compare(String32 x, String32 y)
     {
-      return Compare(x.myData, y.myData);
+      return CompareImpl(x.myData, y.myData);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
     public static bool operator <=(String32 x, String32 y)
     {
-      return Compare(x.myData, y.myData) <= 0;
+      return CompareImpl(x.myData, y.myData) <= 0;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
     public static bool operator >=(String32 x, String32 y)
     {
-      return Compare(x.myData, y.myData) >= 0;
+      return CompareImpl(x.myData, y.myData) >= 0;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
     public static bool operator <(String32 x, String32 y)
     {
-      return Compare(x.myData, y.myData) < 0;
+      return CompareImpl(x.myData, y.myData) < 0;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
     public static bool operator >(String32 x, String32 y)
     {
-      return Compare(x.myData, y.myData) > 0;
+      return CompareImpl(x.myData, y.myData) > 0;
     }
 
     /// <summary>
@@ -315,7 +315,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.OptimizeInline)]
     public int CompareTo(String32 other)
     {
-      return Compare(myData, other.myData);
+      return CompareImpl(myData, other.myData);
     }
 
     /// <summary>
@@ -327,7 +327,7 @@ namespace Neat.Unicode
       return ReferenceEquals(obj, null)
         ? 1
         : obj is String32 other
-        ? Compare(myData, other.myData)
+        ? CompareImpl(myData, other.myData)
         : throw new ArgumentException("The argument '" + nameof(obj) + "' must be Neat.Unicode.String32 or null.", nameof(obj));
     }
 
@@ -336,7 +336,7 @@ namespace Neat.Unicode
     #region Equals, equality operators, IEquatable<String32> members, object members
 
     [MethodImpl(Helper.JustOptimize)]
-    private static bool Equals(Char32[] x, Char32[] y)
+    private static bool EqualsImpl(Char32[] x, Char32[] y)
     {
       if (ReferenceEquals(x, y))
       {
@@ -366,19 +366,19 @@ namespace Neat.Unicode
     [MethodImpl(Helper.OptimizeInline)]
     public static bool Equals(String32 x, String32 y)
     {
-      return Equals(x.myData, y.myData);
+      return EqualsImpl(x.myData, y.myData);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
     public static bool operator ==(String32 x, String32 y)
     {
-      return Equals(x.myData, y.myData);
+      return EqualsImpl(x.myData, y.myData);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
     public static bool operator !=(String32 x, String32 y)
     {
-      return !Equals(x.myData, y.myData);
+      return !EqualsImpl(x.myData, y.myData);
     }
 
     /// <summary>
@@ -387,7 +387,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.OptimizeInline)]
     public bool Equals(String32 other)
     {
-      return Equals(myData, other.myData);
+      return EqualsImpl(myData, other.myData);
     }
 
     /// <summary>
@@ -396,11 +396,11 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     public override bool Equals(object obj)
     {
-      return (obj is String32 other) && Equals(myData, other.myData);
+      return (obj is String32 other) && EqualsImpl(myData, other.myData);
     }
 
     [MethodImpl(Helper.JustOptimize)]
-    private static int ComputeHashCode(Char32[] x)
+    private static int GetHashCodeImpl(Char32[] x)
     {
       if (ReferenceEquals(x, null))
       {
@@ -427,7 +427,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.OptimizeInline)]
     public override int GetHashCode()
     {
-      return ComputeHashCode(myData);
+      return GetHashCodeImpl(myData);
     }
 
     /// <summary>
