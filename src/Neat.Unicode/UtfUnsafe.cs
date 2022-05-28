@@ -5,14 +5,15 @@ namespace Neat.Unicode
 {
   public static class UtfUnsafe
   {
-    internal const int ReplacementCharacter32 = 0xFFFD;
-    internal const char ReplacementCharacter16 = (char)0xFFFD;
-    internal const byte ReplacementCharacter8Lead3 = 0xEF;
-    internal const byte ReplacementCharacter8Cont1 = 0xBF;
-    internal const byte ReplacementCharacter8Cont2 = 0xBD;
-    internal const int MaximumLength32 = 0x7FEFFFFF;
-    internal const int MaximumLength16 = 0x7FEFFFFF;
-    internal const int MaximumLength8 = 0x7FFFFFC7;
+    public const int ReplacementCharacter32 = 0xFFFD;
+    public const char ReplacementCharacter16 = (char)0xFFFD;
+    public const byte ReplacementCharacter8Lead3 = 0xEF;
+    public const byte ReplacementCharacter8Cont1 = 0xBF;
+    public const byte ReplacementCharacter8Cont2 = 0xBD;
+    public const int MaximumLength32 = 0x7FEFFFFF;
+    public const int MaximumLength16 = 0x7FEFFFFF;
+    public const int MaximumLength8 = 0x7FFFFFC7;
+
     internal const string String8WouldBeTooLong = "The string in UTF-8 would be too long.";
     internal const string String16WouldBeTooLong = "The string in UTF-16 would be too long.";
     internal const string String32WouldBeTooLong = "The string in UTF-32 would be too long.";
@@ -24,31 +25,31 @@ namespace Neat.Unicode
 
     [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of byte explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char8Leads1(byte value)
+    public static bool Char8Leads1(byte value)
     {
       return (uint)value < 0x80u;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char8Continues(byte value)
+    public static bool Char8Continues(byte value)
     {
       return (value & 0xC0) == 0x80;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char8Leads2(byte value)
+    public static bool Char8Leads2(byte value)
     {
       return (value & 0xE0) == 0xC0;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char8Leads3(byte value)
+    public static bool Char8Leads3(byte value)
     {
       return (value & 0xF0) == 0xE0;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char8Leads4(byte value)
+    public static bool Char8Leads4(byte value)
     {
       return (value & 0xF8) == 0xF0;
     }
@@ -58,25 +59,25 @@ namespace Neat.Unicode
     #region Char8 to Char32
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static int Char8ToChar32Unchecked1(byte lead1)
+    public static int Char8ToChar32Unchecked1(byte lead1)
     {
       return lead1;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static int Char8ToChar32Unchecked2(byte lead2, byte cont1)
+    public static int Char8ToChar32Unchecked2(byte lead2, byte cont1)
     {
       return ((lead2 & 0x1F) << 6) | (cont1 & 0x3F);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static int Char8ToChar32Unchecked3(byte lead3, byte cont1, byte cont2)
+    public static int Char8ToChar32Unchecked3(byte lead3, byte cont1, byte cont2)
     {
       return ((lead3 & 0x0F) << 12) | ((cont1 & 0x3F) << 6) | (cont2 & 0x3F);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static int Char8ToChar32Unchecked4(byte lead4, byte cont1, byte cont2, byte cont3)
+    public static int Char8ToChar32Unchecked4(byte lead4, byte cont1, byte cont2, byte cont3)
     {
       return ((lead4 & 0x07) << 18) | ((cont1 & 0x3F) << 12) | ((cont2 & 0x3F) << 6) | (cont3 & 0x3F);
     }
@@ -86,31 +87,31 @@ namespace Neat.Unicode
     #region generic property determination for Char16
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char16IsSurrogate(char value)
+    public static bool Char16IsSurrogate(char value)
     {
       return (value & 0xFFFFF800) == 0xD800;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char16IsNotSurrogate(char value)
+    public static bool Char16IsNotSurrogate(char value)
     {
       return (value & 0xFFFFF800) != 0xD800;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char16IsHighSurrogate(char value)
+    public static bool Char16IsHighSurrogate(char value)
     {
       return (value & 0xFFFFFC00) == 0xD800;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char16IsLowSurrogate(char value)
+    public static bool Char16IsLowSurrogate(char value)
     {
       return (value & 0xFFFFFC00) == 0xDC00;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char16IsNotLowSurrogate(char value)
+    public static bool Char16IsNotLowSurrogate(char value)
     {
       return (value & 0xFFFFFC00) != 0xDC00;
     }
@@ -120,13 +121,13 @@ namespace Neat.Unicode
     #region Char16 to Char32
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static int Char16ToChar32Unchecked1(char value)
+    public static int Char16ToChar32Unchecked1(char value)
     {
       return value;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static int Char16ToChar32Unchecked2(char high, char low)
+    public static int Char16ToChar32Unchecked2(char high, char low)
     {
       return (((high & 0x3FF) << 10) | (low & 0x3FF)) + 0x10000;
     }
@@ -136,32 +137,32 @@ namespace Neat.Unicode
     #region range check for Char32
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char32IsBelow0x80(int value)
+    public static bool Char32IsBelow0x80(int value)
     {
       return (uint)value < 0x80u;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char32IsBelow0x800(int value)
+    public static bool Char32IsBelow0x800(int value)
     {
       return (uint)value < 0x800u;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char32IsBelow0x10000(int value)
+    public static bool Char32IsBelow0x10000(int value)
     {
       return (uint)value < 0x10000u;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char32IsBelow0x110000(int value)
+    public static bool Char32IsBelow0x110000(int value)
     {
       return (uint)value < 0x110000u;
     }
 
     [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of int explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char32IsAbove0x10000AndBelow0x110000(int value)
+    public static bool Char32IsAbove0x10000AndBelow0x110000(int value)
     {
       return (uint)(value - 0x10000) < (uint)(0x110000 - 0x10000);
     }
@@ -172,14 +173,14 @@ namespace Neat.Unicode
 
     [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of char explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char16IsBelow0x80(char value)
+    public static bool Char16IsBelow0x80(char value)
     {
       return (uint)value < 0x80u;
     }
 
     [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of char explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char16IsBelow0x800(char value)
+    public static bool Char16IsBelow0x800(char value)
     {
       return (uint)value < 0x800u;
     }
@@ -189,37 +190,37 @@ namespace Neat.Unicode
     #region generic property determination for Char32
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char32IsValid(int value)
+    public static bool Char32IsValid(int value)
     {
       return (uint)value < 0x110000u && (value & 0xFFFFF800) != 0xD800;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char32IsNotValid(int value)
+    public static bool Char32IsNotValid(int value)
     {
       return (uint)value >= 0x110000u || (value & 0xFFFFF800) == 0xD800;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char32IsSurrogate(int value)
+    public static bool Char32IsSurrogate(int value)
     {
       return (value & 0xFFFFF800) == 0xD800;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char32IsNotSurrogate(int value)
+    public static bool Char32IsNotSurrogate(int value)
     {
       return (value & 0xFFFFF800) != 0xD800;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char32IsHighSurrogate(int value)
+    public static bool Char32IsHighSurrogate(int value)
     {
       return (value & 0xFFFFFC00) == 0xD800;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char32IsLowSurrogate(int value)
+    public static bool Char32IsLowSurrogate(int value)
     {
       return (value & 0xFFFFFC00) == 0xDC00;
     }
@@ -229,34 +230,34 @@ namespace Neat.Unicode
     #region generic encoding length counting for Char32 in Char8s
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char32Is1Char8(int value)
+    public static bool Char32Is1Char8(int value)
     {
       return (uint)value < 0x80u;
     }
 
     [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of int explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char32Is2Char8s(int value)
+    public static bool Char32Is2Char8s(int value)
     {
       return (uint)(value - 0x80) < (uint)(0x800 - 0x80);
     }
 
     [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of int explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char32Is3Char8s(int value)
+    public static bool Char32Is3Char8s(int value)
     {
       return (uint)(value - 0x800) < (uint)(0x10000 - 0x800) && (value & 0xFFFFF800) != 0xD800;
     }
 
     [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of int explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char32Is4Char8s(int value)
+    public static bool Char32Is4Char8s(int value)
     {
       return (uint)(value - 0x10000) < (uint)(0x110000 - 0x10000);
     }
 
     [MethodImpl(Helper.JustOptimize)]
-    internal static int Char32LengthInChar8s(int value)
+    public static int Char32LengthInChar8s(int value)
     {
       if (Char32IsBelow0x80(value))
       {
@@ -287,20 +288,20 @@ namespace Neat.Unicode
     #region generic encoding length counting for Char32 in Char16s
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char32Is1Char16(int value)
+    public static bool Char32Is1Char16(int value)
     {
       return (uint)value < 0x10000u && (value & 0xFFFFF800) != 0xD800;
     }
 
     [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of int explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char32Is2Char16s(int value)
+    public static bool Char32Is2Char16s(int value)
     {
       return (uint)(value - 0x10000) < (uint)(0x110000 - 0x10000);
     }
 
     [MethodImpl(Helper.JustOptimize)]
-    internal static int Char32LengthInChar16s(int value)
+    public static int Char32LengthInChar16s(int value)
     {
       if (Char32IsBelow0x10000(value))
       {
@@ -323,61 +324,61 @@ namespace Neat.Unicode
     #region Char32 to Char8
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static byte Char32To1Char8UncheckedLead1(int value)
+    public static byte Char32To1Char8UncheckedLead1(int value)
     {
       return (byte)value;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static byte Char32To2Char8sUncheckedLead2(int value)
+    public static byte Char32To2Char8sUncheckedLead2(int value)
     {
       return (byte)((value >> 6) | 0xC0);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static byte Char32To2Char8sUncheckedCont1(int value)
+    public static byte Char32To2Char8sUncheckedCont1(int value)
     {
       return (byte)((value & 0x3F) | 0x80);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static byte Char32To3Char8sUncheckedLead3(int value)
+    public static byte Char32To3Char8sUncheckedLead3(int value)
     {
       return (byte)((value >> 12) | 0xE0);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static byte Char32To3Char8sUncheckedCont1(int value)
+    public static byte Char32To3Char8sUncheckedCont1(int value)
     {
       return (byte)(((value >> 6) & 0x3F) | 0x80);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static byte Char32To3Char8sUncheckedCont2(int value)
+    public static byte Char32To3Char8sUncheckedCont2(int value)
     {
       return (byte)((value & 0x3F) | 0x80);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static byte Char32To4Char8sUncheckedLead4(int value)
+    public static byte Char32To4Char8sUncheckedLead4(int value)
     {
       return (byte)((value >> 18) | 0xF0);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static byte Char32To4Char8sUncheckedCont1(int value)
+    public static byte Char32To4Char8sUncheckedCont1(int value)
     {
       return (byte)(((value >> 12) & 0x3F) | 0x80);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static byte Char32To4Char8sUncheckedCont2(int value)
+    public static byte Char32To4Char8sUncheckedCont2(int value)
     {
       return (byte)(((value >> 6) & 0x3F) | 0x80);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static byte Char32To4Char8sUncheckedCont3(int value)
+    public static byte Char32To4Char8sUncheckedCont3(int value)
     {
       return (byte)((value & 0x3F) | 0x80);
     }
@@ -387,25 +388,25 @@ namespace Neat.Unicode
     #region Char32 to Char16
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static char Char32To1Char16Unchecked(int value)
+    public static char Char32To1Char16Unchecked(int value)
     {
       return (char)value;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static int Char32To2Char16sUncheckedPrepare(int value)
+    public static int Char32To2Char16sUncheckedPrepare(int value)
     {
       return value - 0x10000;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static char Char32PreparedTo2Char16sUncheckedHigh(int prepared)
+    public static char Char32PreparedTo2Char16sUncheckedHigh(int prepared)
     {
       return (char)((prepared >> 10) | 0xD800);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static char Char32PreparedTo2Char16sUncheckedLow(int prepared)
+    public static char Char32PreparedTo2Char16sUncheckedLow(int prepared)
     {
       return (char)((prepared & 0x3FF) | 0xDC00);
     }
@@ -415,20 +416,20 @@ namespace Neat.Unicode
     #region validity of Char32 from Char8 (overlong, surrogate, above 0x10FFFF)
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char32From2Char8sIsValid(int value)
+    public static bool Char32From2Char8sIsValid(int value)
     {
       return 0x80u <= (uint)value;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char32From3Char8sIsValid(int value)
+    public static bool Char32From3Char8sIsValid(int value)
     {
       return 0x800u <= (uint)value && (value & 0xFFFFF800) != 0xD800;
     }
 
     [SuppressMessage("Style", "IDE0004", Justification = "Make promotion of int explicit.")]
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool Char32From4Char8sIsValid(int value)
+    public static bool Char32From4Char8sIsValid(int value)
     {
       return (uint)(value - 0x10000) < (uint)(0x110000 - 0x10000);
     }
@@ -443,7 +444,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static int FindFirstInvalidChar8(ref byte src0, int src8s)
+    public static int FindFirstInvalidChar8(ref byte src0, int src8s)
     {
       byte lead, cont1, cont2, cont3;
       for (int i = 0, j; i != src8s; ++i)
@@ -499,7 +500,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static int CountInvalidChar8s(ref byte src0, int src8s)
+    public static int CountInvalidChar8s(ref byte src0, int src8s)
     {
       int invalids = 0;
       byte lead, cont1, cont2, cont3;
@@ -558,7 +559,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static void SanitizeChar8s(ref byte src0, int src8s, ref byte dst0, int dst8s)
+    public static void SanitizeChar8s(ref byte src0, int src8s, ref byte dst0, int dst8s)
     {
       int k = 0;
       byte lead, cont1, cont2, cont3;
@@ -653,7 +654,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static int FindFirstInvalidChar16(ref char src0, int src16s)
+    public static int FindFirstInvalidChar16(ref char src0, int src16s)
     {
       char first;
       for (int i = 0; i != src16s; ++i)
@@ -684,7 +685,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static int CountInvalidChar16s(ref char src0, int src16s)
+    public static int CountInvalidChar16s(ref char src0, int src16s)
     {
       int invalids = 0;
       char first;
@@ -717,7 +718,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static void SanitizeChar16s(ref char src0, int src16s, ref char dst0, int dst16s)
+    public static void SanitizeChar16s(ref char src0, int src16s, ref char dst0, int dst16s)
     {
       int k = 0;
       char first, low;
@@ -766,7 +767,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static int FindFirstInvalidChar32(ref int src0, int src32s)
+    public static int FindFirstInvalidChar32(ref int src0, int src32s)
     {
       for (int i = 0; i != src32s; ++i)
       {
@@ -783,7 +784,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static int CountInvalidChar32s(ref int src0, int src32s)
+    public static int CountInvalidChar32s(ref int src0, int src32s)
     {
       int invalids = 0;
       for (int i = 0; i != src32s; ++i)
@@ -802,7 +803,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static void SanitizeChar32s(ref int src0, int src32s, ref int dst0, int dst32s)
+    public static void SanitizeChar32s(ref int src0, int src32s, ref int dst0, int dst32s)
     {
       int k = 0;
       for (int i = 0, value; i != src32s && k != dst32s; ++i, ++k)
@@ -829,7 +830,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static bool String8ToString32CountStrict(ref byte src0, int src8s, out int countIndex)
+    public static bool String8ToString32CountStrict(ref byte src0, int src8s, out int countIndex)
     {
       int dst32s = 0;
       byte lead, cont1, cont2, cont3;
@@ -888,7 +889,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static int String8ToString32CountReplace(ref byte src0, int src8s)
+    public static int String8ToString32CountReplace(ref byte src0, int src8s)
     {
       int dst32s = 0;
       byte lead, cont1, cont2, cont3;
@@ -948,7 +949,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments, and will write exactly <paramref name="dst32s"/> elements beginning <paramref name="dst0"/>.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static void String8ToString32Transform(ref byte src0, int src8s, ref int dst0, int dst32s)
+    public static void String8ToString32Transform(ref byte src0, int src8s, ref int dst0, int dst32s)
     {
       int k = 0;
       byte lead, cont1, cont2, cont3;
@@ -1019,7 +1020,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static bool String16ToString32CountStrict(ref char src0, int src16s, out int countIndex)
+    public static bool String16ToString32CountStrict(ref char src0, int src16s, out int countIndex)
     {
       int dst32s = 0;
       char first;
@@ -1053,7 +1054,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static int String16ToString32CountReplace(ref char src0, int src16s)
+    public static int String16ToString32CountReplace(ref char src0, int src16s)
     {
       int dst32s = 0;
       for (int i = 0; i != src16s; ++i, ++dst32s)
@@ -1074,7 +1075,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments, and will write exactly <paramref name="dst32s"/> elements beginning <paramref name="dst0"/>.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static void String16ToString32Transform(ref char src0, int src16s, ref int dst0, int dst32s)
+    public static void String16ToString32Transform(ref char src0, int src16s, ref int dst0, int dst32s)
     {
       int k = 0;
       char first, low;
@@ -1120,7 +1121,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static bool String32ToString8CountStrict(ref int src0, int src32s, out long countIndex)
+    public static bool String32ToString8CountStrict(ref int src0, int src32s, out long countIndex)
     {
       int valid2s = 0, valid3s = 0, valid4s = 0;
       for (int i = 0, value; i != src32s; ++i)
@@ -1161,7 +1162,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static long String32ToString8CountReplace(ref int src0, int src32s)
+    public static long String32ToString8CountReplace(ref int src0, int src32s)
     {
       int valid2s = 0, valid3invalids = 0, valid4s = 0;
       for (int i = 0, value; i != src32s; ++i)
@@ -1191,7 +1192,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments, and will write exactly <paramref name="dst8s"/> elements beginning <paramref name="dst0"/>.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static void String32ToString8Transform(ref int src0, int src32s, ref byte dst0, int dst8s)
+    public static void String32ToString8Transform(ref int src0, int src32s, ref byte dst0, int dst8s)
     {
       int k = 0;
       for (int i = 0, value; i != src32s && k != dst8s; ++i)
@@ -1267,7 +1268,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static bool String32ToString16CountStrict(ref int src0, int src32s, out long countIndex)
+    public static bool String32ToString16CountStrict(ref int src0, int src32s, out long countIndex)
     {
       int dst16sMoreThanSrc32s = 0;
       for (int i = 0, value; i != src32s; ++i)
@@ -1300,7 +1301,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static long String32ToString16CountReplace(ref int src0, int src32s)
+    public static long String32ToString16CountReplace(ref int src0, int src32s)
     {
       int dst16sMoreThanSrc32s = 0;
       for (int i = 0; i != src32s; ++i)
@@ -1320,7 +1321,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments, and will write exactly <paramref name="dst16s"/> elements beginning <paramref name="dst0"/>.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static void String32ToString16Transform(ref int src0, int src32s, ref char dst0, int dst16s)
+    public static void String32ToString16Transform(ref int src0, int src32s, ref char dst0, int dst16s)
     {
       int k = 0;
       for (int i = 0, value; i != src32s && k != dst16s; ++i)
@@ -1370,7 +1371,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static bool String8ToString16CountStrict(ref byte src0, int src8s, out int countIndex)
+    public static bool String8ToString16CountStrict(ref byte src0, int src8s, out int countIndex)
     {
       int dst16s = 0;
       byte lead, cont1, cont2, cont3;
@@ -1431,7 +1432,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static int String8ToString16CountReplace(ref byte src0, int src8s)
+    public static int String8ToString16CountReplace(ref byte src0, int src8s)
     {
       int dst16s = 0;
       byte lead, cont1, cont2, cont3;
@@ -1490,7 +1491,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments, and will write exactly <paramref name="dst16s"/> elements beginning <paramref name="dst0"/>.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static void String8ToString16Transform(ref byte src0, int src8s, ref char dst0, int dst16s)
+    public static void String8ToString16Transform(ref byte src0, int src8s, ref char dst0, int dst16s)
     {
       int k = 0;
       byte lead, cont1, cont2, cont3;
@@ -1570,7 +1571,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static bool String16ToString8CountStrict(ref char src0, int src16s, out long countIndex)
+    public static bool String16ToString8CountStrict(ref char src0, int src16s, out long countIndex)
     {
       int ch1b2s = 0, ch1b3ch2b4s = 0;
       char first;
@@ -1619,7 +1620,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static long String16ToString8CountReplace(ref char src0, int src16s)
+    public static long String16ToString8CountReplace(ref char src0, int src16s)
     {
       int ch1b2s = 0, ch1b3ch2b4invalids = 0;
       char first;
@@ -1654,7 +1655,7 @@ namespace Neat.Unicode
     /// This method does not validate arguments, and will write exactly <paramref name="dst8s"/> elements beginning <paramref name="dst0"/>.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    internal static void String16ToString8Transform(ref char src0, int src16s, ref byte dst0, int dst8s)
+    public static void String16ToString8Transform(ref char src0, int src16s, ref byte dst0, int dst8s)
     {
       int k = 0;
       char first, low;
