@@ -11,7 +11,7 @@ namespace Neat.Collections
   {
     /// <summary>
     /// Equivalent to <see cref="IEnumerator.MoveNext"/> and
-    /// assigning <see cref="IEnumerator{T}.Current"/> to <paramref name="item"/>
+    /// assigning <see cref="IEnumerator.Current"/> to <paramref name="item"/>
     /// if <see cref="IEnumerator.MoveNext"/> returned <see langword="true"/>.
     /// If a call to this method returns <see langword="false"/>, the enumerator is considered disposed, and
     /// further calls to any method except <see cref="IDisposable.Dispose"/> are undefined.
