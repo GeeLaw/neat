@@ -53,14 +53,14 @@ namespace Neat.Unicode
       private int myIndex;
 
 #if DEBUG
-      private bool myDisposed;
+      private bool myNotDisposed;
 #endif
 
       private string DebuggerDisplay()
       {
         return "Index = " + myIndex.ToString(CultureInfo.InvariantCulture)
 #if DEBUG
-          + (myDisposed ? ", Disposed = True" : ", Disposed = False")
+          + (myNotDisposed ? "" : " <disposed>")
 #endif
           ;
       }
@@ -71,7 +71,7 @@ namespace Neat.Unicode
         myData = data;
         myIndex = -1;
 #if DEBUG
-        myDisposed = false;
+        myNotDisposed = true;
 #endif
       }
 
@@ -79,7 +79,7 @@ namespace Neat.Unicode
       void IEnumerator.Reset()
       {
 #if DEBUG
-        if (myDisposed)
+        if (!myNotDisposed)
         {
           throw new ObjectDisposedException("Neat.Unicode.String16.Enumerator");
         }
@@ -91,7 +91,7 @@ namespace Neat.Unicode
       public bool MoveNext(out char item)
       {
 #if DEBUG
-        if (myDisposed)
+        if (!myNotDisposed)
         {
           throw new ObjectDisposedException("Neat.Unicode.String16.Enumerator");
         }
@@ -105,7 +105,7 @@ namespace Neat.Unicode
           return true;
         }
 #if DEBUG
-        myDisposed = true;
+        myNotDisposed = false;
 #endif
         item = default(char);
         return false;
@@ -115,7 +115,7 @@ namespace Neat.Unicode
       bool IEnumerator2.MoveNext(out object item)
       {
 #if DEBUG
-        if (myDisposed)
+        if (!myNotDisposed)
         {
           throw new ObjectDisposedException("Neat.Unicode.String16.Enumerator");
         }
@@ -129,7 +129,7 @@ namespace Neat.Unicode
           return true;
         }
 #if DEBUG
-        myDisposed = true;
+        myNotDisposed = false;
 #endif
         item = null;
         return false;
@@ -139,7 +139,7 @@ namespace Neat.Unicode
       public bool MoveNext()
       {
 #if DEBUG
-        if (myDisposed)
+        if (!myNotDisposed)
         {
           throw new ObjectDisposedException("Neat.Unicode.String16.Enumerator");
         }
@@ -153,7 +153,7 @@ namespace Neat.Unicode
         get
         {
 #if DEBUG
-          if (myDisposed)
+          if (!myNotDisposed)
           {
             throw new ObjectDisposedException("Neat.Unicode.String16.Enumerator");
           }
@@ -175,7 +175,7 @@ namespace Neat.Unicode
         get
         {
 #if DEBUG
-          if (myDisposed)
+          if (!myNotDisposed)
           {
             throw new ObjectDisposedException("Neat.Unicode.String16.Enumerator");
           }
@@ -188,7 +188,7 @@ namespace Neat.Unicode
       void IDisposable.Dispose()
       {
 #if DEBUG
-        myDisposed = true;
+        myNotDisposed = false;
 #endif
       }
     }
