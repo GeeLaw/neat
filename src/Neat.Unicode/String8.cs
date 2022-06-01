@@ -2,6 +2,7 @@ using System;
 using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -16,6 +17,9 @@ namespace Neat.Unicode
   /// <see cref="String8"/> is binary-compatbile with a reference to an array of <see cref="Char8"/>.
   /// Represents a string encoded in UTF-8, which is not necessarily valid.
   /// Similar to <see langword="string"/>, the underlying memory of any <see cref="String8"/> must be immutable.
+  /// Every public method of this type should only dereference <see langword="this"/> once,
+  /// a trick used by <see cref="ImmutableArray{T}"/> (though this trick could be coincidence-oriented
+  /// programming; see <a href="https://github.com/dotnet/docs/issues/29696">dotnet/docs#29696</a>.)
   /// </summary>
   [DebuggerDisplay("{ToString(),nq}")]
   [StructLayout(LayoutKind.Explicit)]

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -10,6 +11,9 @@ namespace Neat.Unicode
   /// <summary>
   /// <see cref="Char32"/> is binary-compatible with <see langword="int"/> and <see langword="uint"/>.
   /// An instance of <see cref="Char32"/> is not necessarily a valid Unicode code point.
+  /// Every public method of this type should only dereference <see langword="this"/> once,
+  /// a trick used by <see cref="ImmutableArray{T}"/> (though this trick could be coincidence-oriented
+  /// programming; see <a href="https://github.com/dotnet/docs/issues/29696">dotnet/docs#29696</a>.)
   /// </summary>
   [DebuggerDisplay("{DebuggerDisplay(),nq}")]
   [StructLayout(LayoutKind.Explicit, Pack = 4, Size = 4)]
