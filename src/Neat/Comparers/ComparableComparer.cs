@@ -20,7 +20,9 @@ namespace Neat.Comparers
         ? y is null
           ? 0
           : -1
-        : x.CompareTo(y);
+        : y is null
+          ? 1
+          : x.CompareTo(y);
     }
   }
 }
