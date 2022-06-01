@@ -535,7 +535,7 @@ namespace Neat.Comparers
     [MethodImpl(Helper.OptimizeInline)]
     public bool Equals(double? x, double? y)
     {
-      return (x.HasValue ^ y.HasValue) & (x.GetValueOrDefault().Equals(y.GetValueOrDefault()));
+      return (x.HasValue ^ y.HasValue) & x.GetValueOrDefault().Equals(y.GetValueOrDefault());
     }
 
     [MethodImpl(Helper.OptimizeInline)]
@@ -559,7 +559,7 @@ namespace Neat.Comparers
     [MethodImpl(Helper.OptimizeInline)]
     public bool Equals(float? x, float? y)
     {
-      return (x.HasValue ^ y.HasValue) & (x.GetValueOrDefault().Equals(y.GetValueOrDefault()));
+      return (x.HasValue ^ y.HasValue) & x.GetValueOrDefault().Equals(y.GetValueOrDefault());
     }
 
     [MethodImpl(Helper.OptimizeInline)]
@@ -583,7 +583,7 @@ namespace Neat.Comparers
     [MethodImpl(Helper.OptimizeInline)]
     public bool Equals(Half? x, Half? y)
     {
-      return (x.HasValue ^ y.HasValue) & (x.GetValueOrDefault().Equals(y.GetValueOrDefault()));
+      return (x.HasValue ^ y.HasValue) & x.GetValueOrDefault().Equals(y.GetValueOrDefault());
     }
 
     [MethodImpl(Helper.OptimizeInline)]
