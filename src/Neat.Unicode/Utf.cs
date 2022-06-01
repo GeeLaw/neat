@@ -208,9 +208,9 @@ namespace Neat.Unicode
 
     #endregion decoding or encoding 1 code point
 
+    [SuppressMessage("Performance", "CA1822", Justification = "Closed delegates are more performant.")]
     private sealed class StringCreateHelper
     {
-      [SuppressMessage("Performance", "CA1822", Justification = "Closed delegates are more performant.")]
       [MethodImpl(Helper.JustOptimize)]
       public void FromString8(Span<char> span, Char8[] arg)
       {
@@ -221,7 +221,6 @@ namespace Neat.Unicode
           span.Length);
       }
 
-      [SuppressMessage("Performance", "CA1822", Justification = "Closed delegates are more performant.")]
       [MethodImpl(Helper.JustOptimize)]
       public void FromString16(Span<char> span, string arg)
       {
@@ -232,7 +231,6 @@ namespace Neat.Unicode
           span.Length);
       }
 
-      [SuppressMessage("Performance", "CA1822", Justification = "Closed delegates are more performant.")]
       [MethodImpl(Helper.JustOptimize)]
       public void FromString32(Span<char> span, Char32[] arg)
       {
