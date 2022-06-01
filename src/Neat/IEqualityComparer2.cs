@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Neat.Collections
+namespace Neat
 {
   /// <summary>
   /// Defines methods to support the comparison of objects for equality.
