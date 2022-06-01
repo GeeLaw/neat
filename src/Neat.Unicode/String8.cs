@@ -373,34 +373,24 @@ namespace Neat.Unicode
     /// <summary>
     /// This method cannot be called on the <see langword="null"/> wrapper.
     /// </summary>
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public ReadOnlySpan<Char8> AsSpan(int start)
     {
       Char8[] data = myData;
-      int dataLength = data.Length;
-      if ((uint)start > (uint)dataLength)
-      {
-        throw new ArgumentOutOfRangeException(nameof(start));
-      }
-      return new ReadOnlySpan<Char8>(data, start, dataLength - start);
+      /* See String32.AsSpan(int) on why this throws the desired exception. */
+      return new ReadOnlySpan<Char8>(data, start, data.Length - start);
     }
 
     /// <summary>
     /// This method cannot be called on the <see langword="null"/> wrapper.
     /// </summary>
-    [MethodImpl(Helper.JustOptimize)]
+    [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+    [MethodImpl(Helper.OptimizeInline)]
     public ReadOnlySpan<Char8> AsSpan(int start, int length)
     {
       Char8[] data = myData;
-      int dataLength = data.Length;
-      if ((uint)start > (uint)dataLength)
-      {
-        throw new ArgumentOutOfRangeException(nameof(start));
-      }
-      if ((uint)length > (uint)(dataLength - start))
-      {
-        throw new ArgumentOutOfRangeException(nameof(length));
-      }
+      /* See String32.AsSpan(int, int) on why this throws the desired exception. */
+      int throwIfNull = data.Length;
       return new ReadOnlySpan<Char8>(data, start, length);
     }
 
@@ -419,34 +409,24 @@ namespace Neat.Unicode
     /// <summary>
     /// This method cannot be called on the <see langword="null"/> wrapper.
     /// </summary>
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public ReadOnlyMemory<Char8> AsMemory(int start)
     {
       Char8[] data = myData;
-      int dataLength = data.Length;
-      if ((uint)start > (uint)dataLength)
-      {
-        throw new ArgumentOutOfRangeException(nameof(start));
-      }
-      return new ReadOnlyMemory<Char8>(data, start, dataLength - start);
+      /* See String32.AsSpan(int) on why this throws the desired exception. */
+      return new ReadOnlyMemory<Char8>(data, start, data.Length - start);
     }
 
     /// <summary>
     /// This method cannot be called on the <see langword="null"/> wrapper.
     /// </summary>
-    [MethodImpl(Helper.JustOptimize)]
+    [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+    [MethodImpl(Helper.OptimizeInline)]
     public ReadOnlyMemory<Char8> AsMemory(int start, int length)
     {
       Char8[] data = myData;
-      int dataLength = data.Length;
-      if ((uint)start > (uint)dataLength)
-      {
-        throw new ArgumentOutOfRangeException(nameof(start));
-      }
-      if ((uint)length > (uint)(dataLength - start))
-      {
-        throw new ArgumentOutOfRangeException(nameof(length));
-      }
+      /* See String32.AsSpan(int, int) on why this throws the desired exception. */
+      int throwIfNull = data.Length;
       return new ReadOnlyMemory<Char8>(data, start, length);
     }
 
