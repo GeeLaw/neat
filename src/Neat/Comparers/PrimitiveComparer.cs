@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Neat.Comparers
 {
@@ -10,9 +11,11 @@ namespace Neat.Comparers
       IEqualityComparer2<byte>, IComparer<byte>,
       IEqualityComparer2<sbyte>, IComparer<sbyte>,
       IEqualityComparer2<char>, IComparer<char>,
+      IEqualityComparer2<Rune>, IComparer<Rune>,
       IEqualityComparer2<decimal>, IComparer<decimal>,
       IEqualityComparer2<double>, IComparer<double>,
       IEqualityComparer2<float>, IComparer<float>,
+      IEqualityComparer2<Half>, IComparer<Half>,
       IEqualityComparer2<int>, IComparer<int>,
       IEqualityComparer2<uint>, IComparer<uint>,
       IEqualityComparer2<nint>, IComparer<nint>,
@@ -26,9 +29,11 @@ namespace Neat.Comparers
       IEqualityComparer2<byte?>, IComparer<byte?>,
       IEqualityComparer2<sbyte?>, IComparer<sbyte?>,
       IEqualityComparer2<char?>, IComparer<char?>,
+      IEqualityComparer2<Rune?>, IComparer<Rune?>,
       IEqualityComparer2<decimal?>, IComparer<decimal?>,
       IEqualityComparer2<double?>, IComparer<double?>,
       IEqualityComparer2<float?>, IComparer<float?>,
+      IEqualityComparer2<Half?>, IComparer<Half?>,
       IEqualityComparer2<int?>, IComparer<int?>,
       IEqualityComparer2<uint?>, IComparer<uint?>,
       IEqualityComparer2<nint?>, IComparer<nint?>,
@@ -123,6 +128,24 @@ namespace Neat.Comparers
     }
 
     [MethodImpl(Helper.OptimizeInline)]
+    public bool Equals(Rune x, Rune y)
+    {
+      return x.Value == y.Value;
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    public int GetHashCode(Rune obj)
+    {
+      return obj.Value;
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    public int Compare(Rune x, Rune y)
+    {
+      return Compare(x.Value, y.Value);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
     public bool Equals(decimal x, decimal y)
     {
       return decimal.Equals(x, y);
@@ -175,6 +198,26 @@ namespace Neat.Comparers
 
     [MethodImpl(Helper.OptimizeInline)]
     public int Compare(float x, float y)
+    {
+      /* This handles NaN correctly. */
+      return x.CompareTo(y);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    public bool Equals(Half x, Half y)
+    {
+      /* This handles NaN correctly. */
+      return x.Equals(y);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    public int GetHashCode(Half obj)
+    {
+      return obj.GetHashCode();
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    public int Compare(Half x, Half y)
     {
       /* This handles NaN correctly. */
       return x.CompareTo(y);
@@ -440,6 +483,30 @@ namespace Neat.Comparers
     }
 
     [MethodImpl(Helper.OptimizeInline)]
+    public bool Equals(Rune? x, Rune? y)
+    {
+      return (x.HasValue ^ y.HasValue) & (x.GetValueOrDefault().Value == y.GetValueOrDefault().Value);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    public int GetHashCode(Rune? obj)
+    {
+      return obj.GetValueOrDefault().Value;
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    public int Compare(Rune? x, Rune? y)
+    {
+      return x.HasValue
+        ? y.HasValue
+          ? Compare(x.GetValueOrDefault().Value, y.GetValueOrDefault().Value)
+          : 1
+        : y.HasValue
+          ? -1
+          : 0;
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
     public bool Equals(decimal? x, decimal? y)
     {
       return x.HasValue
@@ -503,6 +570,30 @@ namespace Neat.Comparers
 
     [MethodImpl(Helper.OptimizeInline)]
     public int Compare(float? x, float? y)
+    {
+      return x.HasValue
+        ? y.HasValue
+          ? x.GetValueOrDefault().CompareTo(y.GetValueOrDefault())
+          : 1
+        : y.HasValue
+          ? -1
+          : 0;
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    public bool Equals(Half? x, Half? y)
+    {
+      return (x.HasValue ^ y.HasValue) & (x.GetValueOrDefault().Equals(y.GetValueOrDefault()));
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    public int GetHashCode(Half? obj)
+    {
+      return obj.HasValue ? obj.GetValueOrDefault().GetHashCode() : 0;
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    public int Compare(Half? x, Half? y)
     {
       return x.HasValue
         ? y.HasValue
