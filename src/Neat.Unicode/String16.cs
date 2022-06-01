@@ -20,7 +20,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.OptimizeInline)]
     public static bool IsDefault(this string string16)
     {
-      return ReferenceEquals(string16, null);
+      return string16 is null;
     }
 
     /// <summary>
@@ -29,7 +29,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.OptimizeInline)]
     public static bool IsDefaultOrEmpty(this string string16)
     {
-      return ReferenceEquals(string16, null) || string16.Length == 0;
+      return string16 is null || string16.Length == 0;
     }
 
     /// <summary>
@@ -225,7 +225,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       public int GetHashCode(string obj)
       {
-        return ReferenceEquals(obj, null) ? 0 : obj.GetHashCode();
+        return obj is null ? 0 : obj.GetHashCode();
       }
     }
   }

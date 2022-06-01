@@ -50,7 +50,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return ReferenceEquals(myData, null);
+        return myData is null;
       }
     }
 
@@ -63,7 +63,7 @@ namespace Neat.Unicode
       get
       {
         Char32[] data = myData;
-        return ReferenceEquals(data, null) || data.Length == 0;
+        return data is null || data.Length == 0;
       }
     }
 
@@ -117,11 +117,11 @@ namespace Neat.Unicode
       {
         return 0;
       }
-      if (ReferenceEquals(x, null))
+      if (x is null)
       {
         return -1;
       }
-      if (ReferenceEquals(y, null))
+      if (y is null)
       {
         return 1;
       }
@@ -189,7 +189,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     int IComparable.CompareTo(object obj)
     {
-      return ReferenceEquals(obj, null)
+      return obj is null
         ? 1
         : obj is String32 other
         ? CompareImpl(myData, other.myData)
@@ -207,7 +207,7 @@ namespace Neat.Unicode
       {
         return true;
       }
-      if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+      if (x is null || y is null)
       {
         return false;
       }
@@ -267,7 +267,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     private static int GetHashCodeImpl(Char32[] x)
     {
-      if (ReferenceEquals(x, null))
+      if (x is null)
       {
         return 0;
       }

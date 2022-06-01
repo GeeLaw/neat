@@ -133,7 +133,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     int IComparable.CompareTo(object obj)
     {
-      if (ReferenceEquals(obj, null))
+      if (obj is null)
       {
         return 1;
       }

@@ -134,7 +134,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     int IComparable.CompareTo(object obj)
     {
-      return ReferenceEquals(obj, null)
+      return obj is null
         ? 1
         : obj is Char8 other
         ? (int)Value - (int)other.Value

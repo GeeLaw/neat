@@ -272,7 +272,7 @@ namespace Neat.Unicode
     public static bool IsString8Valid(String8 string8)
     {
       Char8[] data = string8.myData;
-      return ReferenceEquals(data, null) || UtfUnsafe.FindFirstInvalidChar8(
+      return data is null || UtfUnsafe.FindFirstInvalidChar8(
         ref Unsafe.As<Char8, byte>(ref MemoryMarshal.GetArrayDataReference(data)),
         data.Length) == -1;
     }
@@ -285,7 +285,7 @@ namespace Neat.Unicode
     public static void ThrowIfString8IsNotValid(String8 string8)
     {
       Char8[] data = string8.myData;
-      if (!ReferenceEquals(data, null) && UtfUnsafe.FindFirstInvalidChar8(
+      if (data is not null && UtfUnsafe.FindFirstInvalidChar8(
         ref Unsafe.As<Char8, byte>(ref MemoryMarshal.GetArrayDataReference(data)),
         data.Length) != -1)
       {
@@ -304,7 +304,7 @@ namespace Neat.Unicode
       Char8[] src = string8.myData;
       int src8s;
       long dst8s;
-      if (ReferenceEquals(src, null) || (dst8s = UtfUnsafe.CountInvalidChar8s(
+      if (src is null || (dst8s = UtfUnsafe.CountInvalidChar8s(
         ref Unsafe.As<Char8, byte>(ref MemoryMarshal.GetArrayDataReference(src)),
         src8s = src.Length)) == 0)
       {
@@ -335,7 +335,7 @@ namespace Neat.Unicode
       Char8[] src = string8.myData;
       int src8s;
       long dst8s;
-      if (ReferenceEquals(src, null) || (dst8s = UtfUnsafe.CountInvalidChar8s(
+      if (src is null || (dst8s = UtfUnsafe.CountInvalidChar8s(
         ref Unsafe.As<Char8, byte>(ref MemoryMarshal.GetArrayDataReference(src)),
         src8s = src.Length)) == 0)
       {
@@ -366,7 +366,7 @@ namespace Neat.Unicode
     {
       string16 = null;
       Char8[] src = string8.myData;
-      if (ReferenceEquals(src, null))
+      if (src is null)
       {
         return true;
       }
@@ -401,7 +401,7 @@ namespace Neat.Unicode
     public static string String8ToString16Strict(String8 string8)
     {
       Char8[] src = string8.myData;
-      if (ReferenceEquals(src, null))
+      if (src is null)
       {
         return null;
       }
@@ -433,7 +433,7 @@ namespace Neat.Unicode
     public static string String8ToString16Replace(String8 string8)
     {
       Char8[] src = string8.myData;
-      if (ReferenceEquals(src, null))
+      if (src is null)
       {
         return null;
       }
@@ -463,7 +463,7 @@ namespace Neat.Unicode
     {
       string32 = default(String32);
       Char8[] src = string8.myData;
-      if (ReferenceEquals(src, null))
+      if (src is null)
       {
         return true;
       }
@@ -504,7 +504,7 @@ namespace Neat.Unicode
     public static String32 String8ToString32Strict(String8 string8)
     {
       Char8[] src = string8.myData;
-      if (ReferenceEquals(src, null))
+      if (src is null)
       {
         return default(String32);
       }
@@ -542,7 +542,7 @@ namespace Neat.Unicode
     public static String32 String8ToString32Replace(String8 string8)
     {
       Char8[] src = string8.myData;
-      if (ReferenceEquals(src, null))
+      if (src is null)
       {
         return default(String32);
       }
@@ -578,7 +578,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.OptimizeInline)]
     public static bool IsString16Valid(string string16)
     {
-      return ReferenceEquals(string16, null) || UtfUnsafe.FindFirstInvalidChar16(
+      return string16 is null || UtfUnsafe.FindFirstInvalidChar16(
         ref MemoryMarshal.GetReference(string16.AsSpan()),
         string16.Length) == -1;
     }
@@ -590,7 +590,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     public static void ThrowIfString16IsNotValid(string string16)
     {
-      if (!ReferenceEquals(string16, null) && UtfUnsafe.FindFirstInvalidChar16(
+      if (string16 is not null && UtfUnsafe.FindFirstInvalidChar16(
         ref MemoryMarshal.GetReference(string16.AsSpan()),
         string16.Length) != -1)
       {
@@ -608,7 +608,7 @@ namespace Neat.Unicode
     public static bool TryString16ToString8Strict(string string16, out String8 string8)
     {
       string8 = default(String8);
-      if (ReferenceEquals(string16, null))
+      if (string16 is null)
       {
         return true;
       }
@@ -648,7 +648,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     public static String8 String16ToString8Strict(string string16)
     {
-      if (ReferenceEquals(string16, null))
+      if (string16 is null)
       {
         return default(String8);
       }
@@ -685,7 +685,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     public static String8 String16ToString8Replace(string string16)
     {
-      if (ReferenceEquals(string16, null))
+      if (string16 is null)
       {
         return default(String8);
       }
@@ -720,7 +720,7 @@ namespace Neat.Unicode
     {
       string src = string16;
       int src16s;
-      if (ReferenceEquals(src, null) || UtfUnsafe.FindFirstInvalidChar16(
+      if (src is null || UtfUnsafe.FindFirstInvalidChar16(
         ref MemoryMarshal.GetReference(src.AsSpan()),
         src16s = src.Length) == -1)
       {
@@ -743,7 +743,7 @@ namespace Neat.Unicode
     {
       string src = string16;
       int src16s;
-      if (ReferenceEquals(src, null) || UtfUnsafe.FindFirstInvalidChar16(
+      if (src is null || UtfUnsafe.FindFirstInvalidChar16(
         ref MemoryMarshal.GetReference(src.AsSpan()),
         src16s = src.Length) == -1)
       {
@@ -766,7 +766,7 @@ namespace Neat.Unicode
     public static bool TryString16ToString32Strict(string string16, out String32 string32)
     {
       string32 = default(String32);
-      if (ReferenceEquals(string16, null))
+      if (string16 is null)
       {
         return true;
       }
@@ -806,7 +806,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     public static String32 String16ToString32Strict(string string16)
     {
-      if (ReferenceEquals(string16, null))
+      if (string16 is null)
       {
         return default(String32);
       }
@@ -843,7 +843,7 @@ namespace Neat.Unicode
     [MethodImpl(Helper.JustOptimize)]
     public static String32 String16ToString32Replace(string string16)
     {
-      if (ReferenceEquals(string16, null))
+      if (string16 is null)
       {
         return default(String32);
       }
@@ -880,7 +880,7 @@ namespace Neat.Unicode
     public static bool IsString32Valid(String32 string32)
     {
       Char32[] data = string32.myData;
-      return ReferenceEquals(data, null) || UtfUnsafe.FindFirstInvalidChar32(
+      return data is null || UtfUnsafe.FindFirstInvalidChar32(
         ref Unsafe.As<Char32, int>(ref MemoryMarshal.GetArrayDataReference(data)),
         data.Length) == -1;
     }
@@ -893,7 +893,7 @@ namespace Neat.Unicode
     public static void ThrowIfString32IsNotValid(String32 string32)
     {
       Char32[] data = string32.myData;
-      if (!ReferenceEquals(data, null) && UtfUnsafe.FindFirstInvalidChar32(
+      if (data is not null && UtfUnsafe.FindFirstInvalidChar32(
         ref Unsafe.As<Char32, int>(ref MemoryMarshal.GetArrayDataReference(data)),
         data.Length) != -1)
       {
@@ -912,7 +912,7 @@ namespace Neat.Unicode
     {
       string8 = default(String8);
       Char32[] src = string32.myData;
-      if (ReferenceEquals(src, null))
+      if (src is null)
       {
         return true;
       }
@@ -953,7 +953,7 @@ namespace Neat.Unicode
     public static String8 String32ToString8Strict(String32 string32)
     {
       Char32[] src = string32.myData;
-      if (ReferenceEquals(src, null))
+      if (src is null)
       {
         return default(String8);
       }
@@ -991,7 +991,7 @@ namespace Neat.Unicode
     public static String8 String32ToString8Replace(String32 string32)
     {
       Char32[] src = string32.myData;
-      if (ReferenceEquals(src, null))
+      if (src is null)
       {
         return default(String8);
       }
@@ -1027,7 +1027,7 @@ namespace Neat.Unicode
     {
       string16 = null;
       Char32[] src = string32.myData;
-      if (ReferenceEquals(src, null))
+      if (src is null)
       {
         return true;
       }
@@ -1062,7 +1062,7 @@ namespace Neat.Unicode
     public static string String32ToString16Strict(String32 string32)
     {
       Char32[] src = string32.myData;
-      if (ReferenceEquals(src, null))
+      if (src is null)
       {
         return null;
       }
@@ -1094,7 +1094,7 @@ namespace Neat.Unicode
     public static string String32ToString16Replace(String32 string32)
     {
       Char32[] src = string32.myData;
-      if (ReferenceEquals(src, null))
+      if (src is null)
       {
         return null;
       }
@@ -1123,7 +1123,7 @@ namespace Neat.Unicode
     {
       Char32[] src = string32.myData;
       int src32s;
-      if (ReferenceEquals(src, null) || UtfUnsafe.FindFirstInvalidChar32(
+      if (src is null || UtfUnsafe.FindFirstInvalidChar32(
         ref Unsafe.As<Char32, int>(ref MemoryMarshal.GetArrayDataReference(src)),
         src32s = src.Length) == -1)
       {
@@ -1152,7 +1152,7 @@ namespace Neat.Unicode
     {
       Char32[] src = string32.myData;
       int src32s;
-      if (ReferenceEquals(src, null) || UtfUnsafe.FindFirstInvalidChar32(
+      if (src is null || UtfUnsafe.FindFirstInvalidChar32(
         ref Unsafe.As<Char32, int>(ref MemoryMarshal.GetArrayDataReference(src)),
         src32s = src.Length) == -1)
       {
