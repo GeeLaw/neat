@@ -53,7 +53,15 @@ namespace Neat.Unicode
       private int myIndex;
 
 #if STRING16_ENUMERATOR_DISPOSE
+
       private bool myNotDisposed;
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      private static void ThrowDisposed()
+      {
+        throw new ObjectDisposedException(typeof(Enumerator).FullName, "The enumerator is already disposed. (This check is enabled by STRING16_ENUMERATOR_DISPOSED.)");
+      }
+
 #endif
 
       private string DebuggerDisplay()
@@ -81,7 +89,7 @@ namespace Neat.Unicode
 #if STRING16_ENUMERATOR_DISPOSE
         if (!myNotDisposed)
         {
-          throw new ObjectDisposedException("Neat.Unicode.String16.Enumerator");
+          ThrowDisposed();
         }
 #endif
         myIndex = -1;
@@ -93,7 +101,7 @@ namespace Neat.Unicode
 #if STRING16_ENUMERATOR_DISPOSE
         if (!myNotDisposed)
         {
-          throw new ObjectDisposedException("Neat.Unicode.String16.Enumerator");
+          ThrowDisposed();
         }
 #endif
         string data = myData;
@@ -117,7 +125,7 @@ namespace Neat.Unicode
 #if STRING16_ENUMERATOR_DISPOSE
         if (!myNotDisposed)
         {
-          throw new ObjectDisposedException("Neat.Unicode.String16.Enumerator");
+          ThrowDisposed();
         }
 #endif
         string data = myData;
@@ -141,7 +149,7 @@ namespace Neat.Unicode
 #if STRING16_ENUMERATOR_DISPOSE
         if (!myNotDisposed)
         {
-          throw new ObjectDisposedException("Neat.Unicode.String16.Enumerator");
+          ThrowDisposed();
         }
 #endif
         return ++myIndex < myData.Length;
@@ -155,7 +163,7 @@ namespace Neat.Unicode
 #if STRING16_ENUMERATOR_DISPOSE
           if (!myNotDisposed)
           {
-            throw new ObjectDisposedException("Neat.Unicode.String16.Enumerator");
+            ThrowDisposed();
           }
 #endif
           return myData[myIndex];
@@ -177,7 +185,7 @@ namespace Neat.Unicode
 #if STRING16_ENUMERATOR_DISPOSE
           if (!myNotDisposed)
           {
-            throw new ObjectDisposedException("Neat.Unicode.String16.Enumerator");
+            ThrowDisposed();
           }
 #endif
           return myData[myIndex];
