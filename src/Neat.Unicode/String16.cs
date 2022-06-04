@@ -59,7 +59,7 @@ namespace Neat.Unicode
       [MethodImpl(Helper.OptimizeNoInline)]
       private static void ThrowDisposed()
       {
-        throw new ObjectDisposedException(typeof(Enumerator).FullName, "The enumerator is already disposed. (This check is enabled by STRING16_ENUMERATOR_DISPOSED.)");
+        throw new ObjectDisposedException(typeof(Enumerator).FullName, "The enumerator is already disposed. (This check is enabled by STRING16_ENUMERATOR_DISPOSE.)");
       }
 
 #endif
