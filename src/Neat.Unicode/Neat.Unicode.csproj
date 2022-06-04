@@ -9,6 +9,10 @@
     <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <DefineConstants>$(DefineConstants);STRING8_ENUMERATOR_DISPOSE;STRING16_ENUMERATOR_DISPOSE;STRING32_ENUMERATOR_DISPOSE</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Neat\Neat.csproj" />
     <ProjectReference Include="..\Neat.Collections\Neat.Collections.csproj" />
