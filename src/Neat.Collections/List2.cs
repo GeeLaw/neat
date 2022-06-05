@@ -1290,19 +1290,53 @@ namespace Neat.Collections
 
     #region Contains, ICollection<T>.Contains, IList.Contains
 
+    /// <summary>
+    /// Determines whether there is an item in the list that is equal to <paramref name="item"/>.
+    /// The equality comparison method must not mutate the list.
+    /// </summary>
     public bool Contains(T item)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      uint version = myVersion;
+#endif
+      int index = theFirstOfGeneric(myData, myCount, item);
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      return index >= 0;
     }
 
     bool ICollection<T>.Contains(T item)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      uint version = myVersion;
+#endif
+      int index = theFirstOfGeneric(myData, myCount, item);
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      return index >= 0;
     }
 
     bool IList.Contains(object value)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      uint version = myVersion;
+#endif
+      int index = theFirstOfObject(myData, myCount, value);
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      return index >= 0;
     }
 
     #endregion Contains, ICollection<T>.Contains, IList.Contains
