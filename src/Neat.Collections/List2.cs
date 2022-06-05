@@ -355,7 +355,8 @@ namespace Neat.Collections
 
     /// <summary>
     /// Except for allocation efficiency,
-    /// the effect is equivalent to calling <see cref="Array.ConstrainedCopy(Array, int, Array, int, int)"/> with the following arguments:
+    /// the effect is equivalent to calling <see cref="Array.ConstrainedCopy(Array, int, Array, int, int)"/>
+    /// (see that method for possible exceptions) with the following arguments:
     /// <see cref="ToArray"/>, <c>0</c>, <paramref name="array"/>, <paramref name="arrayIndex"/>, <see cref="Count"/>.
     /// This means <paramref name="array"/> cannot be a covariant reference.
     /// </summary>
