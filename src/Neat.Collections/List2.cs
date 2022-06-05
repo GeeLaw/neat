@@ -353,19 +353,28 @@ namespace Neat.Collections
 
     #region CopyTo, ICollection<T>.CopyTo, ICollection.CopyTo
 
+    /// <summary>
+    /// Except for allocation efficiency,
+    /// the effect is equivalent to calling <see cref="Array.ConstrainedCopy(Array, int, Array, int, int)"/> with the following arguments:
+    /// <see cref="ToArray"/>, <c>0</c>, <paramref name="array"/>, <paramref name="arrayIndex"/>, <see cref="Count"/>.
+    /// This means <paramref name="array"/> cannot be a covariant reference.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
     public void CopyTo(T[] array, int arrayIndex)
     {
-      throw new NotImplementedException();
+      Array.ConstrainedCopy(myData, 0, array, arrayIndex, myCount);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     void ICollection<T>.CopyTo(T[] array, int arrayIndex)
     {
-      throw new NotImplementedException();
+      Array.ConstrainedCopy(myData, 0, array, arrayIndex, myCount);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     void ICollection.CopyTo(Array array, int index)
     {
-      throw new NotImplementedException();
+      Array.ConstrainedCopy(myData, 0, array, index, myCount);
     }
 
     #endregion CopyTo, ICollection<T>.CopyTo, ICollection.CopyTo
