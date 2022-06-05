@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -14,6 +15,8 @@ namespace Neat.Collections
   /// A dynamically growing array.
   /// All static members of this class are thread-safe.
   /// No instance member of this class is thread-safe unless explicitly stated otherwise.
+  /// Any member that could mutate the list will invalidate all existing enumeration operations, even if no actual change is made
+  /// (e.g., setting the capacity to its current value will invalidate all existing enumeration operations).
   /// </summary>
   public sealed class List2<T> : IEnumerable2<T, List2<T>.Enumerator>, IReadOnlyList<T>, IList<T>, IList
   {
@@ -104,6 +107,50 @@ namespace Neat.Collections
       myVersion = 0;
 #endif
     }
+
+    #region GetPinnableReference, AsSpanBeforeNextMutation
+
+    /// <summary>
+    /// Gets a read-only reference to the first item of this list.
+    /// The result of this method is invalidated as soon as any enumeration-invalidating member of <see cref="List2{T}"/> is invoked.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [MethodImpl(Helper.OptimizeInline)]
+    public ref readonly T GetPinnableReference()
+    {
+      return ref MemoryMarshal.GetArrayDataReference(myData);
+    }
+
+    /// <summary>
+    /// The result of this method is invalidated as soon as any enumeration-invalidating member of <see cref="List2{T}"/> is invoked.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    public Span<T> AsSpanBeforeNextMutation()
+    {
+      return new Span<T>(myData, 0, myCount);
+    }
+
+    /// <summary>
+    /// The result of this method is invalidated as soon as any enumeration-invalidating member of <see cref="List2{T}"/> is invoked.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="start"/> or <paramref name="length"/> is out of range.</exception>
+    [MethodImpl(Helper.OptimizeInline)]
+    public Span<T> AsSpanBeforeNextMutation(int start, int length)
+    {
+      T[] data = myData;
+      int count = myCount;
+      if ((uint)start > (uint)count)
+      {
+        List2.ThrowStart();
+      }
+      if ((uint)length > (uint)(count - start))
+      {
+        List2.ThrowLength();
+      }
+      return new Span<T>(data, start, length);
+    }
+
+    #endregion GetPinnableReference, AsSpanBeforeNextMutation
 
     #region Count, IReadOnlyCollection<T>.Count, ICollection<T>.Count, ICollection.Count
 
