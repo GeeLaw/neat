@@ -794,11 +794,6 @@ namespace Neat.Collections
       AddRangeImpl(array, start, length);
     }
 
-    public void AddRange(IEnumerable<T> enumerable)
-    {
-      throw new NotImplementedException();
-    }
-
     #endregion AddRange
 
     #region Insert, IList<T>.Insert, IList.Insert
