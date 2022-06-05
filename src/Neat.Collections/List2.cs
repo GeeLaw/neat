@@ -553,18 +553,18 @@ namespace Neat.Collections
     {
       T[] data = myData;
       int count = myCount;
-      if (count < data.Length)
+      int least = count + 1;
+      if (least <= data.Length)
       {
         data[count] = item;
         /* No more exception is possible beyond this point. */
-        myCount = ++count;
+        myCount = least;
         return;
       }
-      if (count >= MaximumCapacity)
+      if (least > MaximumCapacity)
       {
         List2.ThrowTooMany();
       }
-      int least = count + 1;
       int suggested = (count > MaximumCapacity / 2
         ? MaximumCapacity
         : count <= StartingCapacity / 2
@@ -575,7 +575,7 @@ namespace Neat.Collections
       newData[count] = item;
       /* No more exception is possible beyond this point. */
       myData = newData;
-      myCount = ++count;
+      myCount = least;
     }
 
     [MethodImpl(Helper.OptimizeNoInline)]
@@ -583,18 +583,18 @@ namespace Neat.Collections
     {
       T[] data = myData;
       int count = myCount;
-      if (count < data.Length)
+      int least = count + 1;
+      if (least <= data.Length)
       {
         data[count] = item;
         /* No more exception is possible beyond this point. */
-        myCount = count + 1;
+        myCount = least;
         return count;
       }
-      if (count >= MaximumCapacity)
+      if (least > MaximumCapacity)
       {
         List2.ThrowTooMany();
       }
-      int least = count + 1;
       int suggested = (count > MaximumCapacity / 2
         ? MaximumCapacity
         : count <= StartingCapacity / 2
@@ -605,7 +605,7 @@ namespace Neat.Collections
       newData[count] = item;
       /* No more exception is possible beyond this point. */
       myData = newData;
-      myCount = count + 1;
+      myCount = least;
       return count;
     }
 
@@ -688,6 +688,7 @@ namespace Neat.Collections
       T[] data = myData;
       int count = myCount;
       int least = count + length;
+      /* The following two comparisons must be unsigned in case "count + length" overflows. */
       if ((uint)least <= (uint)data.Length)
       {
         Array.ConstrainedCopy(array, start, data, count, length);
