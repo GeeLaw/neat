@@ -8,6 +8,11 @@ using System.Runtime.CompilerServices;
 
 namespace Neat.Collections
 {
+  /// <summary>
+  /// A dynamically growing array.
+  /// All static members of this class are thread-safe.
+  /// No instance member of this class is thread-safe unless explicitly stated otherwise.
+  /// </summary>
   public sealed class List2<T> : IEnumerable2<T, List2<T>.Enumerator>, IReadOnlyList<T>, IList<T>, IList
   {
     private T[] myData;
@@ -16,6 +21,31 @@ namespace Neat.Collections
 #if LIST2_ENUMERATION_VERSION
     private uint myVersion;
 #endif
+
+    [SuppressMessage("Performance", "CA1825", Justification = "Avoid excessive generic instantiations.")]
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    private static readonly T[] theEmptyArray = new T[0];
+
+    /// <summary>
+    /// The minimum non-zero capacity favored by <see cref="List2{T}"/>.
+    /// This value is <see cref="List2.StartingCapacity"/>.
+    /// </summary>
+    public const int StartingCapacity = List2.StartingCapacity;
+
+    /// <summary>
+    /// The maximum capacity of a list of <typeparamref name="T"/>.
+    /// This value is <see cref="List2.MaximumCapacityOneByte"/>
+    /// for <see langword="bool"/>, <see langword="byte"/>, <see langword="sbyte"/>, and other one-byte structures.
+    /// For all other types, this value is <see cref="List2.MaximumCapacityOther"/>.
+    /// </summary>
+    public static readonly int MaximumCapacity;
+
+    static List2()
+    {
+      MaximumCapacity = (!RuntimeHelpers.IsReferenceOrContainsReferences<T>() && Unsafe.SizeOf<T>() == 1
+        ? List2.MaximumCapacityOneByte
+        : List2.MaximumCapacityOther);
+    }
 
     #region constructors
 
@@ -178,29 +208,145 @@ namespace Neat.Collections
 
     #endregion Reverse
 
-    #region Capacity, SetCapacity, EnsureCapacity, TrimExcess
-
-    public int Capacity
+    /// <summary>
+    /// This method does not validate its arguments.
+    /// </summary>
+    /// <param name="least">This number should be positive and not exceed <see cref="MaximumCapacity"/>.</param>
+    /// <param name="suggested">This number should be greater than or equal to <paramref name="least"/> and not exceed <see cref="MaximumCapacity"/>.</param>
+    [MethodImpl(Helper.JustOptimize)]
+    private static T[] AllocImpl(int least, int suggested)
     {
-      get
+    Retry:
+      try
       {
-        throw new NotImplementedException();
+        return new T[suggested];
+      }
+      catch (OutOfMemoryException)
+      {
+        if (suggested != least)
+        {
+          suggested = least + (suggested - least) / 2;
+          goto Retry;
+        }
+        throw;
       }
     }
 
+    #region Capacity, SetCapacity, EnsureCapacity, TrimExcess
+
+    /// <summary>
+    /// Gets the capacity of the list.
+    /// </summary>
+    public int Capacity
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      get
+      {
+        return myData.Length;
+      }
+    }
+
+    /// <summary>
+    /// Sets the capacity of the list.
+    /// </summary>
+    /// <param name="capacity">The new capacity.
+    /// This value must be at least <see cref="Count"/> and not exceed <see cref="MaximumCapacity"/>.</param>
+    [MethodImpl(Helper.JustOptimize)]
     public void SetCapacity(int capacity)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      if (capacity < count || capacity > MaximumCapacity)
+      {
+        List2.ThrowCapacity();
+      }
+      if (capacity == 0)
+      {
+        myData = theEmptyArray;
+        return;
+      }
+      if (capacity != data.Length)
+      {
+        T[] newData = new T[capacity];
+        Array.ConstrainedCopy(data, 0, newData, 0, count);
+        /* No more exception is possible beyond this point. */
+        myData = newData;
+      }
     }
 
-    public void EnsureCapacity(int capacityAtLeast)
+    /// <summary>
+    /// Ensures the capacity is at least the specified value and amortizes the cost of growth.
+    /// </summary>
+    /// <param name="capacity">The minimum value of the new capacity.
+    /// This value can be less than <see cref="Count"/> (including being negative),
+    /// but must not exceed <see cref="MaximumCapacity"/>.</param>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="capacity"/> is greater than <see cref="MaximumCapacity"/>.</exception>
+    [MethodImpl(Helper.JustOptimize)]
+    public void EnsureCapacity(int capacity)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      if (capacity > MaximumCapacity)
+      {
+        List2.ThrowCapacity();
+      }
+      if (capacity > data.Length)
+      {
+        int suggested = (count > MaximumCapacity / 2
+          ? MaximumCapacity
+          : count <= StartingCapacity / 2
+          ? StartingCapacity
+          : count * 2);
+        suggested = (suggested < capacity ? capacity : suggested);
+        T[] newData = AllocImpl(capacity, suggested);
+        Array.ConstrainedCopy(data, 0, newData, 0, count);
+        /* No more exception is possible beyond this point. */
+        myData = newData;
+      }
     }
 
+    /// <summary>
+    /// Sets the capacity to <see cref="Count"/> opportunistically.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     public void TrimExcess()
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      if (count == 0)
+      {
+        myData = theEmptyArray;
+        return;
+      }
+      if (count < (int)(data.Length * 0.9))
+      {
+        T[] newData;
+        try
+        {
+          /* We are going to overwrite every element before the newly allocated array
+          /* becomes available to the user, so it is fine to allocate it uninitialized. */
+          newData = GC.AllocateUninitializedArray<T>(count, false);
+        }
+        catch (OutOfMemoryException)
+        {
+          /* There is no guaratee that the list will shrink
+          /* and a no-op is acceptable, although arguably
+          /* more out-of-memory issues are arriving soon. */
+          return;
+        }
+        Array.ConstrainedCopy(data, 0, newData, 0, count);
+        /* No more exception is possible beyond this point. */
+        myData = newData;
+      }
     }
 
     #endregion Capacity, SetCapacity, EnsureCapacity, TrimExcess
@@ -823,6 +969,9 @@ namespace Neat.Collections
 
   public static class List2
   {
+    public const int StartingCapacity = 8;
+    public const int MaximumCapacityOneByte = 0x7FFFFFC7;
+    public const int MaximumCapacityOther = 0x7FEFFFFF;
 
     [MethodImpl(Helper.OptimizeNoInline)]
     internal static void ThrowStart()
@@ -834,6 +983,12 @@ namespace Neat.Collections
     internal static void ThrowLength()
     {
       throw new ArgumentOutOfRangeException("length");
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ThrowCapacity()
+    {
+      throw new ArgumentOutOfRangeException("capacity");
     }
 
 #if LIST2_ENUMERATION_VERSION
