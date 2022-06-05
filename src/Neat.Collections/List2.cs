@@ -1294,6 +1294,7 @@ namespace Neat.Collections
     /// Determines whether there is an item in the list that is equal to <paramref name="item"/>.
     /// The equality comparison method must not mutate the list.
     /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
     public bool Contains(T item)
     {
 #if LIST2_ENUMERATION_VERSION
@@ -1309,6 +1310,7 @@ namespace Neat.Collections
       return index >= 0;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     bool ICollection<T>.Contains(T item)
     {
 #if LIST2_ENUMERATION_VERSION
@@ -1324,6 +1326,7 @@ namespace Neat.Collections
       return index >= 0;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     bool IList.Contains(object value)
     {
 #if LIST2_ENUMERATION_VERSION
@@ -1349,6 +1352,7 @@ namespace Neat.Collections
     /// This method returns the old index of the item that was removed.
     /// It returns <c>-1</c> if no item was removed.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     public int RemoveFirst(T item)
     {
 #if LIST2_ENUMERATION_VERSION
@@ -1379,6 +1383,7 @@ namespace Neat.Collections
     /// This method returns the old index of the item that was removed.
     /// It returns <c>-1</c> if no item was removed.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     public int RemoveLast(T item)
     {
 #if LIST2_ENUMERATION_VERSION
@@ -1403,6 +1408,7 @@ namespace Neat.Collections
       return index;
     }
 
+    [MethodImpl(Helper.JustOptimize)]
     bool ICollection<T>.Remove(T item)
     {
 #if LIST2_ENUMERATION_VERSION
@@ -1428,6 +1434,7 @@ namespace Neat.Collections
       return false;
     }
 
+    [MethodImpl(Helper.JustOptimize)]
     void IList.Remove(object value)
     {
 #if LIST2_ENUMERATION_VERSION
