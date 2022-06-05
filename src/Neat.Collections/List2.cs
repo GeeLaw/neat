@@ -1474,8 +1474,8 @@ namespace Neat.Collections
     /// Determines whether there exists an item in the list satisfying <paramref name="predicate"/>.
     /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
     /// </summary>
-    /// <param name="predicate">This argument must not be null.</param>
-    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
+    /// <param name="predicate">This argument must not be <see langword="null"/>.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
     [MethodImpl(Helper.JustOptimize)]
     public bool ThereExists<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
@@ -1519,8 +1519,8 @@ namespace Neat.Collections
     /// Determines whether all the items in the list satisfy <paramref name="predicate"/>.
     /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
     /// </summary>
-    /// <param name="predicate">This argument must not be null.</param>
-    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
+    /// <param name="predicate">This argument must not be <see langword="null"/>.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
     [MethodImpl(Helper.JustOptimize)]
     public bool ForAll<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
@@ -1561,8 +1561,8 @@ namespace Neat.Collections
     /// Gets the number of items in the list that satisfy <paramref name="predicate"/>.
     /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
     /// </summary>
-    /// <param name="predicate">This argument must not be null.</param>
-    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
+    /// <param name="predicate">This argument must not be <see langword="null"/>.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
     [MethodImpl(Helper.JustOptimize)]
     public int CountSuchThat<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
@@ -1603,8 +1603,8 @@ namespace Neat.Collections
     /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
     /// This method returns <c>-1</c> if no item is found.
     /// </summary>
-    /// <param name="predicate">This argument must not be null.</param>
-    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
+    /// <param name="predicate">This argument must not be <see langword="null"/>.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
     [MethodImpl(Helper.JustOptimize)]
     public int FirstSuchThat<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
@@ -1646,9 +1646,9 @@ namespace Neat.Collections
     /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
     /// This method returns <c>-1</c> if no item is found.
     /// </summary>
-    /// <param name="predicate">This argument must not be null.</param>
+    /// <param name="predicate">This argument must not be <see langword="null"/>.</param>
     /// <param name="afterInclusive">This value must be non-negative and not exceed <see cref="Count"/>.</param>
-    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">If <paramref name="afterInclusive"/> is out of range.</exception>
     [MethodImpl(Helper.JustOptimize)]
     public int FirstSuchThat<TPredicate>(TPredicate predicate, int afterInclusive) where TPredicate : IPredicate
@@ -1695,10 +1695,10 @@ namespace Neat.Collections
     /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
     /// This method returns <c>-1</c> if no item is found.
     /// </summary>
-    /// <param name="predicate">This argument must not be null.</param>
+    /// <param name="predicate">This argument must not be <see langword="null"/>.</param>
     /// <param name="afterInclusive">This value must be non-negative and not exceed <see cref="Count"/>.</param>
     /// <param name="length">This value must be non-negative and not exceed <see cref="Count"/> minus <paramref name="afterInclusive"/>.</param>
-    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="afterInclusive"/> or <paramref name="length"/> is out of range.</exception>
     [MethodImpl(Helper.JustOptimize)]
     public int FirstSuchThat<TPredicate>(TPredicate predicate, int afterInclusive, int length) where TPredicate : IPredicate
@@ -1749,8 +1749,8 @@ namespace Neat.Collections
     /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
     /// This method returns <c>-1</c> if no item is found.
     /// </summary>
-    /// <param name="predicate">This argument must not be null.</param>
-    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
+    /// <param name="predicate">This argument must not be <see langword="null"/>.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
     [MethodImpl(Helper.JustOptimize)]
     public int LastSuchThat<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
@@ -1786,9 +1786,9 @@ namespace Neat.Collections
     /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
     /// This method returns <c>-1</c> if no item is found.
     /// </summary>
-    /// <param name="predicate">This argument must not be null.</param>
+    /// <param name="predicate">This argument must not be <see langword="null"/>.</param>
     /// <param name="beforeExclusive">This value must be non-negative and not exceed <see cref="Count"/>.</param>
-    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">If <paramref name="beforeExclusive"/> is out of range.</exception>
     [MethodImpl(Helper.JustOptimize)]
     public int LastSuchThat<TPredicate>(TPredicate predicate, int beforeExclusive) where TPredicate : IPredicate
@@ -1829,10 +1829,10 @@ namespace Neat.Collections
     /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
     /// This method returns <c>-1</c> if no item is found.
     /// </summary>
-    /// <param name="predicate">This argument must not be null.</param>
+    /// <param name="predicate">This argument must not be <see langword="null"/>.</param>
     /// <param name="beforeExclusive">This value must be non-negative and not exceed <see cref="Count"/>.</param>
     /// <param name="length">This value must be non-negative and not exceed <paramref name="beforeExclusive"/>.</param>
-    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="beforeExclusive"/> or <paramref name="length"/> is out of range.</exception>
     [MethodImpl(Helper.JustOptimize)]
     public int LastSuchThat<TPredicate>(TPredicate predicate, int beforeExclusive, int length) where TPredicate : IPredicate
@@ -1890,8 +1890,8 @@ namespace Neat.Collections
     /// because that portion is being modified thus unstable.
     /// This method returns the number of items that were removed.
     /// </summary>
-    /// <param name="predicate">This argument must not be null.</param>
-    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
+    /// <param name="predicate">This argument must not be <see langword="null"/>.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
     [MethodImpl(Helper.JustOptimize)]
     public int RemoveAllSuchThat<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
@@ -1953,10 +1953,10 @@ namespace Neat.Collections
     /// because that portion is being modified thus unstable.
     /// This method returns the number of items that were removed.
     /// </summary>
-    /// <param name="predicate">This argument must not be null.</param>
+    /// <param name="predicate">This argument must not be <see langword="null"/>.</param>
     /// <param name="start">This value must be non-negative and not exceed <see cref="Count"/>.</param>
     /// <param name="length">This value must be non-negative and not exceed <see cref="Count"/> minus <paramref name="start"/>.</param>
-    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="start"/> or <paramref name="length"/> is out of range.</exception>
     [MethodImpl(Helper.JustOptimize)]
     public int RemoveAllSuchThat<TPredicate>(TPredicate predicate, int start, int length) where TPredicate : IPredicate
