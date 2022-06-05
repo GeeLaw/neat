@@ -527,21 +527,132 @@ namespace Neat.Collections
 
     #endregion Clear, ICollection<T>.Clear, IList.Clear
 
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private void AddRareImpl(T item)
+    {
+      T[] data = myData;
+      int count = myCount;
+      if (count < data.Length)
+      {
+        data[count] = item;
+        /* No more exception is possible beyond this point. */
+        myCount = ++count;
+        return;
+      }
+      if (count >= MaximumCapacity)
+      {
+        List2.ThrowTooMany();
+      }
+      int least = count + 1;
+      int suggested = (count > MaximumCapacity / 2
+        ? MaximumCapacity
+        : count <= StartingCapacity / 2
+        ? StartingCapacity
+        : count * 2);
+      T[] newData = AllocImpl(least, suggested);
+      Array.ConstrainedCopy(data, 0, newData, 0, count);
+      newData[count] = item;
+      /* No more exception is possible beyond this point. */
+      myData = newData;
+      myCount = ++count;
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private int IListAddRareImpl(T item)
+    {
+      T[] data = myData;
+      int count = myCount;
+      if (count < data.Length)
+      {
+        data[count] = item;
+        /* No more exception is possible beyond this point. */
+        myCount = count + 1;
+        return count;
+      }
+      if (count >= MaximumCapacity)
+      {
+        List2.ThrowTooMany();
+      }
+      int least = count + 1;
+      int suggested = (count > MaximumCapacity / 2
+        ? MaximumCapacity
+        : count <= StartingCapacity / 2
+        ? StartingCapacity
+        : count * 2);
+      T[] newData = AllocImpl(least, suggested);
+      Array.ConstrainedCopy(data, 0, newData, 0, count);
+      newData[count] = item;
+      /* No more exception is possible beyond this point. */
+      myData = newData;
+      myCount = count + 1;
+      return count;
+    }
+
     #region Add, ICollection<T>.Add, IList.Add
 
+    /// <summary>
+    /// Adds an item to the end of the list.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
     public void Add(T item)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      if (count < data.Length)
+      {
+        data[count] = item;
+        /* No more exception is possible beyond this point. */
+        myCount = ++count;
+      }
+      else
+      {
+        AddRareImpl(item);
+      }
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     void ICollection<T>.Add(T item)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      if (count < data.Length)
+      {
+        data[count] = item;
+        /* No more exception is possible beyond this point. */
+        myCount = ++count;
+      }
+      else
+      {
+        AddRareImpl(item);
+      }
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     int IList.Add(object value)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      T item = (T)value;
+      T[] data = myData;
+      int count = myCount;
+      if (count < data.Length)
+      {
+        data[count] = item;
+        /* No more exception is possible beyond this point. */
+        myCount = count + 1;
+        return count;
+      }
+      else
+      {
+        return IListAddRareImpl(item);
+      }
     }
 
     #endregion Add, ICollection<T>.Add, IList.Add
@@ -1108,6 +1219,12 @@ namespace Neat.Collections
     internal static void ThrowCapacity()
     {
       throw new ArgumentOutOfRangeException("capacity");
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ThrowTooMany()
+    {
+      throw new InvalidOperationException("There will be more than MaximumCapacity number of items in the list.");
     }
 
 #if LIST2_ENUMERATION_VERSION
