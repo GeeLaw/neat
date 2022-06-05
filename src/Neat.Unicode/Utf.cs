@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Neat.Collections;
 
 namespace Neat.Unicode
 {
@@ -251,6 +252,22 @@ namespace Neat.Unicode
 
     [SuppressMessage("Performance", "CA1825", Justification = "Avoid excessive generic instantiations.")]
     internal static readonly Char32[] theEmptyChar32s = new Char32[0];
+
+    #region String8Builder, String32Builder
+
+    [MethodImpl(Helper.OptimizeInline)]
+    public static String8 ToString8(this List2<Char8> s8b)
+    {
+      return new String8(s8b.ToArray());
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    public static String32 ToString32(this List2<Char32> s32b)
+    {
+      return new String32(s32b.ToArray());
+    }
+
+    #endregion String8Builder, String32Builder
 
     static Utf()
     {
