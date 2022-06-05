@@ -475,7 +475,7 @@ namespace Neat.Collections
       /* therefore, it is fine to allocate it uninitialized. */
       T[] results = GC.AllocateUninitializedArray<T>(length, false);
       Array.ConstrainedCopy(data, start, results, 0, length);
-      return new List2<T>(results, count);
+      return new List2<T>(results, length);
     }
 
     #endregion ToArray, GetRange
