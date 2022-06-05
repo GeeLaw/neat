@@ -47,7 +47,7 @@ namespace Neat.Collections
         : List2.MaximumCapacityOther);
     }
 
-    #region constructors
+    #region public constructors
 
     public List2()
     {
@@ -64,6 +64,8 @@ namespace Neat.Collections
       throw new NotImplementedException();
     }
 
+    #endregion public constructors
+
     /// <summary>
     /// This constructor does not validate its arguments.
     /// </summary>
@@ -76,8 +78,6 @@ namespace Neat.Collections
       myVersion = 0;
 #endif
     }
-
-    #endregion constructors
 
     #region Count, IReadOnlyCollection<T>.Count, ICollection<T>.Count, ICollection.Count
 
