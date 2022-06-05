@@ -1075,26 +1075,122 @@ namespace Neat.Collections
 
     #endregion InsertRange
 
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private void RemoveAtRareImpl(int index)
+    {
+      T[] data = myData;
+      int count = myCount;
+      if ((uint)index >= (uint)count)
+      {
+        List2.ThrowIndex();
+      }
+      Array.ConstrainedCopy(data, index + 1, data, index, --count - index);
+      data[count] = default(T);
+      /* No more exception is possible beyond this point. */
+      myCount = count;
+    }
+
     #region RemoveAt, RemoveRange, IList<T>.RemoveAt, IList.RemoveAt
 
+    /// <summary>
+    /// Removes the item at the specified index.
+    /// </summary>
+    /// <param name="index">This value must be non-negative and less than <see cref="Count"/>.</param>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="index"/> is out of range.</exception>
+    [MethodImpl(Helper.OptimizeInline)]
     public void RemoveAt(int index)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      if (index >= 0 && index == count - 1)
+      {
+        myData[index] = default(T);
+        /* No more exception is possible beyond this point. */
+        myCount = index;
+      }
+      else
+      {
+        RemoveAtRareImpl(index);
+      }
     }
 
+    /// <summary>
+    /// Removes the items in the specified range.
+    /// </summary>
+    /// <param name="start">This value must be non-negative and not exceed <see cref="Count"/>.</param>
+    /// <param name="length">This value must be non-negative and not exceed <see cref="Count"/> minus <paramref name="start"/>.</param>
+    /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="start"/> or <paramref name="length"/> is out of range.</exception>
+    [MethodImpl(Helper.JustOptimize)]
     public void RemoveRange(int start, int length)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      if ((uint)start > (uint)count)
+      {
+        List2.ThrowStart();
+      }
+      if (length == 0)
+      {
+        return;
+      }
+      if ((uint)length > (uint)(count - start))
+      {
+        List2.ThrowLength();
+      }
+      count -= length;
+      Array.ConstrainedCopy(data, start + length, data, start, count - start);
+      if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+      {
+        Array.Clear(data, count, length);
+      }
+      /* No more exception is possible beyond this point. */
+      myCount = count;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     void IList<T>.RemoveAt(int index)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      if (index >= 0 && index == count - 1)
+      {
+        myData[index] = default(T);
+        /* No more exception is possible beyond this point. */
+        myCount = index;
+      }
+      else
+      {
+        RemoveAtRareImpl(index);
+      }
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     void IList.RemoveAt(int index)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      if (index >= 0 && index == count - 1)
+      {
+        myData[index] = default(T);
+        /* No more exception is possible beyond this point. */
+        myCount = index;
+      }
+      else
+      {
+        RemoveAtRareImpl(index);
+      }
     }
 
     #endregion RemoveAt, RemoveRange, IList<T>.RemoveAt, IList.RemoveAt
