@@ -1397,30 +1397,35 @@ namespace Neat.Collections
     public const int MaximumCapacityOneByte = 0x7FFFFFC7;
     public const int MaximumCapacityOther = 0x7FEFFFFF;
 
+    [DoesNotReturn]
     [MethodImpl(Helper.OptimizeNoInline)]
     internal static void ThrowStart()
     {
       throw new ArgumentOutOfRangeException("start");
     }
 
+    [DoesNotReturn]
     [MethodImpl(Helper.OptimizeNoInline)]
     internal static void ThrowLength()
     {
       throw new ArgumentOutOfRangeException("length");
     }
 
+    [DoesNotReturn]
     [MethodImpl(Helper.OptimizeNoInline)]
     internal static void ThrowCapacity()
     {
       throw new ArgumentOutOfRangeException("capacity");
     }
 
+    [DoesNotReturn]
     [MethodImpl(Helper.OptimizeNoInline)]
     internal static void ThrowTooMany()
     {
       throw new InvalidOperationException("There will be more than MaximumCapacity number of items in the list.");
     }
 
+    [DoesNotReturn]
     [MethodImpl(Helper.OptimizeNoInline)]
     internal static void ThrowIndex()
     {
@@ -1429,6 +1434,7 @@ namespace Neat.Collections
 
 #if LIST2_ENUMERATION_VERSION
 
+    [DoesNotReturn]
     [MethodImpl(Helper.OptimizeNoInline)]
     internal static void ThrowVersion()
     {
@@ -1439,6 +1445,7 @@ namespace Neat.Collections
 
 #if LIST2_ENUMERATOR_DISPOSE
 
+    [DoesNotReturn]
     [MethodImpl(Helper.OptimizeNoInline)]
     internal static void ThrowDisposed()
     {

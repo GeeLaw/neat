@@ -56,6 +56,7 @@ namespace Neat.Unicode
 
       private bool myNotDisposed;
 
+      [DoesNotReturn]
       [MethodImpl(Helper.OptimizeNoInline)]
       private static void ThrowDisposed()
       {
