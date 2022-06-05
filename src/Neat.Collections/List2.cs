@@ -1744,19 +1744,139 @@ namespace Neat.Collections
       return -1;
     }
 
+    /// <summary>
+    /// Finds the index of the item with the largest index that satisfies <paramref name="predicate"/>.
+    /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
+    /// This method returns <c>-1</c> if no item is found.
+    /// </summary>
+    /// <param name="predicate">This argument must not be null.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
+    [MethodImpl(Helper.JustOptimize)]
     public int LastSuchThat<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      uint version = myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      count = ((uint)count < (uint)data.Length ? count : data.Length);
+      ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
+      if (predicate is null)
+      {
+        List2.ThrowPredicate();
+      }
+      while (count-- != 0)
+      {
+        if (predicate.Invoke(this, count, Unsafe.Add(ref data0, count)))
+        {
+          break;
+        }
+      }
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      return count;
     }
 
+    /// <summary>
+    /// Finds the index of the item with the largest index less than <paramref name="beforeExclusive"/> that satisfies <paramref name="predicate"/>.
+    /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
+    /// This method returns <c>-1</c> if no item is found.
+    /// </summary>
+    /// <param name="predicate">This argument must not be null.</param>
+    /// <param name="beforeExclusive">This value must be non-negative and not exceed <see cref="Count"/>.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="beforeExclusive"/> is out of range.</exception>
+    [MethodImpl(Helper.JustOptimize)]
     public int LastSuchThat<TPredicate>(TPredicate predicate, int beforeExclusive) where TPredicate : IPredicate
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      uint version = myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      count = ((uint)count < (uint)data.Length ? count : data.Length);
+      ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
+      if (predicate is null)
+      {
+        List2.ThrowPredicate();
+      }
+      if ((uint)beforeExclusive > (uint)count)
+      {
+        List2.ThrowBeforeExclusive();
+      }
+      while (beforeExclusive-- != 0)
+      {
+        if (predicate.Invoke(this, beforeExclusive, Unsafe.Add(ref data0, beforeExclusive)))
+        {
+          break;
+        }
+      }
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      return beforeExclusive;
     }
 
+    /// <summary>
+    /// Finds the index of the item with the largest index within the specified range that satisfies <paramref name="predicate"/>.
+    /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
+    /// This method returns <c>-1</c> if no item is found.
+    /// </summary>
+    /// <param name="predicate">This argument must not be null.</param>
+    /// <param name="beforeExclusive">This value must be non-negative and not exceed <see cref="Count"/>.</param>
+    /// <param name="length">This value must be non-negative and not exceed <paramref name="beforeExclusive"/>.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="beforeExclusive"/> or <paramref name="length"/> is out of range.</exception>
+    [MethodImpl(Helper.JustOptimize)]
     public int LastSuchThat<TPredicate>(TPredicate predicate, int beforeExclusive, int length) where TPredicate : IPredicate
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      uint version = myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      count = ((uint)count < (uint)data.Length ? count : data.Length);
+      ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
+      if (predicate is null)
+      {
+        List2.ThrowPredicate();
+      }
+      if ((uint)beforeExclusive > (uint)count)
+      {
+        List2.ThrowBeforeExclusive();
+      }
+      if ((uint)length > (uint)beforeExclusive)
+      {
+        List2.ThrowLength();
+      }
+      for (count = beforeExclusive - length; beforeExclusive-- != count;)
+      {
+        if (predicate.Invoke(this, beforeExclusive, Unsafe.Add(ref data0, beforeExclusive)))
+        {
+          /* Note that the not-found termination does not have "beforeExclusive == -1". */
+#if LIST2_ENUMERATION_VERSION
+          if (version != myVersion)
+          {
+            List2.ThrowVersion();
+          }
+#endif
+          return beforeExclusive;
+        }
+      }
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      return -1;
     }
 
     #endregion FirstSuchThat, LastSuchThat
@@ -2143,6 +2263,13 @@ namespace Neat.Collections
     internal static void ThrowAfterInclusive()
     {
       throw new ArgumentOutOfRangeException("afterInclusive");
+    }
+
+    [DoesNotReturn]
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ThrowBeforeExclusive()
+    {
+      throw new ArgumentOutOfRangeException("beforeExclusive");
     }
 
 #if LIST2_ENUMERATION_VERSION
