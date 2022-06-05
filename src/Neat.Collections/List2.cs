@@ -1250,11 +1250,6 @@ namespace Neat.Collections
       throw new NotImplementedException();
     }
 
-    public int RemoveAll(T item)
-    {
-      throw new NotImplementedException();
-    }
-
     bool ICollection<T>.Remove(T item)
     {
       throw new NotImplementedException();
