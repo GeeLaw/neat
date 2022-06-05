@@ -38,35 +38,42 @@ namespace Neat.Collections
 
     #region Count, IReadOnlyCollection<T>.Count, ICollection<T>.Count, ICollection.Count
 
+    /// <summary>
+    /// Gets the number of items in this list.
+    /// </summary>
     public int Count
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return myCount;
       }
     }
 
     int IReadOnlyCollection<T>.Count
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return myCount;
       }
     }
 
     int ICollection<T>.Count
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return myCount;
       }
     }
 
     int ICollection.Count
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return myCount;
       }
     }
 
