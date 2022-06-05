@@ -49,14 +49,33 @@ namespace Neat.Collections
 
     #region public constructors
 
+    /// <summary>
+    /// Initializes a new, empty list.
+    /// </summary>
     public List2()
     {
-      throw new NotImplementedException();
+      myData = theEmptyArray;
+      myCount = 0;
+#if LIST2_ENUMERATION_VERSION
+      myVersion = 0;
+#endif
     }
 
-    public List2(int capacityAtLeast)
+    /// <summary>
+    /// Initializes a list whose <see cref="Capacity"/> is exactly <paramref name="capacity"/>.
+    /// </summary>
+    /// <param name="capacity">This value must be non-negative and not exceed <see cref="MaximumCapacity"/>.</param>
+    public List2(int capacity)
     {
-      throw new NotImplementedException();
+      if ((uint)capacity > (uint)MaximumCapacity)
+      {
+        List2.ThrowCapacity();
+      }
+      myData = (capacity == 0 ? theEmptyArray : new T[capacity]);
+      myCount = 0;
+#if LIST2_ENUMERATION_VERSION
+      myVersion = 0;
+#endif
     }
 
     public List2(IEnumerable<T> items)
