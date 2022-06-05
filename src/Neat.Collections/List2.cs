@@ -482,19 +482,47 @@ namespace Neat.Collections
 
     #region Clear, ICollection<T>.Clear, IList.Clear
 
+    /// <summary>
+    /// Clears the list.
+    /// This method does not perform any allocation.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
     public void Clear()
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+      {
+        Array.Clear(myData, 0, myCount);
+      }
+      myCount = 0;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     void ICollection<T>.Clear()
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+      {
+        Array.Clear(myData, 0, myCount);
+      }
+      myCount = 0;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     void IList.Clear()
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+      {
+        Array.Clear(myData, 0, myCount);
+      }
+      myCount = 0;
     }
 
     #endregion Clear, ICollection<T>.Clear, IList.Clear
