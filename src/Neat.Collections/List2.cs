@@ -627,7 +627,7 @@ namespace Neat.Collections
       {
         data[count] = item;
         /* No more exception is possible beyond this point. */
-        myCount = ++count;
+        myCount = count + 1;
       }
       else
       {
@@ -647,7 +647,7 @@ namespace Neat.Collections
       {
         data[count] = item;
         /* No more exception is possible beyond this point. */
-        myCount = ++count;
+        myCount = count + 1;
       }
       else
       {
@@ -854,7 +854,7 @@ namespace Neat.Collections
       {
         data[count] = item;
         /* No more exception is possible beyond this point. */
-        myCount = ++count;
+        myCount = count + 1;
       }
       else
       {
@@ -874,7 +874,7 @@ namespace Neat.Collections
       {
         data[count] = item;
         /* No more exception is possible beyond this point. */
-        myCount = ++count;
+        myCount = count + 1;
       }
       else
       {
@@ -895,7 +895,7 @@ namespace Neat.Collections
       {
         data[count] = item;
         /* No more exception is possible beyond this point. */
-        myCount = ++count;
+        myCount = count + 1;
       }
       else
       {
