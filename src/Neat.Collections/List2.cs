@@ -81,47 +81,66 @@ namespace Neat.Collections
 
     #region this[int index], IReadOnlyList<T>.this[int index], IList<T>.this[int index], IList.this[int index]
 
+    /// <summary>
+    /// Gets or sets the item at the specified index.
+    /// </summary>
     public T this[int index]
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return myData[(uint)index < (uint)myCount ? index : -1];
       }
+      [MethodImpl(Helper.OptimizeInline)]
       set
       {
-        throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+        ++myVersion;
+#endif
+        myData[(uint)index < (uint)myCount ? index : -1] = value;
       }
     }
 
     T IReadOnlyList<T>.this[int index]
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return myData[(uint)index < (uint)myCount ? index : -1];
       }
     }
 
     T IList<T>.this[int index]
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return myData[(uint)index < (uint)myCount ? index : -1];
       }
+      [MethodImpl(Helper.OptimizeInline)]
       set
       {
-        throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+        ++myVersion;
+#endif
+        myData[(uint)index < (uint)myCount ? index : -1] = value;
       }
     }
 
     object IList.this[int index]
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return myData[(uint)index < (uint)myCount ? index : -1];
       }
+      [MethodImpl(Helper.OptimizeInline)]
       set
       {
-        throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+        ++myVersion;
+#endif
+        myData[(uint)index < (uint)myCount ? index : -1] = (T)value;
       }
     }
 
