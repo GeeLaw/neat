@@ -42,11 +42,21 @@ namespace Neat.Collections
     /// </summary>
     public static readonly int MaximumCapacity;
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    private static readonly List2.IndexOf<T, T> theFirstOfGeneric;
+
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    private static readonly List2.IndexOf<T, object> theFirstOfObject;
+
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    private static readonly List2.IndexOf<T, T> theLastOfGeneric;
+
     static List2()
     {
       MaximumCapacity = (!RuntimeHelpers.IsReferenceOrContainsReferences<T>() && Unsafe.SizeOf<T>() == 1
         ? List2.MaximumCapacityOneByte
         : List2.MaximumCapacityOther);
+      List2.GetIndexOfDelegates(out theFirstOfGeneric, out theFirstOfObject, out theLastOfGeneric);
     }
 
     #region public constructors
@@ -1199,24 +1209,81 @@ namespace Neat.Collections
 
     #region FirstIndexOf, LastIndexOf, IList<T>.IndexOf, IList.IndexOf
 
+    /// <summary>
+    /// Finds the index of the item with the smallest index that is equal to <paramref name="item"/>.
+    /// The equality comparison method must not mutate the list.
+    /// This method returns <c>-1</c> if no item is found.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
     public int FirstIndexOf(T item)
     {
-      throw new NotImplementedException();
+      /* "the...Of..." delegate calls user-written "Equals",
+      /* which could do terrible things including mutating the list.
+      /* We would like to guard against such rudeness. */
+#if LIST2_ENUMERATION_VERSION
+      uint version = myVersion;
+#endif
+      int index = theFirstOfGeneric(myData, myCount, item);
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      return index;
     }
 
+    /// <summary>
+    /// Finds the index of the item with the largest index that is equal to <paramref name="item"/>.
+    /// The equality comparison method must not mutate the list.
+    /// This method returns <c>-1</c> if no item is found.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
     public int LastIndexOf(T item)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      uint version = myVersion;
+#endif
+      int index = theLastOfGeneric(myData, myCount, item);
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      return index;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     int IList<T>.IndexOf(T item)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      uint version = myVersion;
+#endif
+      int index = theFirstOfGeneric(myData, myCount, item);
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      return index;
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     int IList.IndexOf(object value)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      uint version = myVersion;
+#endif
+      int index = theFirstOfObject(myData, myCount, value);
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      return index;
     }
 
     #endregion FirstIndexOf, LastIndexOf, IList<T>.IndexOf, IList.IndexOf
