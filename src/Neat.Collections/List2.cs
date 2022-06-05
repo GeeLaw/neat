@@ -797,21 +797,109 @@ namespace Neat.Collections
 
     #endregion AddRange
 
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private void InsertRareImpl(int index, T item)
+    {
+      T[] data = myData;
+      int count = myCount;
+      if ((uint)index > (uint)count)
+      {
+        List2.ThrowIndex();
+      }
+      int least = count + 1;
+      if (least <= data.Length)
+      {
+        Array.ConstrainedCopy(data, index, data, index + 1, count - index);
+        data[index] = item;
+        /* No more exception is possible beyond this point. */
+        myCount = least;
+        return;
+      }
+      if (least > MaximumCapacity)
+      {
+        List2.ThrowTooMany();
+      }
+      int suggested = (count > MaximumCapacity / 2
+        ? MaximumCapacity
+        : count <= StartingCapacity / 2
+        ? StartingCapacity
+        : count * 2);
+      T[] newData = AllocImpl(least, suggested);
+      Array.ConstrainedCopy(data, 0, newData, 0, index);
+      newData[index] = item;
+      Array.ConstrainedCopy(data, index, newData, index + 1, count - index);
+      /* No more exception is possible beyond this point. */
+      myData = newData;
+      myCount = least;
+    }
+
     #region Insert, IList<T>.Insert, IList.Insert
 
+    /// <summary>
+    /// Inserts the specified item at the specified index.
+    /// </summary>
+    /// <param name="index">The new index of the inserted item.
+    /// This value must be non-negative and not exceed <see cref="Count"/>.</param>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="index"/> is out of range.</exception>
+    [MethodImpl(Helper.OptimizeInline)]
     public void Insert(int index, T item)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      if (index == count && count < data.Length)
+      {
+        data[count] = item;
+        /* No more exception is possible beyond this point. */
+        myCount = ++count;
+      }
+      else
+      {
+        InsertRareImpl(index, item);
+      }
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     void IList<T>.Insert(int index, T item)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      if (index == count && count < data.Length)
+      {
+        data[count] = item;
+        /* No more exception is possible beyond this point. */
+        myCount = ++count;
+      }
+      else
+      {
+        InsertRareImpl(index, item);
+      }
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     void IList.Insert(int index, object value)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      T item = (T)value;
+      T[] data = myData;
+      int count = myCount;
+      if (index == count && count < data.Length)
+      {
+        data[count] = item;
+        /* No more exception is possible beyond this point. */
+        myCount = ++count;
+      }
+      else
+      {
+        InsertRareImpl(index, item);
+      }
     }
 
     #endregion Insert, IList<T>.Insert, IList.Insert
@@ -1336,6 +1424,12 @@ namespace Neat.Collections
     internal static void ThrowTooMany()
     {
       throw new InvalidOperationException("There will be more than MaximumCapacity number of items in the list.");
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ThrowIndex()
+    {
+      throw new ArgumentOutOfRangeException("index");
     }
 
 #if LIST2_ENUMERATION_VERSION
