@@ -607,37 +607,49 @@ namespace Neat.Unicode
     /// <summary>
     /// This method cannot be called if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
     /// </summary>
-    [MethodImpl(Helper.JustOptimize)]
+    [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+    [MethodImpl(Helper.OptimizeInline)]
     IEnumerator2<Char8> IEnumerable2<Char8>.GetEnumerator()
     {
-      return GetEnumerator();
+      Char8[] data = myData;
+      int throwIfNull = data.Length;
+      return new Enumerator(data);
     }
 
     /// <summary>
     /// This method cannot be called if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
     /// </summary>
-    [MethodImpl(Helper.JustOptimize)]
+    [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+    [MethodImpl(Helper.OptimizeInline)]
     IEnumerator2 IEnumerable2.GetEnumerator()
     {
-      return GetEnumerator();
+      Char8[] data = myData;
+      int throwIfNull = data.Length;
+      return new Enumerator(data);
     }
 
     /// <summary>
     /// This method cannot be called if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
     /// </summary>
-    [MethodImpl(Helper.JustOptimize)]
+    [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+    [MethodImpl(Helper.OptimizeInline)]
     IEnumerator<Char8> IEnumerable<Char8>.GetEnumerator()
     {
-      return GetEnumerator();
+      Char8[] data = myData;
+      int throwIfNull = data.Length;
+      return new Enumerator(data);
     }
 
     /// <summary>
     /// This method cannot be called if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
     /// </summary>
-    [MethodImpl(Helper.JustOptimize)]
+    [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+    [MethodImpl(Helper.OptimizeInline)]
     IEnumerator IEnumerable.GetEnumerator()
     {
-      return GetEnumerator();
+      Char8[] data = myData;
+      int throwIfNull = data.Length;
+      return new Enumerator(data);
     }
 
     #endregion GetEnumerator
