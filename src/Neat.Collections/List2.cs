@@ -926,11 +926,6 @@ namespace Neat.Collections
       throw new NotImplementedException();
     }
 
-    public void InsertRange(int index, IEnumerable<T> source)
-    {
-      throw new NotImplementedException();
-    }
-
     #endregion InsertRange
 
     #region RemoveAt, RemoveRange, IList<T>.RemoveAt, IList.RemoveAt
