@@ -732,6 +732,7 @@ namespace Neat.Collections
     /// Adds an array of items to the end of this list.
     /// </summary>
     /// <exception cref="NullReferenceException">If <paramref name="array"/> is <see langword="null"/>.</exception>
+    /// <exception cref="InvalidOperationException">If the number of items will be greater than <see cref="MaximumCapacity"/>.</exception>
     [MethodImpl(Helper.OptimizeInline)]
     public void AddRange(T[] array)
     {
@@ -749,6 +750,7 @@ namespace Neat.Collections
     /// <param name="length">This value must be non-negative and not exceed the length of <paramref name="array"/> minus <paramref name="start"/>.</param>
     /// <exception cref="NullReferenceException">If <paramref name="array"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="start"/> or <paramref name="length"/> is out of range.</exception>
+    /// <exception cref="InvalidOperationException">If the number of items will be greater than <see cref="MaximumCapacity"/>.</exception>
     [MethodImpl(Helper.OptimizeInline)]
     public void AddRange(T[] array, int start, int length)
     {
@@ -763,6 +765,7 @@ namespace Neat.Collections
     /// </summary>
     /// <param name="list">This argument can be the list being appended.</param>
     /// <exception cref="NullReferenceException">If <paramref name="list"/> is <see langword="null"/>.</exception>
+    /// <exception cref="InvalidOperationException">If the number of items will be greater than <see cref="MaximumCapacity"/>.</exception>
     [MethodImpl(Helper.OptimizeInline)]
     public void AddRange(List2<T> list)
     {
@@ -782,6 +785,7 @@ namespace Neat.Collections
     /// <param name="length">This value must be non-negative and not exceed the <see cref="Count"/> of <paramref name="list"/> minus <paramref name="start"/>.</param>
     /// <exception cref="NullReferenceException">If <paramref name="list"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="start"/> or <paramref name="length"/> is out of range.</exception>
+    /// <exception cref="InvalidOperationException">If the number of items will be greater than <see cref="MaximumCapacity"/>.</exception>
     [MethodImpl(Helper.OptimizeInline)]
     public void AddRange(List2<T> list, int start, int length)
     {
@@ -837,6 +841,7 @@ namespace Neat.Collections
     /// <param name="index">The new index of the inserted item.
     /// This value must be non-negative and not exceed <see cref="Count"/>.</param>
     /// <exception cref="ArgumentOutOfRangeException">If <paramref name="index"/> is out of range.</exception>
+    /// <exception cref="InvalidOperationException">If the number of items will be greater than <see cref="MaximumCapacity"/>.</exception>
     [MethodImpl(Helper.OptimizeInline)]
     public void Insert(int index, T item)
     {
@@ -998,7 +1003,7 @@ namespace Neat.Collections
     /// This is the new index of the first newly inserted item.</param>
     /// <exception cref="NullReferenceException">If <paramref name="source"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">If <paramref name="index"/> is out of range.</exception>
-    /// <exception cref="InvalidOperationException">If <see cref="Count"/> will exceed <see cref="MaximumCapacity"/> after inserting the items.</exception>
+    /// <exception cref="InvalidOperationException">If the number of items will be greater than <see cref="MaximumCapacity"/>.</exception>
     [MethodImpl(Helper.OptimizeInline)]
     public void InsertRange(int index, T[] source)
     {
@@ -1018,7 +1023,7 @@ namespace Neat.Collections
     /// <param name="length">This value must be non-negative and not exceed the length of <paramref name="source"/> minus <paramref name="start"/>.</param>
     /// <exception cref="NullReferenceException">If <paramref name="source"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">If <paramref name="index"/>, <paramref name="start"/>, or <paramref name="length"/> is out of range.</exception>
-    /// <exception cref="InvalidOperationException">If <see cref="Count"/> will exceed <see cref="MaximumCapacity"/> after inserting the items.</exception>
+    /// <exception cref="InvalidOperationException">If the number of items will be greater than <see cref="MaximumCapacity"/>.</exception>
     [MethodImpl(Helper.OptimizeInline)]
     public void InsertRange(int index, T[] source, int start, int length)
     {
@@ -1036,7 +1041,7 @@ namespace Neat.Collections
     /// <param name="source">It is allowed to insert a list into itself.</param>
     /// <exception cref="NullReferenceException">If <paramref name="source"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">If <paramref name="index"/> is out of range.</exception>
-    /// <exception cref="InvalidOperationException">If <see cref="Count"/> will exceed <see cref="MaximumCapacity"/> after inserting the items.</exception>
+    /// <exception cref="InvalidOperationException">If the number of items will be greater than <see cref="MaximumCapacity"/>.</exception>
     [MethodImpl(Helper.OptimizeInline)]
     public void InsertRange(int index, List2<T> source)
     {
@@ -1058,7 +1063,7 @@ namespace Neat.Collections
     /// <param name="length">This value must be non-negative and not exceed the length of <paramref name="source"/> minus <paramref name="start"/>.</param>
     /// <exception cref="NullReferenceException">If <paramref name="source"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">If <paramref name="index"/>, <paramref name="start"/>, or <paramref name="length"/> is out of range.</exception>
-    /// <exception cref="InvalidOperationException">If <see cref="Count"/> will exceed <see cref="MaximumCapacity"/> after inserting the items.</exception>
+    /// <exception cref="InvalidOperationException">If the number of items will be greater than <see cref="MaximumCapacity"/>.</exception>
     [MethodImpl(Helper.OptimizeInline)]
     public void InsertRange(int index, List2<T> source, int start, int length)
     {
