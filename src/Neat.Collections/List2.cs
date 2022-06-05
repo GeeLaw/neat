@@ -1883,14 +1883,141 @@ namespace Neat.Collections
 
     #region RemoveAllSuchThat
 
+    /// <summary>
+    /// Removes all the items in the list that satisfy <paramref name="predicate"/>.
+    /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
+    /// On each invocation, the predicate should not try reading the list for items with indices smaller than the <c>index</c> passed into it,
+    /// because that portion is being modified thus unstable.
+    /// This method returns the number of items that were removed.
+    /// </summary>
+    /// <param name="predicate">This argument must not be null.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
+    [MethodImpl(Helper.JustOptimize)]
     public int RemoveAllSuchThat<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      uint version = ++myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      count = ((uint)count < (uint)data.Length ? count : data.Length);
+      ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
+      if (predicate is null)
+      {
+        List2.ThrowPredicate();
+      }
+      /* Step 1: Find the first item to be removed. */
+      int i = 0;
+      while (i != count)
+      {
+        if (predicate.Invoke(this, i, Unsafe.Add(ref data0, i)))
+        {
+          break;
+        }
+        ++i;
+      }
+      /* Step 2: Move items to remain to the new location.
+      /*         j = index to put the next item to remain */
+      int j = i;
+      while (i++ != count)
+      {
+        if (!predicate.Invoke(this, i, Unsafe.Add(ref data0, i)))
+        {
+          Unsafe.Add(ref data0, j++) = Unsafe.Add(ref data0, i);
+        }
+      }
+      /* If bad things happen, throw the exception without touching the internal state of the list any more. */
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      /* Now,     j = new count of list
+      /*      count = number of removed items */
+      count -= j;
+      if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+      {
+        Array.Clear(data, j, count);
+      }
+      /* No more exception is possible beyond this point. */
+      myCount = j;
+      return count;
     }
 
+    /// <summary>
+    /// Removes all the items in the specified range that satisfy <paramref name="predicate"/>.
+    /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
+    /// On each invocation, the predicate should not try reading the list for items with indices
+    /// between <paramref name="start"/> (inclusive, cannot read) and the <c>index</c> passed into it (exclusive, can read),
+    /// because that portion is being modified thus unstable.
+    /// This method returns the number of items that were removed.
+    /// </summary>
+    /// <param name="predicate">This argument must not be null.</param>
+    /// <param name="start">This value must be non-negative and not exceed <see cref="Count"/>.</param>
+    /// <param name="length">This value must be non-negative and not exceed <see cref="Count"/> minus <paramref name="start"/>.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="start"/> or <paramref name="length"/> is out of range.</exception>
+    [MethodImpl(Helper.JustOptimize)]
     public int RemoveAllSuchThat<TPredicate>(TPredicate predicate, int start, int length) where TPredicate : IPredicate
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      uint version = ++myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      count = ((uint)count < (uint)data.Length ? count : data.Length);
+      ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
+      if (predicate is null)
+      {
+        List2.ThrowPredicate();
+      }
+      if ((uint)start > (uint)count)
+      {
+        List2.ThrowStart();
+      }
+      if ((uint)length > (uint)(count - start))
+      {
+        List2.ThrowLength();
+      }
+      int end = start + length;
+      while (start != end)
+      {
+        if (predicate.Invoke(this, start, Unsafe.Add(ref data0, start)))
+        {
+          break;
+        }
+        ++start;
+      }
+      int j = start;
+      while (start++ != end)
+      {
+        if (!predicate.Invoke(this, start, Unsafe.Add(ref data0, start)))
+        {
+          Unsafe.Add(ref data0, j++) = Unsafe.Add(ref data0, start);
+        }
+      }
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      /* Old list is  [0, oldStart) + [oldStart,          end) + [end, count).
+      /* Current  is  [0, oldStart) + [oldStart, j) + [j, end) + [end, count).
+      /*                                              ^^^^^^^^ should be removed */
+      Array.ConstrainedCopy(data, end, data, j, count - end);
+      /* Now, end = number of removed items */
+      end -= j;
+      /* Now,   j = new count of list */
+      j = count - end;
+      if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+      {
+        Array.Clear(data, j, end);
+      }
+      /* No more exception is possible beyond this point. */
+      myCount = j;
+      return end;
     }
 
     #endregion RemoveAllSuchThat
