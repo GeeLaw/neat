@@ -1598,19 +1598,150 @@ namespace Neat.Collections
 
     #region FirstSuchThat, LastSuchThat
 
+    /// <summary>
+    /// Finds the index of the item with the smallest index that satisfies <paramref name="predicate"/>.
+    /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
+    /// This method returns <c>-1</c> if no item is found.
+    /// </summary>
+    /// <param name="predicate">This argument must not be null.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
+    [MethodImpl(Helper.JustOptimize)]
     public int FirstSuchThat<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      uint version = myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      count = ((uint)count < (uint)data.Length ? count : data.Length);
+      ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
+      if (predicate is null)
+      {
+        List2.ThrowPredicate();
+      }
+      for (int index = 0; index != count; ++index)
+      {
+        if (predicate.Invoke(this, index, Unsafe.Add(ref data0, index)))
+        {
+#if LIST2_ENUMERATION_VERSION
+          if (version != myVersion)
+          {
+            List2.ThrowVersion();
+          }
+#endif
+          return index;
+        }
+      }
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      return -1;
     }
 
+    /// <summary>
+    /// Finds the index of the item with the smallest index greater than or equal to <paramref name="afterInclusive"/> that satisfies <paramref name="predicate"/>.
+    /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
+    /// This method returns <c>-1</c> if no item is found.
+    /// </summary>
+    /// <param name="predicate">This argument must not be null.</param>
+    /// <param name="afterInclusive">This value must be non-negative and not exceed <see cref="Count"/>.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="afterInclusive"/> is out of range.</exception>
+    [MethodImpl(Helper.JustOptimize)]
     public int FirstSuchThat<TPredicate>(TPredicate predicate, int afterInclusive) where TPredicate : IPredicate
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      uint version = myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      count = ((uint)count < (uint)data.Length ? count : data.Length);
+      ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
+      if (predicate is null)
+      {
+        List2.ThrowPredicate();
+      }
+      if ((uint)afterInclusive > (uint)count)
+      {
+        List2.ThrowAfterInclusive();
+      }
+      for (; afterInclusive != count; ++afterInclusive)
+      {
+        if (predicate.Invoke(this, afterInclusive, Unsafe.Add(ref data0, afterInclusive)))
+        {
+#if LIST2_ENUMERATION_VERSION
+          if (version != myVersion)
+          {
+            List2.ThrowVersion();
+          }
+#endif
+          return afterInclusive;
+        }
+      }
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      return -1;
     }
 
+    /// <summary>
+    /// Finds the index of the item with the smallest index within the specified range that satisfies <paramref name="predicate"/>.
+    /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
+    /// This method returns <c>-1</c> if no item is found.
+    /// </summary>
+    /// <param name="predicate">This argument must not be null.</param>
+    /// <param name="afterInclusive">This value must be non-negative and not exceed <see cref="Count"/>.</param>
+    /// <param name="length">This value must be non-negative and not exceed <see cref="Count"/> minus <paramref name="afterInclusive"/>.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="afterInclusive"/> or <paramref name="length"/> is out of range.</exception>
+    [MethodImpl(Helper.JustOptimize)]
     public int FirstSuchThat<TPredicate>(TPredicate predicate, int afterInclusive, int length) where TPredicate : IPredicate
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      uint version = myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      count = ((uint)count < (uint)data.Length ? count : data.Length);
+      ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
+      if (predicate is null)
+      {
+        List2.ThrowPredicate();
+      }
+      if ((uint)afterInclusive > (uint)count)
+      {
+        List2.ThrowAfterInclusive();
+      }
+      if ((uint)length > (uint)(count - afterInclusive))
+      {
+        List2.ThrowLength();
+      }
+      for (count = afterInclusive + length; afterInclusive != count; ++afterInclusive)
+      {
+        if (predicate.Invoke(this, afterInclusive, Unsafe.Add(ref data0, afterInclusive)))
+        {
+#if LIST2_ENUMERATION_VERSION
+          if (version != myVersion)
+          {
+            List2.ThrowVersion();
+          }
+#endif
+          return afterInclusive;
+        }
+      }
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      return -1;
     }
 
     public int LastSuchThat<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
@@ -2005,6 +2136,13 @@ namespace Neat.Collections
     internal static void ThrowPredicate()
     {
       throw new ArgumentNullException("predicate");
+    }
+
+    [DoesNotReturn]
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ThrowAfterInclusive()
+    {
+      throw new ArgumentOutOfRangeException("afterInclusive");
     }
 
 #if LIST2_ENUMERATION_VERSION
