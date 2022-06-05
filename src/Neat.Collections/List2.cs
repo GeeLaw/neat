@@ -1534,43 +1534,63 @@ namespace Neat.Collections
 
     #region IList.IsFixedSize, ICollection<T>.IsReadOnly, IList.IsReadOnly, ICollection.IsSynchronized, ICollection.SyncRoot
 
+    /// <summary>
+    /// This member is thread-safe.
+    /// </summary>
     bool IList.IsFixedSize
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return false;
       }
     }
 
+    /// <summary>
+    /// This member is thread-safe.
+    /// </summary>
     bool ICollection<T>.IsReadOnly
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return false;
       }
     }
 
+    /// <summary>
+    /// This member is thread-safe.
+    /// </summary>
     bool IList.IsReadOnly
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return false;
       }
     }
 
+    /// <summary>
+    /// This member is thread-safe.
+    /// </summary>
     bool ICollection.IsSynchronized
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return false;
       }
     }
 
+    /// <summary>
+    /// This member is thread-safe.
+    /// </summary>
     object ICollection.SyncRoot
     {
+      [MethodImpl(Helper.JustOptimize)]
       get
       {
-        throw new NotImplementedException();
+        throw new NotSupportedException("SyncRoot is not supported.");
       }
     }
 
