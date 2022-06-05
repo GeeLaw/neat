@@ -119,7 +119,7 @@ namespace Neat.Unicode
         return false;
       }
 
-      [MethodImpl(Helper.JustOptimize)]
+      [MethodImpl(Helper.OptimizeInline)]
       bool IEnumerator2.MoveNext(out object item)
       {
 #if STRING16_ENUMERATOR_DISPOSE
@@ -179,7 +179,7 @@ namespace Neat.Unicode
       [DebuggerBrowsable(DebuggerBrowsableState.Never)]
       object IEnumerator.Current
       {
-        [MethodImpl(Helper.JustOptimize)]
+        [MethodImpl(Helper.OptimizeInline)]
         get
         {
 #if STRING16_ENUMERATOR_DISPOSE

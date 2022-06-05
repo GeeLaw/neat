@@ -277,7 +277,7 @@ namespace Neat.Unicode
     /// <summary>
     /// This method can be called even if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
     /// </summary>
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public override bool Equals(object obj)
     {
       return (obj is String8 other) && EqualsImpl(myData, other.myData);
@@ -510,7 +510,7 @@ namespace Neat.Unicode
         return false;
       }
 
-      [MethodImpl(Helper.JustOptimize)]
+      [MethodImpl(Helper.OptimizeInline)]
       bool IEnumerator2.MoveNext(out object item)
       {
 #if STRING8_ENUMERATOR_DISPOSE
@@ -568,7 +568,7 @@ namespace Neat.Unicode
       [DebuggerBrowsable(DebuggerBrowsableState.Never)]
       object IEnumerator.Current
       {
-        [MethodImpl(Helper.JustOptimize)]
+        [MethodImpl(Helper.OptimizeInline)]
         get
         {
 #if STRING8_ENUMERATOR_DISPOSE

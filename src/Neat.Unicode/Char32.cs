@@ -176,7 +176,7 @@ namespace Neat.Unicode
       return Value == other.Value;
     }
 
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public override bool Equals(object obj)
     {
       return (obj is Char32 other) && (Value == other.Value);
