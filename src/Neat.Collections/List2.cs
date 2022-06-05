@@ -1343,24 +1343,112 @@ namespace Neat.Collections
 
     #region RemoveFirst, RemoveLast, RemoveAll, ICollection<T>.Remove, IList.Remove
 
+    /// <summary>
+    /// Removes the item with the smallest index that is equal to <paramref name="item"/>.
+    /// The equality comparison method must not mutate the list.
+    /// This method returns the old index of the item that was removed.
+    /// It returns <c>-1</c> if no item was removed.
+    /// </summary>
     public int RemoveFirst(T item)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      uint version = ++myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      int index = theFirstOfGeneric(data, count, item);
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      if (index >= 0)
+      {
+        Array.ConstrainedCopy(data, index + 1, data, index, --count - index);
+        data[count] = default(T);
+        /* No more exception is possible beyond this point. */
+        myCount = count;
+      }
+      return index;
     }
 
+    /// <summary>
+    /// Removes the item with the largest index that is equal to <paramref name="item"/>.
+    /// The equality comparison method must not mutate the list.
+    /// This method returns the old index of the item that was removed.
+    /// It returns <c>-1</c> if no item was removed.
+    /// </summary>
     public int RemoveLast(T item)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      uint version = ++myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      int index = theLastOfGeneric(data, count, item);
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      if (index >= 0)
+      {
+        Array.ConstrainedCopy(data, index + 1, data, index, --count - index);
+        data[count] = default(T);
+        /* No more exception is possible beyond this point. */
+        myCount = count;
+      }
+      return index;
     }
 
     bool ICollection<T>.Remove(T item)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      uint version = ++myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      int index = theFirstOfGeneric(data, count, item);
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      if (index >= 0)
+      {
+        Array.ConstrainedCopy(data, index + 1, data, index, --count - index);
+        data[count] = default(T);
+        /* No more exception is possible beyond this point. */
+        myCount = count;
+        return true;
+      }
+      return false;
     }
 
     void IList.Remove(object value)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      uint version = ++myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      int index = theFirstOfObject(data, count, value);
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      if (index >= 0)
+      {
+        Array.ConstrainedCopy(data, index + 1, data, index, --count - index);
+        data[count] = default(T);
+        /* No more exception is possible beyond this point. */
+        myCount = count;
+      }
     }
 
     #endregion RemoveFirst, RemoveLast, RemoveAll, ICollection<T>.Remove, IList.Remove
