@@ -64,6 +64,19 @@ namespace Neat.Collections
       throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// This constructor does not validate its arguments.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    private List2(T[] data, int count)
+    {
+      myData = data;
+      myCount = count;
+#if LIST2_ENUMERATION_VERSION
+      myVersion = 0;
+#endif
+    }
+
     #endregion constructors
 
     #region Count, IReadOnlyCollection<T>.Count, ICollection<T>.Count, ICollection.Count
@@ -382,19 +395,87 @@ namespace Neat.Collections
 
     #region ToArray, GetRange
 
+    /// <summary>
+    /// Gets an array of length <see cref="Count"/> containing the items in this list.
+    /// This array is guaranteed to be newly allocated if <see cref="Count"/> is positive.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     public T[] ToArray()
     {
-      throw new NotImplementedException();
+      T[] data = myData;
+      int count = myCount;
+      if (count == 0)
+      {
+        return theEmptyArray;
+      }
+      /* We will copy to every item in this array before it is made available to the user,
+      /* therefore, it is fine to allocate it uninitialized. */
+      T[] results = GC.AllocateUninitializedArray<T>(count, false);
+      Array.ConstrainedCopy(data, 0, results, 0, count);
+      return results;
     }
 
+    /// <summary>
+    /// Gets an array of length <see cref="Count"/> containing the items in the specified range of this list.
+    /// This array is guaranteed to be newly allocated if <paramref name="length"/> is positive.
+    /// </summary>
+    /// <param name="start">This value must be non-negative and not exceed <see cref="Count"/>.</param>
+    /// <param name="length">This value must be non-negative and not exceed <see cref="Count"/> minus <paramref name="start"/>.</param>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="start"/> is negative or greater than <see cref="Count"/>,
+    /// or if <paramref name="length"/> is negative or greater than <see cref="Count"/> minus <paramref name="start"/>.</exception>
+    [MethodImpl(Helper.JustOptimize)]
     public T[] ToArray(int start, int length)
     {
-      throw new NotImplementedException();
+      T[] data = myData;
+      int count = myCount;
+      if ((uint)start > (uint)count)
+      {
+        List2.ThrowStart();
+      }
+      if ((uint)length > (uint)(count - start))
+      {
+        List2.ThrowLength();
+      }
+      if (length == 0)
+      {
+        return theEmptyArray;
+      }
+      /* We will copy to every item in this array before it is made available to the user,
+      /* therefore, it is fine to allocate it uninitialized. */
+      T[] results = GC.AllocateUninitializedArray<T>(length, false);
+      Array.ConstrainedCopy(data, start, results, 0, length);
+      return results;
     }
 
+    /// <summary>
+    /// Creates a newly allocated list containing the items in the specified range of this list.
+    /// </summary>
+    /// <param name="start">This value must be non-negative and not exceed <see cref="Count"/>.</param>
+    /// <param name="length">This value must be non-negative and not exceed <see cref="Count"/> minus <paramref name="start"/>.</param>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="start"/> is negative or greater than <see cref="Count"/>,
+    /// or if <paramref name="length"/> is negative or greater than <see cref="Count"/> minus <paramref name="start"/>.</exception>
+    [MethodImpl(Helper.JustOptimize)]
     public List2<T> GetRange(int start, int length)
     {
-      throw new NotImplementedException();
+      T[] data = myData;
+      int count = myCount;
+      if ((uint)start > (uint)count)
+      {
+        List2.ThrowStart();
+      }
+      if ((uint)length > (uint)(count - start))
+      {
+        List2.ThrowLength();
+      }
+      if (length == 0)
+      {
+        return new List2<T>(theEmptyArray, 0);
+      }
+      /* We will copy to every item in this array before it is made available to the user,
+      /* therefore, it is fine to allocate it uninitialized. */
+      T[] results = GC.AllocateUninitializedArray<T>(length, false);
+      Array.ConstrainedCopy(data, start, results, 0, length);
+      return new List2<T>(results, count);
     }
 
     #endregion ToArray, GetRange
