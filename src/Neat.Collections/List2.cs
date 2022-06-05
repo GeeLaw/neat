@@ -1462,24 +1462,122 @@ namespace Neat.Collections
 
     #region IPredicate, ThereExists, ForAll, CountSuchThat
 
+    /// <summary>
+    /// This interface should be implemented by <see langword="struct"/>s to maximize performance.
+    /// </summary>
     public interface IPredicate
     {
       bool Invoke(List2<T> list, int index, T item);
     }
 
+    /// <summary>
+    /// Determines whether there exists an item in the list satisfying <paramref name="predicate"/>.
+    /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     public bool ThereExists<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
-      throw new NotImplementedException();
+      /* A rude predicate.Invoke could mutate the list. */
+#if LIST2_ENUMERATION_VERSION
+      uint version = myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      /* Protect us from instance corruption due to race conditions.
+      /* See Neat.Collections.List2.IndexOfHelper.FirstOfObject method. */
+      count = ((uint)count < (uint)data.Length ? count : data.Length);
+      ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
+      for (int index = 0; index != count; ++index)
+      {
+        if (predicate.Invoke(this, index, Unsafe.Add(ref data0, index)))
+        {
+#if LIST2_ENUMERATION_VERSION
+          if (version != myVersion)
+          {
+            List2.ThrowVersion();
+          }
+#endif
+          return true;
+        }
+      }
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      return false;
     }
 
+    /// <summary>
+    /// Determines whether all the items in the list satisfy <paramref name="predicate"/>.
+    /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     public bool ForAll<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      uint version = myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      /* Protect us from instance corruption due to race conditions.
+      /* See Neat.Collections.List2.IndexOfHelper.FirstOfObject method. */
+      count = ((uint)count < (uint)data.Length ? count : data.Length);
+      ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
+      for (int index = 0; index != count; ++index)
+      {
+        if (!predicate.Invoke(this, index, Unsafe.Add(ref data0, index)))
+        {
+#if LIST2_ENUMERATION_VERSION
+          if (version != myVersion)
+          {
+            List2.ThrowVersion();
+          }
+#endif
+          return false;
+        }
+      }
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      return true;
     }
 
+    /// <summary>
+    /// Gets the number of items in the list that satisfy <paramref name="predicate"/>.
+    /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     public int CountSuchThat<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      uint version = myVersion;
+#endif
+      T[] data = myData;
+      int count = myCount;
+      /* Protect us from instance corruption due to race conditions.
+      /* See Neat.Collections.List2.IndexOfHelper.FirstOfObject method. */
+      count = ((uint)count < (uint)data.Length ? count : data.Length);
+      ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
+      int countSuchThat = 0;
+      for (int index = 0; index != count; ++index)
+      {
+        if (predicate.Invoke(this, index, Unsafe.Add(ref data0, index)))
+        {
+          ++countSuchThat;
+        }
+      }
+#if LIST2_ENUMERATION_VERSION
+      if (version != myVersion)
+      {
+        List2.ThrowVersion();
+      }
+#endif
+      return countSuchThat;
     }
 
     #endregion IPredicate, ThereExists, ForAll, CountSuchThat
