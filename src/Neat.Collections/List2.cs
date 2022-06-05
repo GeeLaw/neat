@@ -125,9 +125,9 @@ namespace Neat.Collections
     /// The result of this method is invalidated as soon as any enumeration-invalidating member of <see cref="List2{T}"/> is invoked.
     /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
-    public Span<T> AsSpanBeforeNextMutation()
+    public ReadOnlySpan<T> AsSpanBeforeNextMutation()
     {
-      return new Span<T>(myData, 0, myCount);
+      return new ReadOnlySpan<T>(myData, 0, myCount);
     }
 
     /// <summary>
@@ -135,7 +135,7 @@ namespace Neat.Collections
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="start"/> or <paramref name="length"/> is out of range.</exception>
     [MethodImpl(Helper.OptimizeInline)]
-    public Span<T> AsSpanBeforeNextMutation(int start, int length)
+    public ReadOnlySpan<T> AsSpanBeforeNextMutation(int start, int length)
     {
       T[] data = myData;
       int count = myCount;
@@ -147,7 +147,7 @@ namespace Neat.Collections
       {
         List2.ThrowLength();
       }
-      return new Span<T>(data, start, length);
+      return new ReadOnlySpan<T>(data, start, length);
     }
 
     #endregion GetPinnableReference, AsSpanBeforeNextMutation
