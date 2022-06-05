@@ -148,14 +148,32 @@ namespace Neat.Collections
 
     #region Reverse
 
+    /// <summary>
+    /// Reverses the list.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
     public void Reverse()
     {
-      throw new NotImplementedException();
+      Array.Reverse(myData, 0, myCount);
     }
 
+    /// <summary>
+    /// Reverses the specified range of the list.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
     public void Reverse(int start, int length)
     {
-      throw new NotImplementedException();
+      T[] data = myData;
+      int count = myCount;
+      if ((uint)start > (uint)count)
+      {
+        List2.ThrowStart();
+      }
+      if ((uint)length > (uint)(count - start))
+      {
+        List2.ThrowLength();
+      }
+      Array.Reverse(data, start, length);
     }
 
     #endregion Reverse
@@ -805,6 +823,18 @@ namespace Neat.Collections
 
   public static class List2
   {
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ThrowStart()
+    {
+      throw new ArgumentOutOfRangeException("start");
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ThrowLength()
+    {
+      throw new ArgumentOutOfRangeException("length");
+    }
 
 #if LIST2_ENUMERATION_VERSION
 
