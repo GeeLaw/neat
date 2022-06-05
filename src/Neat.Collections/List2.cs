@@ -1,11 +1,22 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace Neat.Collections
 {
   public sealed class List2<T> : IEnumerable2<T, List2<T>.Enumerator>, IReadOnlyList<T>, IList<T>, IList
   {
+    private T[] myData;
+    private int myCount;
+
+#if LIST2_ENUMERATION_VERSION
+    private uint myVersion;
+#endif
+
     #region constructors
 
     public List2()
@@ -515,82 +526,280 @@ namespace Neat.Collections
 
     #endregion IList.IsFixedSize, ICollection<T>.IsReadOnly, IList.IsReadOnly, ICollection.IsSynchronized, ICollection.SyncRoot
 
+    /// <summary>
+    /// Enumerates items in <see cref="List2{T}"/>.
+    /// </summary>
+    [DebuggerDisplay("{DebuggerDisplay(),nq}")]
     public struct Enumerator : IEnumerator2<T>
     {
+      [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
+      private T[] myData;
+
+      [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
+      private int myCount;
+
+      private int myIndex;
+
+#if LIST2_ENUMERATION_VERSION
+
+      [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
+      private List2<T> myTarget;
+
+      [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
+      private uint myVersion;
+
+#endif
+
+#if LIST2_ENUMERATOR_DISPOSE
+      private bool myNotDisposed;
+#endif
+
+      private string DebuggerDisplay()
+      {
+        return "Count = " + myCount.ToString(CultureInfo.InvariantCulture)
+          + ", Index = " + myIndex.ToString(CultureInfo.InvariantCulture)
+#if LIST2_ENUMERATION_VERSION
+          + ", Version = " + myVersion.ToString(CultureInfo.InvariantCulture)
+#endif
+#if LIST2_ENUMERATOR_DISPOSE
+          + (myNotDisposed ? "" : " <disposed>")
+#endif
+          ;
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      internal Enumerator(List2<T> target)
+      {
+        myData = target.myData;
+        myCount = target.myCount;
+        myIndex = -1;
+#if LIST2_ENUMERATION_VERSION
+        myTarget = target;
+        myVersion = target.myVersion;
+#endif
+#if LIST2_ENUMERATOR_DISPOSE
+        myNotDisposed = true;
+#endif
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
       void IEnumerator.Reset()
       {
-        throw new NotImplementedException();
+#if LIST2_ENUMERATOR_DISPOSE
+        if (!myNotDisposed)
+        {
+          List2.ThrowDisposed();
+        }
+#endif
+#if LIST2_ENUMERATION_VERSION
+        if (myVersion != myTarget.myVersion)
+        {
+          List2.ThrowVersion();
+        }
+#endif
+        myIndex = -1;
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public bool MoveNext(out T item)
       {
-        throw new NotImplementedException();
+#if LIST2_ENUMERATOR_DISPOSE
+        if (!myNotDisposed)
+        {
+          List2.ThrowDisposed();
+        }
+#endif
+#if LIST2_ENUMERATION_VERSION
+        if (myVersion != myTarget.myVersion)
+        {
+          List2.ThrowVersion();
+        }
+#endif
+        T[] data = myData;
+        int count = myCount;
+        int index = myIndex;
+        myIndex = ++index;
+        if (index < count)
+        {
+          item = data[index];
+          return true;
+        }
+#if LIST2_ENUMERATOR_DISPOSE
+        myNotDisposed = false;
+#endif
+        item = default(T);
+        return false;
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       bool IEnumerator2.MoveNext(out object item)
       {
-        throw new NotImplementedException();
+#if LIST2_ENUMERATOR_DISPOSE
+        if (!myNotDisposed)
+        {
+          List2.ThrowDisposed();
+        }
+#endif
+#if LIST2_ENUMERATION_VERSION
+        if (myVersion != myTarget.myVersion)
+        {
+          List2.ThrowVersion();
+        }
+#endif
+        T[] data = myData;
+        int count = myCount;
+        int index = myIndex;
+        myIndex = ++index;
+        if (index < count)
+        {
+          item = data[index];
+          return true;
+        }
+#if LIST2_ENUMERATOR_DISPOSE
+        myNotDisposed = false;
+#endif
+        item = null;
+        return false;
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public bool MoveNext()
       {
-        throw new NotImplementedException();
+#if LIST2_ENUMERATOR_DISPOSE
+        if (!myNotDisposed)
+        {
+          List2.ThrowDisposed();
+        }
+#endif
+#if LIST2_ENUMERATION_VERSION
+        if (myVersion != myTarget.myVersion)
+        {
+          List2.ThrowVersion();
+        }
+#endif
+        return ++myIndex < myCount;
       }
 
       public T Current
       {
+        [MethodImpl(Helper.OptimizeInline)]
         get
         {
-          throw new NotImplementedException();
+#if LIST2_ENUMERATOR_DISPOSE
+          if (!myNotDisposed)
+          {
+            List2.ThrowDisposed();
+          }
+#endif
+#if LIST2_ENUMERATION_VERSION
+          if (myVersion != myTarget.myVersion)
+          {
+            List2.ThrowVersion();
+          }
+#endif
+          return myData[myIndex];
         }
       }
 
+      /// <summary>
+      /// This property is hidden in the debugging view to work around
+      /// <a href="https://developercommunity.visualstudio.com/t/Inspecting-a-property-returning-a-field/10056308">this bug of Visual Studio</a>.
+      /// </summary>
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
       object IEnumerator.Current
       {
+        [MethodImpl(Helper.OptimizeInline)]
         get
         {
-          throw new NotImplementedException();
+#if LIST2_ENUMERATOR_DISPOSE
+          if (!myNotDisposed)
+          {
+            List2.ThrowDisposed();
+          }
+#endif
+#if LIST2_ENUMERATION_VERSION
+          if (myVersion != myTarget.myVersion)
+          {
+            List2.ThrowVersion();
+          }
+#endif
+          return myData[myIndex];
         }
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       void IDisposable.Dispose()
       {
-        throw new NotImplementedException();
+#if LIST2_ENUMERATOR_DISPOSE
+        myNotDisposed = false;
+#endif
       }
     }
 
     #region GetEnumerator
 
+    [MethodImpl(Helper.OptimizeInline)]
     public Enumerator GetEnumerator()
     {
-      throw new NotImplementedException();
+      return new Enumerator(this);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     Enumerator IEnumerable2<T, Enumerator>.GetEnumerator()
     {
-      throw new NotImplementedException();
+      return new Enumerator(this);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     IEnumerator2<T> IEnumerable2<T>.GetEnumerator()
     {
-      throw new NotImplementedException();
+      return new Enumerator(this);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     IEnumerator2 IEnumerable2.GetEnumerator()
     {
-      throw new NotImplementedException();
+      return new Enumerator(this);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     IEnumerator<T> IEnumerable<T>.GetEnumerator()
     {
-      throw new NotImplementedException();
+      return new Enumerator(this);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     IEnumerator IEnumerable.GetEnumerator()
     {
-      throw new NotImplementedException();
+      return new Enumerator(this);
     }
 
     #endregion GetEnumerator
+  }
+
+  public static class List2
+  {
+
+#if LIST2_ENUMERATION_VERSION
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ThrowVersion()
+    {
+      throw new InvalidOperationException("The list is modified during enumeration. (This check is enabled by LIST2_ENUMERATION_VERSION.)");
+    }
+
+#endif
+
+#if LIST2_ENUMERATOR_DISPOSE
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ThrowDisposed()
+    {
+      throw new ObjectDisposedException(typeof(List2<>.Enumerator).FullName,
+        "The enumerator is already disposed. (This check is enabled by LIST2_ENUMERATOR_DISPOSE.)");
+    }
+
+#endif
+
   }
 }

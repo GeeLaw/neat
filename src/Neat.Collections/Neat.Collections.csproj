@@ -8,6 +8,10 @@
     <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <DefineConstants>$(DefineConstants);LIST2_ENUMERATION_VERSION;LIST2_ENUMERATOR_DISPOSE</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Neat\Neat.csproj" />
   </ItemGroup>
