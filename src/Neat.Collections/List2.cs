@@ -222,6 +222,9 @@ namespace Neat.Collections
     /// <summary>
     /// Reverses the specified range of the list.
     /// </summary>
+    /// <param name="start">This value must be non-negative and not exceed <see cref="Count"/>.</param>
+    /// <param name="length">This value must be non-negative and not exceed <see cref="Count"/> minus <paramref name="start"/>.</param>
+    /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="start"/> or <paramref name="length"/> is out of range.</exception>
     [MethodImpl(Helper.OptimizeInline)]
     public void Reverse(int start, int length)
     {
@@ -283,6 +286,7 @@ namespace Neat.Collections
     /// </summary>
     /// <param name="capacity">The new capacity.
     /// This value must be at least <see cref="Count"/> and not exceed <see cref="MaximumCapacity"/>.</param>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="capacity"/> is out of range.</exception>
     [MethodImpl(Helper.JustOptimize)]
     public void SetCapacity(int capacity)
     {
@@ -315,7 +319,7 @@ namespace Neat.Collections
     /// <param name="capacity">The minimum value of the new capacity.
     /// This value can be less than <see cref="Count"/> (including being negative),
     /// but must not exceed <see cref="MaximumCapacity"/>.</param>
-    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="capacity"/> is greater than <see cref="MaximumCapacity"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="capacity"/> is out of range.</exception>
     [MethodImpl(Helper.JustOptimize)]
     public void EnsureCapacity(int capacity)
     {
@@ -440,8 +444,7 @@ namespace Neat.Collections
     /// </summary>
     /// <param name="start">This value must be non-negative and not exceed <see cref="Count"/>.</param>
     /// <param name="length">This value must be non-negative and not exceed <see cref="Count"/> minus <paramref name="start"/>.</param>
-    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="start"/> is negative or greater than <see cref="Count"/>,
-    /// or if <paramref name="length"/> is negative or greater than <see cref="Count"/> minus <paramref name="start"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="start"/> or <paramref name="length"/> is out of range.</exception>
     [MethodImpl(Helper.JustOptimize)]
     public T[] ToArray(int start, int length)
     {
@@ -471,8 +474,7 @@ namespace Neat.Collections
     /// </summary>
     /// <param name="start">This value must be non-negative and not exceed <see cref="Count"/>.</param>
     /// <param name="length">This value must be non-negative and not exceed <see cref="Count"/> minus <paramref name="start"/>.</param>
-    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="start"/> is negative or greater than <see cref="Count"/>,
-    /// or if <paramref name="length"/> is negative or greater than <see cref="Count"/> minus <paramref name="start"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="start"/> or <paramref name="length"/> is out of range.</exception>
     [MethodImpl(Helper.JustOptimize)]
     public List2<T> GetRange(int start, int length)
     {
@@ -612,6 +614,7 @@ namespace Neat.Collections
     /// <summary>
     /// Adds an item to the end of the list.
     /// </summary>
+    /// <exception cref="InvalidOperationException">If the number of items will be greater than <see cref="MaximumCapacity"/>.</exception>
     [MethodImpl(Helper.OptimizeInline)]
     public void Add(T item)
     {
