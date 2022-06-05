@@ -90,11 +90,6 @@ namespace Neat.Collections
 #endif
     }
 
-    public List2(IEnumerable<T> items)
-    {
-      throw new NotImplementedException();
-    }
-
     #endregion public constructors
 
     /// <summary>
