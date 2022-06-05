@@ -900,26 +900,172 @@ namespace Neat.Collections
 
     #endregion Insert, IList<T>.Insert, IList.Insert
 
+    /// <summary>
+    /// This method validates its arguments.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    private void InsertRangeImpl(int index, T[] source, int start, int length, int sourceCount)
+    {
+      T[] data = myData;
+      int count = myCount;
+      if ((uint)index > (uint)count)
+      {
+        List2.ThrowIndex();
+      }
+      if ((uint)start > (uint)sourceCount)
+      {
+        List2.ThrowStart();
+      }
+      if ((uint)length > (uint)(sourceCount - start))
+      {
+        List2.ThrowLength();
+      }
+      if (length == 0)
+      {
+        return;
+      }
+      int least = count + length;
+      /* This comparison must be unsigned because "least = count + length" might have overflown. */
+      if ((uint)least > (uint)MaximumCapacity)
+      {
+        List2.ThrowTooMany();
+      }
+      /* Case 1: Reallocate. It does matter if "source" is "data". */
+      if (least > data.Length)
+      {
+        int suggested = (count > MaximumCapacity / 2
+          ? MaximumCapacity
+          : count <= StartingCapacity / 2
+          ? StartingCapacity
+          : count * 2);
+        suggested = (suggested < least ? least : suggested);
+        T[] newData = AllocImpl(least, suggested);
+        Array.ConstrainedCopy(data, 0, newData, 0, index);
+        Array.ConstrainedCopy(source, start, newData, index, length);
+        Array.ConstrainedCopy(data, index, newData, index + length, count - index);
+        /* No more exception is possible beyond this point. */
+        myData = newData;
+        myCount = least;
+        return;
+      }
+      /* Case 2: "source" is not "data". */
+      if (!ReferenceEquals(source, data))
+      {
+        Array.ConstrainedCopy(data, index, data, index + length, count - index);
+        Array.ConstrainedCopy(source, start, data, index, length);
+        /* No more exception is possible beyond this point. */
+        myCount = least;
+        return;
+      }
+      /* Below, 1234/pq/PQ/x represent other/source/inserted/uninitialized items.
+      /* Case 3: 12pq34   => 12PQpq34    or    12pq34 => 12pqPQ34    (identical effect).
+      /* Handle: 12pq34xx => 12pqPQ34
+      /*           ^^^^          ^^^^ */
+      if (index == start || index == start + length)
+      {
+        Array.ConstrainedCopy(data, start, data, start + length, count - start);
+        /* No more exception is possible beyond this point. */
+        myCount = least;
+        return;
+      }
+      /* Case   4: 12pq34   => 1PQ2pq34
+      /*   Handle: 12pq34xx => 12p2pq34    then    12p2pq34 => 1pq2pq34
+      /*            ^^^^^         ^^^^^                ^^       ^^
+      /* Case 5.1: 12pq34   => 12pq3PQ4
+      /*   Handle: 12pq34xx => 12pq34x4    then    12pq34x4 => 12pq3PQ4
+      /*                ^             ^              ^^             ^^
+      /* Case 5.2: 12pq34   => 12pPQq34
+      /*   Handle: 12pq34xx => 12pq3q34    then    12pq3q34 => 12pPQq34
+      /*              ^^^           ^^^              ^^           ^^
+      /* The first step of Case 4/5.1/5.2 is the same.
+      /* The second step of Case 5.1/5.2 is the same. */
+      Array.ConstrainedCopy(data, index, data, index + length, count - index);
+      Array.ConstrainedCopy(data,
+        index < start
+        ? start + length /* Case 4 --- pq sits at the moved location */
+        : start /* Case 5.1 and Case 5.2 --- pq sits at the original location */,
+        data, index, length);
+      /* No more exception is possible beyond this point. */
+      myCount = least;
+    }
+
     #region InsertRange
 
+    /// <summary>
+    /// Inserts an array at the specified index.
+    /// </summary>
+    /// <param name="index">This value must be non-negative and not exceed <see cref="Count"/>.
+    /// This is the new index of the first newly inserted item.</param>
+    /// <exception cref="NullReferenceException">If <paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="index"/> is out of range.</exception>
+    /// <exception cref="InvalidOperationException">If <see cref="Count"/> will exceed <see cref="MaximumCapacity"/> after inserting the items.</exception>
+    [MethodImpl(Helper.OptimizeInline)]
     public void InsertRange(int index, T[] source)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      int length = source.Length;
+      InsertRangeImpl(index, source, 0, length, length);
     }
 
+    /// <summary>
+    /// Inserts the specified range of an array at the specified index.
+    /// </summary>
+    /// <param name="index">This value must be non-negative and not exceed <see cref="Count"/>.
+    /// This is the new index of the first newly inserted item.</param>
+    /// <param name="start">This value must be non-negative and not exceed the length of <paramref name="source"/>.</param>
+    /// <param name="length">This value must be non-negative and not exceed the length of <paramref name="source"/> minus <paramref name="start"/>.</param>
+    /// <exception cref="NullReferenceException">If <paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="index"/>, <paramref name="start"/>, or <paramref name="length"/> is out of range.</exception>
+    /// <exception cref="InvalidOperationException">If <see cref="Count"/> will exceed <see cref="MaximumCapacity"/> after inserting the items.</exception>
+    [MethodImpl(Helper.OptimizeInline)]
     public void InsertRange(int index, T[] source, int start, int length)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      InsertRangeImpl(index, source, start, length, source.Length);
     }
 
+    /// <summary>
+    /// Inserts a list at the specified index.
+    /// </summary>
+    /// <param name="index">This value must be non-negative and not exceed <see cref="Count"/>.
+    /// This is the new index of the first newly inserted item.</param>
+    /// <param name="source">It is allowed to insert a list into itself.</param>
+    /// <exception cref="NullReferenceException">If <paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="index"/> is out of range.</exception>
+    /// <exception cref="InvalidOperationException">If <see cref="Count"/> will exceed <see cref="MaximumCapacity"/> after inserting the items.</exception>
+    [MethodImpl(Helper.OptimizeInline)]
     public void InsertRange(int index, List2<T> source)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      T[] data = source.myData;
+      int count = source.myCount;
+      InsertRangeImpl(index, data, 0, count, count);
     }
 
+    /// <summary>
+    /// Inserts the specified range of a list at the specified index.
+    /// </summary>
+    /// <param name="index">This value must be non-negative and not exceed <see cref="Count"/>.
+    /// This is the new index of the first newly inserted item.</param>
+    /// <param name="source">It is allowed to insert a list into itself.</param>
+    /// <param name="start">This value must be non-negative and not exceed the length of <paramref name="source"/>.</param>
+    /// <param name="length">This value must be non-negative and not exceed the length of <paramref name="source"/> minus <paramref name="start"/>.</param>
+    /// <exception cref="NullReferenceException">If <paramref name="source"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="index"/>, <paramref name="start"/>, or <paramref name="length"/> is out of range.</exception>
+    /// <exception cref="InvalidOperationException">If <see cref="Count"/> will exceed <see cref="MaximumCapacity"/> after inserting the items.</exception>
+    [MethodImpl(Helper.OptimizeInline)]
     public void InsertRange(int index, List2<T> source, int start, int length)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      InsertRangeImpl(index, source.myData, start, length, source.myCount);
     }
 
     #endregion InsertRange
