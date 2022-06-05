@@ -1521,8 +1521,6 @@ namespace Neat.Collections
 #endif
       T[] data = myData;
       int count = myCount;
-      /* Protect us from instance corruption due to race conditions.
-      /* See Neat.Collections.List2.IndexOfHelper.FirstOfObject method. */
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
       for (int index = 0; index != count; ++index)
@@ -1559,8 +1557,6 @@ namespace Neat.Collections
 #endif
       T[] data = myData;
       int count = myCount;
-      /* Protect us from instance corruption due to race conditions.
-      /* See Neat.Collections.List2.IndexOfHelper.FirstOfObject method. */
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
       int countSuchThat = 0;
