@@ -62,7 +62,7 @@ namespace Neat.Collections
     }
 
     /// <summary>
-    /// Initializes a list whose <see cref="Capacity"/> is exactly <paramref name="capacity"/>.
+    /// Initializes a new, empty list whose <see cref="Capacity"/> is exactly <paramref name="capacity"/>.
     /// </summary>
     /// <param name="capacity">This value must be non-negative and not exceed <see cref="MaximumCapacity"/>.</param>
     public List2(int capacity)
