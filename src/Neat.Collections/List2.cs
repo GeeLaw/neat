@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Neat.Collections
 {
@@ -1693,5 +1695,486 @@ namespace Neat.Collections
 
 #endif
 
+    #region IndexOf
+
+    internal delegate int IndexOf<in T, in U>(T[] data, int count, U arg);
+
+    private static readonly IndexOfHelper theIndexOfHelper;
+    private static readonly IndexOf<object, object> theFirstOfObject;
+    private static readonly IndexOf<object, object> theLastOfObject;
+    private static readonly MethodInfo theFirstOfEquatableValueGeneric;
+    private static readonly MethodInfo theFirstOfEquatableValueObject;
+    private static readonly MethodInfo theLastOfEquatableValueGeneric;
+    private static readonly MethodInfo theFirstOfNullableEquatableValueGeneric;
+    private static readonly MethodInfo theFirstOfNullableEquatableValueObject;
+    private static readonly MethodInfo theLastOfNullableEquatableValueGeneric;
+    private static readonly MethodInfo theFirstOfValueGeneric;
+    private static readonly MethodInfo theFirstOfValueObject;
+    private static readonly MethodInfo theLastOfValueGeneric;
+    private static readonly MethodInfo theFirstOfNullableValueGeneric;
+    private static readonly MethodInfo theFirstOfNullableValueObject;
+    private static readonly MethodInfo theLastOfNullableValueGeneric;
+
+    [MethodImpl(Helper.JustOptimize)]
+    internal static void GetIndexOfDelegates<T>(out IndexOf<T, T> firstOfGeneric, out IndexOf<T, object> firstOfObject, out IndexOf<T, T> lastOfGeneric)
+    {
+      Type t = typeof(T);
+      Type[] ts;
+      if (t.IsValueType)
+      {
+        IndexOfHelper helper = theIndexOfHelper;
+        if (!t.IsGenericType || t.GetGenericTypeDefinition() != typeof(Nullable<>))
+        {
+          /* T is non-nullable value type */
+          ts = new Type[1] { t };
+          if (t.IsAssignableTo(typeof(IEquatable<T>)))
+          {
+            firstOfGeneric = theFirstOfEquatableValueGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+            firstOfObject = theFirstOfEquatableValueObject.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, object>>(helper);
+            lastOfGeneric = theLastOfEquatableValueGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+          }
+          else
+          {
+            firstOfGeneric = theFirstOfValueGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+            firstOfObject = theFirstOfValueObject.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, object>>(helper);
+            lastOfGeneric = theLastOfValueGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+          }
+        }
+        else
+        {
+          /* T is Nullable<t> */
+          ts = t.GetGenericArguments();
+          t = ts[0];
+          if (t.IsAssignableTo(typeof(IEquatable<>).MakeGenericType(ts)))
+          {
+            firstOfGeneric = theFirstOfNullableEquatableValueGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+            firstOfObject = theFirstOfNullableEquatableValueObject.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, object>>(helper);
+            lastOfGeneric = theLastOfNullableEquatableValueGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+          }
+          else
+          {
+            firstOfGeneric = theFirstOfNullableValueGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+            firstOfObject = theFirstOfNullableValueObject.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, object>>(helper);
+            lastOfGeneric = theLastOfNullableValueGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+          }
+        }
+      }
+      else
+      {
+        /* T is reference type */
+        firstOfGeneric = (IndexOf<T, T>)(object)theFirstOfObject;
+        firstOfObject = (IndexOf<T, object>)(object)theFirstOfObject;
+        lastOfGeneric = (IndexOf<T, T>)(object)theLastOfObject;
+      }
+    }
+
+    static List2()
+    {
+      IndexOfHelper helper = new IndexOfHelper();
+      theIndexOfHelper = helper;
+      theFirstOfObject = helper.FirstOfObject;
+      theLastOfObject = helper.LastOfObject;
+      Type t = typeof(IndexOfHelper);
+      theFirstOfEquatableValueGeneric = t.GetMethod(nameof(IndexOfHelper.FirstOfEquatableValueGeneric));
+      theFirstOfEquatableValueObject = t.GetMethod(nameof(IndexOfHelper.FirstOfEquatableValueObject));
+      theLastOfEquatableValueGeneric = t.GetMethod(nameof(IndexOfHelper.LastOfEquatableValueGeneric));
+      theFirstOfNullableEquatableValueGeneric = t.GetMethod(nameof(IndexOfHelper.FirstOfNullableEquatableValueGeneric));
+      theFirstOfNullableEquatableValueObject = t.GetMethod(nameof(IndexOfHelper.FirstOfNullableEquatableValueObject));
+      theLastOfNullableEquatableValueGeneric = t.GetMethod(nameof(IndexOfHelper.LastOfNullableEquatableValueGeneric));
+      theFirstOfValueGeneric = t.GetMethod(nameof(IndexOfHelper.FirstOfValueGeneric));
+      theFirstOfValueObject = t.GetMethod(nameof(IndexOfHelper.FirstOfValueObject));
+      theLastOfValueGeneric = t.GetMethod(nameof(IndexOfHelper.LastOfValueGeneric));
+      theFirstOfNullableValueGeneric = t.GetMethod(nameof(IndexOfHelper.FirstOfNullableValueGeneric));
+      theFirstOfNullableValueObject = t.GetMethod(nameof(IndexOfHelper.FirstOfNullableValueObject));
+      theLastOfNullableValueGeneric = t.GetMethod(nameof(IndexOfHelper.LastOfNullableValueGeneric));
+    }
+
+    [SuppressMessage("Performance", "CA1822", Justification = "Closed delegates are more performant.")]
+    private sealed class IndexOfHelper
+    {
+      #region object (all reference types)
+
+      [MethodImpl(Helper.JustOptimize)]
+      public int FirstOfObject(object[] data, int count, object item)
+      {
+        /* We do not try IEquatable<T> for T : class because of the following rationales:
+        /* (1) Interface method dispatch is slower than class virtual method dispatch.
+        /*     (But I am not sure whether
+        /*         https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/botr/virtual-stub-dispatch.md
+        /*     makes interface method dispatch on par with class virtual method dispatch
+        /*     for monomorphic sites.)
+        /* (2) We cannot take advantage of generic delegate contravariance to reduce allocation of delegates.
+        /* It is important to adjust "count", because it could come from an instance corrupted by race conditions.
+        /* And we want to skip array bounds check while keeping memory safety as far as CLR is concerned. */
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref object data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item is null)
+        {
+          for (int i = 0; i != count; ++i)
+          {
+            if (Unsafe.Add(ref data0, i) is null)
+            {
+              return i;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; i != count; ++i)
+          {
+            /* We should not call data[i].Equals(item) for the following reasons:
+            /* (1) data[i] could be null but item is not.
+            /* (2) Monomorphic site could have better performance. */
+            if (item.Equals(Unsafe.Add(ref data0, i)))
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public int LastOfObject(object[] data, int count, object item)
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref object data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item is null)
+        {
+          while (count-- != 0)
+          {
+            if (Unsafe.Add(ref data0, count) is null)
+            {
+              break;
+            }
+          }
+        }
+        else
+        {
+          while (count-- != 0)
+          {
+            if (item.Equals(Unsafe.Add(ref data0, count)))
+            {
+              break;
+            }
+          }
+        }
+        return count;
+      }
+
+      #endregion object (all reference types)
+
+      #region struct T : IEquatable<T>
+
+      [MethodImpl(Helper.JustOptimize)]
+      public int FirstOfEquatableValueGeneric<T>(T[] data, int count, T item) where T : struct, IEquatable<T>
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        for (int i = 0; i != count; ++i)
+        {
+          /* We should not call data[i].Equals(item) for the following reasons:
+          /* (1) A terrible implementation of "bool IEquatable<T>.Equals(T other)" could mutate "this".
+          /* (2) We must avoid mutating the list.
+          /* (3) "item" is a copy local to this function so it is safe to mutate. */
+          if (item.Equals(Unsafe.Add(ref data0, i)))
+          {
+            return i;
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public int FirstOfEquatableValueObject<T>(T[] data, int count, object value) where T : struct, IEquatable<T>
+      {
+        if (value is T item)
+        {
+          count = ((uint)count < (uint)data.Length ? count : data.Length);
+          ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
+          for (int i = 0; i != count; ++i)
+          {
+            if (item.Equals(Unsafe.Add(ref data0, i)))
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public int LastOfEquatableValueGeneric<T>(T[] data, int count, T item) where T : struct, IEquatable<T>
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        while (count-- != 0)
+        {
+          if (item.Equals(Unsafe.Add(ref data0, count)))
+          {
+            break;
+          }
+        }
+        return count;
+      }
+
+      #endregion struct T : IEquatable<T>
+
+      #region Nullable<T> where T : struct, IEquatable<T>
+
+      [MethodImpl(Helper.JustOptimize)]
+      public int FirstOfNullableEquatableValueGeneric<T>(T?[] data, int count, T? item) where T : struct, IEquatable<T>
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item.HasValue)
+        {
+          T itemValue = item.GetValueOrDefault();
+          for (int i = 0; i != count; ++i)
+          {
+            if (Unsafe.Add(ref data0, i).HasValue && itemValue.Equals(Unsafe.Add(ref data0, i).GetValueOrDefault()))
+            {
+              return i;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; i != count; ++i)
+          {
+            if (!Unsafe.Add(ref data0, i).HasValue)
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public int FirstOfNullableEquatableValueObject<T>(T?[] data, int count, object value) where T : struct, IEquatable<T>
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (value is T itemValue)
+        {
+          for (int i = 0; i != count; ++i)
+          {
+            if (Unsafe.Add(ref data0, i).HasValue && itemValue.Equals(Unsafe.Add(ref data0, i).GetValueOrDefault()))
+            {
+              return i;
+            }
+          }
+        }
+        else if (value is null)
+        {
+          for (int i = 0; i != count; ++i)
+          {
+            if (!Unsafe.Add(ref data0, i).HasValue)
+            {
+              return i;
+            }
+          }
+        }
+        /* This also includes the case when "value" is neither T nor null. */
+        return -1;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public int LastOfNullableEquatableValueGeneric<T>(T?[] data, int count, T? item) where T : struct, IEquatable<T>
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item.HasValue)
+        {
+          T itemValue = item.GetValueOrDefault();
+          while (count-- != 0)
+          {
+            if (Unsafe.Add(ref data0, count).HasValue && itemValue.Equals(Unsafe.Add(ref data0, count).GetValueOrDefault()))
+            {
+              break;
+            }
+          }
+        }
+        else
+        {
+          while (count-- != 0)
+          {
+            if (!Unsafe.Add(ref data0, count).HasValue)
+            {
+              break;
+            }
+          }
+        }
+        return count;
+      }
+
+      #endregion Nullable<T> where T : struct, IEquatable<T>
+
+      #region struct T not implementing IEquatable<T>
+
+      [MethodImpl(Helper.JustOptimize)]
+      public int FirstOfValueGeneric<T>(T[] data, int count, T item) where T : struct
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        /* There are two cases:
+        /* (1) The most derrived override of "bool object.Equals(object obj)" is on "T".
+        /* (2) It is on "ValueType" or "Enum".
+        /* Calling "a.Equals(b)" will...
+        /* (1) box "b";
+        /* (2) box both "a" and "b".
+        /* We always call "CopyOf(data[i]).Equals(value)", where "value" is a cached boxed "item".
+        /* In the two cases, ...
+        /* (1) there is only 1 boxing;
+        /* (2) there are (N+1) boxings.
+        /* In the second case, (N+1) boxings is already optimal.
+        /* The copying of data[i] is to avoid mutating the list inside the call to "Equals". */
+        ValueType value = item;
+        for (int i = 0; i != count; ++i)
+        {
+          T datai = Unsafe.Add(ref data0, i);
+          /* If T overrides Equals, this constrained call JIT-compiles to direct instance call.
+          /* Otherwise, it JIT-compiles to boxing and virtual call. */
+          if (datai.Equals(value))
+          {
+            return i;
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public int FirstOfValueObject<T>(T[] data, int count, object value) where T : struct
+      {
+        if (value is T)
+        {
+          count = ((uint)count < (uint)data.Length ? count : data.Length);
+          ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
+          /* There is no point in casting "value" to "ValueType". */
+          for (int i = 0; i != count; ++i)
+          {
+            T datai = Unsafe.Add(ref data0, i);
+            if (datai.Equals(value))
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public int LastOfValueGeneric<T>(T[] data, int count, T item) where T : struct
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        ValueType value = item;
+        while (count-- != 0)
+        {
+          T datai = Unsafe.Add(ref data0, count);
+          if (datai.Equals(value))
+          {
+            break;
+          }
+        }
+        return count;
+      }
+
+      #endregion struct T not implementing IEquatable<T>
+
+      #region Nullable<T> where T : struct does not implement IEquatable<T>
+
+      [MethodImpl(Helper.JustOptimize)]
+      public int FirstOfNullableValueGeneric<T>(T?[] data, int count, T? item) where T : struct
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item.HasValue)
+        {
+          ValueType value = item;
+          for (int i = 0; i != count; ++i)
+          {
+            /* GetValueOrDefault() will make a copy for us. */
+            if (Unsafe.Add(ref data0, i).HasValue && Unsafe.Add(ref data0, i).GetValueOrDefault().Equals(value))
+            {
+              return i;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; i != count; ++i)
+          {
+            if (!Unsafe.Add(ref data0, i).HasValue)
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public int FirstOfNullableValueObject<T>(T?[] data, int count, object value) where T : struct
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (value is T)
+        {
+          for (int i = 0; i != count; ++i)
+          {
+            if (Unsafe.Add(ref data0, i).HasValue && Unsafe.Add(ref data0, i).GetValueOrDefault().Equals(value))
+            {
+              return i;
+            }
+          }
+        }
+        else if (value is null)
+        {
+          for (int i = 0; i != count; ++i)
+          {
+            if (!Unsafe.Add(ref data0, i).HasValue)
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public int LastOfNullableValueGeneric<T>(T?[] data, int count, T? item) where T : struct
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item.HasValue)
+        {
+          ValueType value = item;
+          while (count-- != 0)
+          {
+            if (Unsafe.Add(ref data0, count).HasValue && Unsafe.Add(ref data0, count).GetValueOrDefault().Equals(value))
+            {
+              break;
+            }
+          }
+        }
+        else
+        {
+          while (count-- != 0)
+          {
+            if (!Unsafe.Add(ref data0, count).HasValue)
+            {
+              break;
+            }
+          }
+        }
+        return count;
+      }
+
+      #endregion Nullable<T> where T : struct does not implement IEquatable<T>
+    }
+
+    #endregion IndexOf
   }
 }
