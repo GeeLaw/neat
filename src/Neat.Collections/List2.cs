@@ -679,26 +679,119 @@ namespace Neat.Collections
 
     #endregion Add, ICollection<T>.Add, IList.Add
 
+    /// <summary>
+    /// This method does not validate its arguments.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    private void AddRangeImpl(T[] array, int start, int length)
+    {
+      T[] data = myData;
+      int count = myCount;
+      int least = count + length;
+      if ((uint)least <= (uint)data.Length)
+      {
+        Array.ConstrainedCopy(array, start, data, count, length);
+        /* No more exception is possible beyond this point. */
+        myCount = least;
+        return;
+      }
+      if ((uint)least > (uint)MaximumCapacity)
+      {
+        List2.ThrowTooMany();
+      }
+      int suggested = (count > MaximumCapacity / 2
+        ? MaximumCapacity
+        : count <= StartingCapacity / 2
+        ? StartingCapacity
+        : count * 2);
+      suggested = (suggested < least ? least : suggested);
+      T[] newData = AllocImpl(least, suggested);
+      Array.ConstrainedCopy(data, 0, newData, 0, count);
+      Array.ConstrainedCopy(array, start, newData, count, length);
+      /* No more exception is possible beyond this point. */
+      myData = newData;
+      myCount = least;
+    }
+
     #region AddRange
 
+    /// <summary>
+    /// Adds an array of items to the end of this list.
+    /// </summary>
+    /// <exception cref="NullReferenceException">If <paramref name="array"/> is <see langword="null"/>.</exception>
+    [MethodImpl(Helper.OptimizeInline)]
     public void AddRange(T[] array)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      AddRangeImpl(array, 0, array.Length);
     }
 
+    /// <summary>
+    /// Adds the items in the specified range of the array to the end of this list.
+    /// </summary>
+    /// <param name="start">This value must be non-negative and not exceed the length of <paramref name="array"/>.</param>
+    /// <param name="length">This value must be non-negative and not exceed the length of <paramref name="array"/> minus <paramref name="start"/>.</param>
+    /// <exception cref="NullReferenceException">If <paramref name="array"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="start"/> or <paramref name="length"/> is out of range.</exception>
+    [MethodImpl(Helper.JustOptimize)]
     public void AddRange(T[] array, int start, int length)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      int otherCount = array.Length;
+      if ((uint)start > (uint)otherCount)
+      {
+        List2.ThrowStart();
+      }
+      if ((uint)length > (uint)(otherCount - start))
+      {
+        List2.ThrowLength();
+      }
+      AddRangeImpl(array, start, length);
     }
 
+    /// <summary>
+    /// Adds a list of items to the end of this list.
+    /// </summary>
+    /// <param name="list">This argument can be the list being appended.</param>
+    /// <exception cref="NullReferenceException">If <paramref name="list"/> is <see langword="null"/>.</exception>
+    [MethodImpl(Helper.OptimizeInline)]
     public void AddRange(List2<T> list)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      AddRangeImpl(list.myData, 0, list.myCount);
     }
 
+    /// <summary>
+    /// Adds the items in the specified range of the a list to the end of this list.
+    /// </summary>
+    /// <param name="list">This argument can be the list being appended.</param>
+    /// <param name="start">This value must be non-negative and not exceed the <see cref="Count"/> of <paramref name="list"/>.</param>
+    /// <param name="length">This value must be non-negative and not exceed the <see cref="Count"/> of <paramref name="list"/> minus <paramref name="start"/>.</param>
+    /// <exception cref="NullReferenceException">If <paramref name="list"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="start"/> or <paramref name="length"/> is out of range.</exception>
+    [MethodImpl(Helper.JustOptimize)]
     public void AddRange(List2<T> list, int start, int length)
     {
-      throw new NotImplementedException();
+#if LIST2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      T[] array = list.myData;
+      int otherCount = list.myCount;
+      if ((uint)start > (uint)otherCount)
+      {
+        List2.ThrowStart();
+      }
+      if ((uint)length > (uint)(otherCount - start))
+      {
+        List2.ThrowLength();
+      }
+      AddRangeImpl(array, start, length);
     }
 
     public void AddRange(IEnumerable<T> enumerable)
