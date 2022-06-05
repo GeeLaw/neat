@@ -370,7 +370,7 @@ namespace Neat.Unicode
     public ReadOnlySpan<Char32> AsSpan(int start)
     {
       Char32[] data = myData;
-      /* This throws the desired exception: 
+      /* This throws the desired exception:
       /* - When data is null, data.Length will trigger NullReferenceException.
       /* - When data is not null but start < 0 or start > data.Length,
       /*   the constructor of ReadOnlySpan<Char32> will throw ArgumentOutOfRangeException. */
@@ -385,7 +385,7 @@ namespace Neat.Unicode
     public ReadOnlySpan<Char32> AsSpan(int start, int length)
     {
       Char32[] data = myData;
-      /* This throws the desired exception: 
+      /* This throws the desired exception:
       /* - When data is null, data.Length will trigger NullReferenceException.
       /* - When data is not null but start < 0 or start > data.Length,
       /*   the constructor of ReadOnlySpan<Char32> will throw ArgumentOutOfRangeException.
