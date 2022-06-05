@@ -1474,6 +1474,8 @@ namespace Neat.Collections
     /// Determines whether there exists an item in the list satisfying <paramref name="predicate"/>.
     /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
     /// </summary>
+    /// <param name="predicate">This argument must not be null.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
     [MethodImpl(Helper.JustOptimize)]
     public bool ThereExists<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
@@ -1487,6 +1489,10 @@ namespace Neat.Collections
       /* See Neat.Collections.List2.IndexOfHelper.FirstOfObject method. */
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
+      if (predicate is null)
+      {
+        List2.ThrowPredicate();
+      }
       for (int index = 0; index != count; ++index)
       {
         if (predicate.Invoke(this, index, Unsafe.Add(ref data0, index)))
@@ -1513,6 +1519,8 @@ namespace Neat.Collections
     /// Determines whether all the items in the list satisfy <paramref name="predicate"/>.
     /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
     /// </summary>
+    /// <param name="predicate">This argument must not be null.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
     [MethodImpl(Helper.JustOptimize)]
     public bool ForAll<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
@@ -1523,6 +1531,10 @@ namespace Neat.Collections
       int count = myCount;
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
+      if (predicate is null)
+      {
+        List2.ThrowPredicate();
+      }
       for (int index = 0; index != count; ++index)
       {
         if (!predicate.Invoke(this, index, Unsafe.Add(ref data0, index)))
@@ -1549,6 +1561,8 @@ namespace Neat.Collections
     /// Gets the number of items in the list that satisfy <paramref name="predicate"/>.
     /// Calling <see cref="IPredicate.Invoke(List2{T}, int, T)"/> on <paramref name="predicate"/> must not mutate the list.
     /// </summary>
+    /// <param name="predicate">This argument must not be null.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is null.</exception>
     [MethodImpl(Helper.JustOptimize)]
     public int CountSuchThat<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
@@ -1559,6 +1573,10 @@ namespace Neat.Collections
       int count = myCount;
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
+      if (predicate is null)
+      {
+        List2.ThrowPredicate();
+      }
       int countSuchThat = 0;
       for (int index = 0; index != count; ++index)
       {
@@ -1980,6 +1998,13 @@ namespace Neat.Collections
     internal static void ThrowIndex()
     {
       throw new ArgumentOutOfRangeException("index");
+    }
+
+    [DoesNotReturn]
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ThrowPredicate()
+    {
+      throw new ArgumentNullException("predicate");
     }
 
 #if LIST2_ENUMERATION_VERSION
