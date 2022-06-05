@@ -311,7 +311,7 @@ namespace Neat.Unicode
       dst8s = src8s + dst8s * 2;
       if (dst8s > MaximumLength8)
       {
-        throw new OutOfMemoryException(String8WouldBeTooLong);
+        throw new ArgumentException(String8WouldBeTooLong, nameof(string8));
       }
       Char8[] dst = GC.AllocateUninitializedArray<Char8>((int)dst8s, false);
       UtfUnsafe.SanitizeChar8s(
@@ -342,7 +342,7 @@ namespace Neat.Unicode
       dst8s = src8s + dst8s * 2;
       if (dst8s > MaximumLength8)
       {
-        throw new OutOfMemoryException(String8WouldBeTooLong);
+        throw new ArgumentException(String8WouldBeTooLong, nameof(string8));
       }
       Char8[] dst = GC.AllocateUninitializedArray<Char8>((int)dst8s, false);
       UtfUnsafe.SanitizeChar8s(
@@ -382,7 +382,7 @@ namespace Neat.Unicode
       {
         if (dst16s > MaximumLength16)
         {
-          throw new OutOfMemoryException(String16WouldBeTooLong);
+          throw new ArgumentException(String16WouldBeTooLong, nameof(string8));
         }
         string16 = string.Create(dst16s, src, theFromString8Action);
         return true;
@@ -416,7 +416,7 @@ namespace Neat.Unicode
       {
         if (dst16s > MaximumLength16)
         {
-          throw new OutOfMemoryException(String16WouldBeTooLong);
+          throw new ArgumentException(String16WouldBeTooLong, nameof(string8));
         }
         return string.Create(dst16s, src, theFromString8Action);
       }
@@ -445,7 +445,7 @@ namespace Neat.Unicode
         src8s);
       if (dst16s > MaximumLength16)
       {
-        throw new OutOfMemoryException(String16WouldBeTooLong);
+        throw new ArgumentException(String16WouldBeTooLong, nameof(string8));
       }
       return string.Create(dst16s, src, theFromString8Action);
     }
@@ -479,7 +479,7 @@ namespace Neat.Unicode
       {
         if (dst32s > MaximumLength32)
         {
-          throw new OutOfMemoryException(String32WouldBeTooLong);
+          throw new ArgumentException(String32WouldBeTooLong, nameof(string8));
         }
         Char32[] dst = GC.AllocateUninitializedArray<Char32>(dst32s, false);
         UtfUnsafe.String8ToString32Transform(
@@ -519,7 +519,7 @@ namespace Neat.Unicode
       {
         if (dst32s > MaximumLength32)
         {
-          throw new OutOfMemoryException(String32WouldBeTooLong);
+          throw new ArgumentException(String32WouldBeTooLong, nameof(string8));
         }
         Char32[] dst = GC.AllocateUninitializedArray<Char32>(dst32s, false);
         UtfUnsafe.String8ToString32Transform(
@@ -554,7 +554,7 @@ namespace Neat.Unicode
         src8s);
       if (dst32s > MaximumLength32)
       {
-        throw new OutOfMemoryException(String32WouldBeTooLong);
+        throw new ArgumentException(String32WouldBeTooLong, nameof(string8));
       }
       Char32[] dst = GC.AllocateUninitializedArray<Char32>(dst32s, false);
       UtfUnsafe.String8ToString32Transform(
@@ -624,7 +624,7 @@ namespace Neat.Unicode
       {
         if (dst8s > MaximumLength8)
         {
-          throw new OutOfMemoryException(String8WouldBeTooLong);
+          throw new ArgumentException(String8WouldBeTooLong, nameof(string16));
         }
         Char8[] dst = GC.AllocateUninitializedArray<Char8>((int)dst8s, false);
         UtfUnsafe.String16ToString8Transform(
@@ -663,7 +663,7 @@ namespace Neat.Unicode
       {
         if (dst8s > MaximumLength8)
         {
-          throw new OutOfMemoryException(String8WouldBeTooLong);
+          throw new ArgumentException(String8WouldBeTooLong, nameof(string16));
         }
         Char8[] dst = GC.AllocateUninitializedArray<Char8>((int)dst8s, false);
         UtfUnsafe.String16ToString8Transform(
@@ -697,7 +697,7 @@ namespace Neat.Unicode
         src16s);
       if (dst8s > MaximumLength8)
       {
-        throw new OutOfMemoryException(String8WouldBeTooLong);
+        throw new ArgumentException(String8WouldBeTooLong, nameof(string16));
       }
       Char8[] dst = GC.AllocateUninitializedArray<Char8>((int)dst8s, false);
       UtfUnsafe.String16ToString8Transform(
@@ -726,7 +726,7 @@ namespace Neat.Unicode
       }
       if (src16s > MaximumLength16)
       {
-        throw new OutOfMemoryException(String16WouldBeTooLong);
+        throw new ArgumentException(String16WouldBeTooLong, nameof(string16));
       }
       string16 = string.Create(src16s, src, theFromString16Action);
       return false;
@@ -749,7 +749,7 @@ namespace Neat.Unicode
       }
       if (src16s > MaximumLength16)
       {
-        throw new OutOfMemoryException(String16WouldBeTooLong);
+        throw new ArgumentException(String16WouldBeTooLong, nameof(string16));
       }
       return string.Create(src16s, src, theFromString16Action);
     }
@@ -782,7 +782,7 @@ namespace Neat.Unicode
       {
         if (dst32s > MaximumLength32)
         {
-          throw new OutOfMemoryException(String32WouldBeTooLong);
+          throw new ArgumentException(String32WouldBeTooLong, nameof(string16));
         }
         Char32[] dst = GC.AllocateUninitializedArray<Char32>(dst32s, false);
         UtfUnsafe.String16ToString32Transform(
@@ -821,7 +821,7 @@ namespace Neat.Unicode
       {
         if (dst32s > MaximumLength32)
         {
-          throw new OutOfMemoryException(String32WouldBeTooLong);
+          throw new ArgumentException(String32WouldBeTooLong, nameof(string16));
         }
         Char32[] dst = GC.AllocateUninitializedArray<Char32>(dst32s, false);
         UtfUnsafe.String16ToString32Transform(
@@ -855,7 +855,7 @@ namespace Neat.Unicode
         src16s);
       if (dst32s > MaximumLength32)
       {
-        throw new OutOfMemoryException(String32WouldBeTooLong);
+        throw new ArgumentException(String32WouldBeTooLong, nameof(string16));
       }
       Char32[] dst = GC.AllocateUninitializedArray<Char32>(dst32s, false);
       UtfUnsafe.String16ToString32Transform(
@@ -928,7 +928,7 @@ namespace Neat.Unicode
       {
         if (dst8s > MaximumLength8)
         {
-          throw new OutOfMemoryException(String8WouldBeTooLong);
+          throw new ArgumentException(String8WouldBeTooLong, nameof(string32));
         }
         Char8[] dst = GC.AllocateUninitializedArray<Char8>((int)dst8s, false);
         UtfUnsafe.String32ToString8Transform(
@@ -968,7 +968,7 @@ namespace Neat.Unicode
       {
         if (dst8s > MaximumLength8)
         {
-          throw new OutOfMemoryException(String8WouldBeTooLong);
+          throw new ArgumentException(String8WouldBeTooLong, nameof(string32));
         }
         Char8[] dst = GC.AllocateUninitializedArray<Char8>((int)dst8s, false);
         UtfUnsafe.String32ToString8Transform(
@@ -1003,7 +1003,7 @@ namespace Neat.Unicode
         src32s);
       if (dst8s > MaximumLength8)
       {
-        throw new OutOfMemoryException(String8WouldBeTooLong);
+        throw new ArgumentException(String8WouldBeTooLong, nameof(string32));
       }
       Char8[] dst = GC.AllocateUninitializedArray<Char8>((int)dst8s, false);
       UtfUnsafe.String32ToString8Transform(
@@ -1043,7 +1043,7 @@ namespace Neat.Unicode
       {
         if (dst16s > MaximumLength16)
         {
-          throw new OutOfMemoryException(String16WouldBeTooLong);
+          throw new ArgumentException(String16WouldBeTooLong, nameof(string32));
         }
         string16 = string.Create((int)dst16s, src, theFromString32Action);
         return true;
@@ -1077,7 +1077,7 @@ namespace Neat.Unicode
       {
         if (dst16s > MaximumLength16)
         {
-          throw new OutOfMemoryException(String16WouldBeTooLong);
+          throw new ArgumentException(String16WouldBeTooLong, nameof(string32));
         }
         return string.Create((int)dst16s, src, theFromString32Action);
       }
@@ -1106,7 +1106,7 @@ namespace Neat.Unicode
         src32s);
       if (dst16s > MaximumLength16)
       {
-        throw new OutOfMemoryException(String16WouldBeTooLong);
+        throw new ArgumentException(String16WouldBeTooLong, nameof(string32));
       }
       return string.Create((int)dst16s, src, theFromString32Action);
     }
@@ -1129,7 +1129,7 @@ namespace Neat.Unicode
       }
       if (src32s > MaximumLength32)
       {
-        throw new OutOfMemoryException(String32WouldBeTooLong);
+        throw new ArgumentException(String32WouldBeTooLong, nameof(string32));
       }
       Char32[] dst = GC.AllocateUninitializedArray<Char32>(src32s, false);
       UtfUnsafe.SanitizeChar32s(
@@ -1158,7 +1158,7 @@ namespace Neat.Unicode
       }
       if (src32s > MaximumLength32)
       {
-        throw new OutOfMemoryException(String32WouldBeTooLong);
+        throw new ArgumentException(String32WouldBeTooLong, nameof(string32));
       }
       Char32[] dst = GC.AllocateUninitializedArray<Char32>(src32s, false);
       UtfUnsafe.SanitizeChar32s(
