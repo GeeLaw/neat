@@ -680,25 +680,37 @@ namespace Neat.Collections
     #endregion Add, ICollection<T>.Add, IList.Add
 
     /// <summary>
-    /// This method does not validate its arguments.
+    /// This method validates its arguments.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    private void AddRangeImpl(T[] array, int start, int length)
+    private void AddRangeImpl(T[] source, int start, int length, int sourceCount)
     {
+      if ((uint)start > (uint)sourceCount)
+      {
+        List2.ThrowStart();
+      }
+      if ((uint)length > (uint)(sourceCount - start))
+      {
+        List2.ThrowLength();
+      }
+      if (length == 0)
+      {
+        return;
+      }
       T[] data = myData;
       int count = myCount;
       int least = count + length;
-      /* The following two comparisons must be unsigned in case "count + length" overflows. */
-      if ((uint)least <= (uint)data.Length)
-      {
-        Array.ConstrainedCopy(array, start, data, count, length);
-        /* No more exception is possible beyond this point. */
-        myCount = least;
-        return;
-      }
+      /* This comparison must be unsigned because "least = count + length" might have overflown. */
       if ((uint)least > (uint)MaximumCapacity)
       {
         List2.ThrowTooMany();
+      }
+      if (least <= data.Length)
+      {
+        Array.ConstrainedCopy(source, start, data, count, length);
+        /* No more exception is possible beyond this point. */
+        myCount = least;
+        return;
       }
       int suggested = (count > MaximumCapacity / 2
         ? MaximumCapacity
@@ -708,7 +720,7 @@ namespace Neat.Collections
       suggested = (suggested < least ? least : suggested);
       T[] newData = AllocImpl(least, suggested);
       Array.ConstrainedCopy(data, 0, newData, 0, count);
-      Array.ConstrainedCopy(array, start, newData, count, length);
+      Array.ConstrainedCopy(source, start, newData, count, length);
       /* No more exception is possible beyond this point. */
       myData = newData;
       myCount = least;
@@ -726,7 +738,8 @@ namespace Neat.Collections
 #if LIST2_ENUMERATION_VERSION
       ++myVersion;
 #endif
-      AddRangeImpl(array, 0, array.Length);
+      int count = array.Length;
+      AddRangeImpl(array, 0, count, count);
     }
 
     /// <summary>
@@ -736,22 +749,13 @@ namespace Neat.Collections
     /// <param name="length">This value must be non-negative and not exceed the length of <paramref name="array"/> minus <paramref name="start"/>.</param>
     /// <exception cref="NullReferenceException">If <paramref name="array"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="start"/> or <paramref name="length"/> is out of range.</exception>
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public void AddRange(T[] array, int start, int length)
     {
 #if LIST2_ENUMERATION_VERSION
       ++myVersion;
 #endif
-      int otherCount = array.Length;
-      if ((uint)start > (uint)otherCount)
-      {
-        List2.ThrowStart();
-      }
-      if ((uint)length > (uint)(otherCount - start))
-      {
-        List2.ThrowLength();
-      }
-      AddRangeImpl(array, start, length);
+      AddRangeImpl(array, start, length, array.Length);
     }
 
     /// <summary>
@@ -765,7 +769,9 @@ namespace Neat.Collections
 #if LIST2_ENUMERATION_VERSION
       ++myVersion;
 #endif
-      AddRangeImpl(list.myData, 0, list.myCount);
+      T[] data = list.myData;
+      int count = list.myCount;
+      AddRangeImpl(data, 0, count, count);
     }
 
     /// <summary>
@@ -776,23 +782,13 @@ namespace Neat.Collections
     /// <param name="length">This value must be non-negative and not exceed the <see cref="Count"/> of <paramref name="list"/> minus <paramref name="start"/>.</param>
     /// <exception cref="NullReferenceException">If <paramref name="list"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="start"/> or <paramref name="length"/> is out of range.</exception>
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public void AddRange(List2<T> list, int start, int length)
     {
 #if LIST2_ENUMERATION_VERSION
       ++myVersion;
 #endif
-      T[] array = list.myData;
-      int otherCount = list.myCount;
-      if ((uint)start > (uint)otherCount)
-      {
-        List2.ThrowStart();
-      }
-      if ((uint)length > (uint)(otherCount - start))
-      {
-        List2.ThrowLength();
-      }
-      AddRangeImpl(array, start, length);
+      AddRangeImpl(list.myData, start, length, list.myCount);
     }
 
     #endregion AddRange
