@@ -280,12 +280,12 @@ namespace Neat.Unicode
       {
         value = x[i].Value;
         hash = (hash ^ (value & 0xFF)) * Helper.FnvPrime;
-        value >>= 8;
+        value = (int)((uint)value >> 8);
         hash = (hash ^ (value & 0xFF)) * Helper.FnvPrime;
-        value >>= 8;
+        value = (int)((uint)value >> 8);
         hash = (hash ^ (value & 0xFF)) * Helper.FnvPrime;
-        value >>= 8;
-        hash = (hash ^ (value & 0xFF)) * Helper.FnvPrime;
+        value = (int)((uint)value >> 8);
+        hash = (hash ^ value) * Helper.FnvPrime;
       }
       return hash ^ x.Length;
     }
