@@ -2548,6 +2548,36 @@ namespace Neat.Collections
     private static readonly MethodInfo theFirstOfNullableValueGeneric;
     private static readonly MethodInfo theFirstOfNullableValueObject;
     private static readonly MethodInfo theLastOfNullableValueGeneric;
+    private static readonly MethodInfo theFirstOfEnum8Generic;
+    private static readonly MethodInfo theFirstOfEnum8Object;
+    private static readonly MethodInfo theLastOfEnum8Generic;
+    private static readonly MethodInfo theFirstOfEnum16Generic;
+    private static readonly MethodInfo theFirstOfEnum16Object;
+    private static readonly MethodInfo theLastOfEnum16Generic;
+    private static readonly MethodInfo theFirstOfEnum32Generic;
+    private static readonly MethodInfo theFirstOfEnum32Object;
+    private static readonly MethodInfo theLastOfEnum32Generic;
+    private static readonly MethodInfo theFirstOfEnum64Generic;
+    private static readonly MethodInfo theFirstOfEnum64Object;
+    private static readonly MethodInfo theLastOfEnum64Generic;
+    private static readonly MethodInfo theFirstOfEnumNativeGeneric;
+    private static readonly MethodInfo theFirstOfEnumNativeObject;
+    private static readonly MethodInfo theLastOfEnumNativeGeneric;
+    private static readonly MethodInfo theFirstOfNullableEnum8Generic;
+    private static readonly MethodInfo theFirstOfNullableEnum8Object;
+    private static readonly MethodInfo theLastOfNullableEnum8Generic;
+    private static readonly MethodInfo theFirstOfNullableEnum16Generic;
+    private static readonly MethodInfo theFirstOfNullableEnum16Object;
+    private static readonly MethodInfo theLastOfNullableEnum16Generic;
+    private static readonly MethodInfo theFirstOfNullableEnum32Generic;
+    private static readonly MethodInfo theFirstOfNullableEnum32Object;
+    private static readonly MethodInfo theLastOfNullableEnum32Generic;
+    private static readonly MethodInfo theFirstOfNullableEnum64Generic;
+    private static readonly MethodInfo theFirstOfNullableEnum64Object;
+    private static readonly MethodInfo theLastOfNullableEnum64Generic;
+    private static readonly MethodInfo theFirstOfNullableEnumNativeGeneric;
+    private static readonly MethodInfo theFirstOfNullableEnumNativeObject;
+    private static readonly MethodInfo theLastOfNullableEnumNativeGeneric;
 
     [MethodImpl(Helper.JustOptimize)]
     internal static void GetIndexOfDelegates<T>(out IndexOf<T, T> firstOfGeneric, out IndexOf<T, object> firstOfObject, out IndexOf<T, T> lastOfGeneric)
@@ -2566,13 +2596,59 @@ namespace Neat.Collections
             firstOfGeneric = theFirstOfEquatableValueGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
             firstOfObject = theFirstOfEquatableValueObject.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, object>>(helper);
             lastOfGeneric = theLastOfEquatableValueGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+            return;
           }
-          else
+          if (t.IsEnum)
           {
-            firstOfGeneric = theFirstOfValueGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
-            firstOfObject = theFirstOfValueObject.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, object>>(helper);
-            lastOfGeneric = theLastOfValueGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+            Type u = t.GetEnumUnderlyingType();
+            if (u == typeof(byte) || u == typeof(sbyte))
+            {
+              firstOfGeneric = theFirstOfEnum8Generic.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+              firstOfObject = theFirstOfEnum8Object.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, object>>(helper);
+              lastOfGeneric = theLastOfEnum8Generic.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+              return;
+            }
+            if (u == typeof(short) || u == typeof(ushort) || u == typeof(char))
+            {
+              firstOfGeneric = theFirstOfEnum16Generic.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+              firstOfObject = theFirstOfEnum16Object.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, object>>(helper);
+              lastOfGeneric = theLastOfEnum16Generic.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+              return;
+            }
+            if (u == typeof(int) || u == typeof(uint))
+            {
+              firstOfGeneric = theFirstOfEnum32Generic.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+              firstOfObject = theFirstOfEnum32Object.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, object>>(helper);
+              lastOfGeneric = theLastOfEnum32Generic.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+              return;
+            }
+            if (u == typeof(long) || u == typeof(ulong))
+            {
+              firstOfGeneric = theFirstOfEnum64Generic.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+              firstOfObject = theFirstOfEnum64Object.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, object>>(helper);
+              lastOfGeneric = theLastOfEnum64Generic.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+              return;
+            }
+            if (u == typeof(IntPtr) || u == typeof(UIntPtr))
+            {
+              firstOfGeneric = theFirstOfEnumNativeGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+              firstOfObject = theFirstOfEnumNativeObject.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, object>>(helper);
+              lastOfGeneric = theLastOfEnumNativeGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+              return;
+            }
+            /* C# (ECMA-334, 5th Edition, December 2017) Section 9.3.10 only allows
+            /*     byte, sbyte, short, ushort, int, uint, long, ulong
+            /* as the underlying type of an enumeration type.
+            /* However, CLI (ECMA-335, 5th Edition, December 2010) Partition II Section 14.3 also allows
+            /*     bool, char, nint, nuint.
+            /* I have no idea how to deal with "bool", given the iffy issues with "bool" whose underlying bit pattern
+            /* is neither 0x00 nor 0x01, so I left it out and let CLR handle it (potentially with boxing).
+            /* Fall through to general value type. */
           }
+          firstOfGeneric = theFirstOfValueGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+          firstOfObject = theFirstOfValueObject.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, object>>(helper);
+          lastOfGeneric = theLastOfValueGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+          return;
         }
         else
         {
@@ -2584,13 +2660,51 @@ namespace Neat.Collections
             firstOfGeneric = theFirstOfNullableEquatableValueGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
             firstOfObject = theFirstOfNullableEquatableValueObject.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, object>>(helper);
             lastOfGeneric = theLastOfNullableEquatableValueGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+            return;
           }
-          else
+          if (t.IsEnum)
           {
-            firstOfGeneric = theFirstOfNullableValueGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
-            firstOfObject = theFirstOfNullableValueObject.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, object>>(helper);
-            lastOfGeneric = theLastOfNullableValueGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+            Type u = t.GetEnumUnderlyingType();
+            if (u == typeof(byte) || u == typeof(sbyte))
+            {
+              firstOfGeneric = theFirstOfNullableEnum8Generic.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+              firstOfObject = theFirstOfNullableEnum8Object.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, object>>(helper);
+              lastOfGeneric = theLastOfNullableEnum8Generic.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+              return;
+            }
+            if (u == typeof(short) || u == typeof(ushort) || u == typeof(char))
+            {
+              firstOfGeneric = theFirstOfNullableEnum16Generic.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+              firstOfObject = theFirstOfNullableEnum16Object.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, object>>(helper);
+              lastOfGeneric = theLastOfNullableEnum16Generic.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+              return;
+            }
+            if (u == typeof(int) || u == typeof(uint))
+            {
+              firstOfGeneric = theFirstOfNullableEnum32Generic.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+              firstOfObject = theFirstOfNullableEnum32Object.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, object>>(helper);
+              lastOfGeneric = theLastOfNullableEnum32Generic.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+              return;
+            }
+            if (u == typeof(long) || u == typeof(ulong))
+            {
+              firstOfGeneric = theFirstOfNullableEnum64Generic.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+              firstOfObject = theFirstOfNullableEnum64Object.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, object>>(helper);
+              lastOfGeneric = theLastOfNullableEnum64Generic.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+              return;
+            }
+            if (u == typeof(IntPtr) || u == typeof(UIntPtr))
+            {
+              firstOfGeneric = theFirstOfNullableEnumNativeGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+              firstOfObject = theFirstOfNullableEnumNativeObject.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, object>>(helper);
+              lastOfGeneric = theLastOfNullableEnumNativeGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+              return;
+            }
           }
+          firstOfGeneric = theFirstOfNullableValueGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+          firstOfObject = theFirstOfNullableValueObject.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, object>>(helper);
+          lastOfGeneric = theLastOfNullableValueGeneric.MakeGenericMethod(ts).CreateDelegate<IndexOf<T, T>>(helper);
+          return;
         }
       }
       else
@@ -2599,6 +2713,7 @@ namespace Neat.Collections
         firstOfGeneric = (IndexOf<T, T>)(object)theFirstOfObject;
         firstOfObject = (IndexOf<T, object>)(object)theFirstOfObject;
         lastOfGeneric = (IndexOf<T, T>)(object)theLastOfObject;
+        return;
       }
     }
 
@@ -2621,6 +2736,36 @@ namespace Neat.Collections
       theFirstOfNullableValueGeneric = t.GetMethod(nameof(IndexOfHelper.FirstOfNullableValueGeneric));
       theFirstOfNullableValueObject = t.GetMethod(nameof(IndexOfHelper.FirstOfNullableValueObject));
       theLastOfNullableValueGeneric = t.GetMethod(nameof(IndexOfHelper.LastOfNullableValueGeneric));
+      theFirstOfEnum8Generic = t.GetMethod(nameof(IndexOfHelper.FirstOfEnum8Generic));
+      theFirstOfEnum8Object = t.GetMethod(nameof(IndexOfHelper.FirstOfEnum8Object));
+      theLastOfEnum8Generic = t.GetMethod(nameof(IndexOfHelper.LastOfEnum8Generic));
+      theFirstOfEnum16Generic = t.GetMethod(nameof(IndexOfHelper.FirstOfEnum16Generic));
+      theFirstOfEnum16Object = t.GetMethod(nameof(IndexOfHelper.FirstOfEnum16Object));
+      theLastOfEnum16Generic = t.GetMethod(nameof(IndexOfHelper.LastOfEnum16Generic));
+      theFirstOfEnum32Generic = t.GetMethod(nameof(IndexOfHelper.FirstOfEnum32Generic));
+      theFirstOfEnum32Object = t.GetMethod(nameof(IndexOfHelper.FirstOfEnum32Object));
+      theLastOfEnum32Generic = t.GetMethod(nameof(IndexOfHelper.LastOfEnum32Generic));
+      theFirstOfEnum64Generic = t.GetMethod(nameof(IndexOfHelper.FirstOfEnum64Generic));
+      theFirstOfEnum64Object = t.GetMethod(nameof(IndexOfHelper.FirstOfEnum64Object));
+      theLastOfEnum64Generic = t.GetMethod(nameof(IndexOfHelper.LastOfEnum64Generic));
+      theFirstOfEnumNativeGeneric = t.GetMethod(nameof(IndexOfHelper.FirstOfEnumNativeGeneric));
+      theFirstOfEnumNativeObject = t.GetMethod(nameof(IndexOfHelper.FirstOfEnumNativeObject));
+      theLastOfEnumNativeGeneric = t.GetMethod(nameof(IndexOfHelper.LastOfEnumNativeGeneric));
+      theFirstOfNullableEnum8Generic = t.GetMethod(nameof(IndexOfHelper.FirstOfNullableEnum8Generic));
+      theFirstOfNullableEnum8Object = t.GetMethod(nameof(IndexOfHelper.FirstOfNullableEnum8Object));
+      theLastOfNullableEnum8Generic = t.GetMethod(nameof(IndexOfHelper.LastOfNullableEnum8Generic));
+      theFirstOfNullableEnum16Generic = t.GetMethod(nameof(IndexOfHelper.FirstOfNullableEnum16Generic));
+      theFirstOfNullableEnum16Object = t.GetMethod(nameof(IndexOfHelper.FirstOfNullableEnum16Object));
+      theLastOfNullableEnum16Generic = t.GetMethod(nameof(IndexOfHelper.LastOfNullableEnum16Generic));
+      theFirstOfNullableEnum32Generic = t.GetMethod(nameof(IndexOfHelper.FirstOfNullableEnum32Generic));
+      theFirstOfNullableEnum32Object = t.GetMethod(nameof(IndexOfHelper.FirstOfNullableEnum32Object));
+      theLastOfNullableEnum32Generic = t.GetMethod(nameof(IndexOfHelper.LastOfNullableEnum32Generic));
+      theFirstOfNullableEnum64Generic = t.GetMethod(nameof(IndexOfHelper.FirstOfNullableEnum64Generic));
+      theFirstOfNullableEnum64Object = t.GetMethod(nameof(IndexOfHelper.FirstOfNullableEnum64Object));
+      theLastOfNullableEnum64Generic = t.GetMethod(nameof(IndexOfHelper.LastOfNullableEnum64Generic));
+      theFirstOfNullableEnumNativeGeneric = t.GetMethod(nameof(IndexOfHelper.FirstOfNullableEnumNativeGeneric));
+      theFirstOfNullableEnumNativeObject = t.GetMethod(nameof(IndexOfHelper.FirstOfNullableEnumNativeObject));
+      theLastOfNullableEnumNativeGeneric = t.GetMethod(nameof(IndexOfHelper.LastOfNullableEnumNativeGeneric));
     }
 
     [SuppressMessage("Performance", "CA1822", Justification = "Closed delegates are more performant.")]
@@ -2854,7 +2999,7 @@ namespace Neat.Collections
         ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
         /* There are two cases:
         /* (1) The most derrived override of "bool object.Equals(object obj)" is on "T".
-        /* (2) It is on "ValueType" or "Enum".
+        /* (2) It is on "ValueType" (not "Enum").
         /* Calling "a.Equals(b)" will...
         /* (1) box "b";
         /* (2) box both "a" and "b".
@@ -3007,6 +3152,744 @@ namespace Neat.Collections
       }
 
       #endregion Nullable<T> where T : struct does not implement IEquatable<T>
+
+      #region enum T : sbyte, byte, short, ushort, int, uint, long, ulong, nint, nuint
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int FirstOfEnum8Generic<T>(T[] data, int count, T item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref byte data0 = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetArrayDataReference(data));
+        byte itemNumericValue = Unsafe.As<T, byte>(ref item);
+        for (int i = 0; i != count; ++i)
+        {
+          if (itemNumericValue == Unsafe.Add(ref data0, i))
+          {
+            return i;
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int FirstOfEnum8Object<T>(T[] data, int count, object item) where T : struct, Enum
+      {
+        if (item is T itemValue)
+        {
+          count = ((uint)count < (uint)data.Length ? count : data.Length);
+          ref byte data0 = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetArrayDataReference(data));
+          byte itemNumericValue = Unsafe.As<T, byte>(ref itemValue);
+          for (int i = 0; i != count; ++i)
+          {
+            if (itemNumericValue == Unsafe.Add(ref data0, i))
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int LastOfEnum8Generic<T>(T[] data, int count, T item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref byte data0 = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetArrayDataReference(data));
+        byte itemNumericValue = Unsafe.As<T, byte>(ref item);
+        while (count-- != 0)
+        {
+          if (itemNumericValue == Unsafe.Add(ref data0, count))
+          {
+            break;
+          }
+        }
+        return count;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int FirstOfEnum16Generic<T>(T[] data, int count, T item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref ushort data0 = ref Unsafe.As<T, ushort>(ref MemoryMarshal.GetArrayDataReference(data));
+        ushort itemNumericValue = Unsafe.As<T, ushort>(ref item);
+        for (int i = 0; i != count; ++i)
+        {
+          if (itemNumericValue == Unsafe.Add(ref data0, i))
+          {
+            return i;
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int FirstOfEnum16Object<T>(T[] data, int count, object item) where T : struct, Enum
+      {
+        if (item is T itemValue)
+        {
+          count = ((uint)count < (uint)data.Length ? count : data.Length);
+          ref ushort data0 = ref Unsafe.As<T, ushort>(ref MemoryMarshal.GetArrayDataReference(data));
+          ushort itemNumericValue = Unsafe.As<T, ushort>(ref itemValue);
+          for (int i = 0; i != count; ++i)
+          {
+            if (itemNumericValue == Unsafe.Add(ref data0, i))
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int LastOfEnum16Generic<T>(T[] data, int count, T item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref ushort data0 = ref Unsafe.As<T, ushort>(ref MemoryMarshal.GetArrayDataReference(data));
+        ushort itemNumericValue = Unsafe.As<T, ushort>(ref item);
+        while (count-- != 0)
+        {
+          if (itemNumericValue == Unsafe.Add(ref data0, count))
+          {
+            break;
+          }
+        }
+        return count;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int FirstOfEnum32Generic<T>(T[] data, int count, T item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref uint data0 = ref Unsafe.As<T, uint>(ref MemoryMarshal.GetArrayDataReference(data));
+        uint itemNumericValue = Unsafe.As<T, uint>(ref item);
+        for (int i = 0; i != count; ++i)
+        {
+          if (itemNumericValue == Unsafe.Add(ref data0, i))
+          {
+            return i;
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int FirstOfEnum32Object<T>(T[] data, int count, object item) where T : struct, Enum
+      {
+        if (item is T itemValue)
+        {
+          count = ((uint)count < (uint)data.Length ? count : data.Length);
+          ref uint data0 = ref Unsafe.As<T, uint>(ref MemoryMarshal.GetArrayDataReference(data));
+          uint itemNumericValue = Unsafe.As<T, uint>(ref itemValue);
+          for (int i = 0; i != count; ++i)
+          {
+            if (itemNumericValue == Unsafe.Add(ref data0, i))
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int LastOfEnum32Generic<T>(T[] data, int count, T item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref uint data0 = ref Unsafe.As<T, uint>(ref MemoryMarshal.GetArrayDataReference(data));
+        uint itemNumericValue = Unsafe.As<T, uint>(ref item);
+        while (count-- != 0)
+        {
+          if (itemNumericValue == Unsafe.Add(ref data0, count))
+          {
+            break;
+          }
+        }
+        return count;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int FirstOfEnum64Generic<T>(T[] data, int count, T item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref ulong data0 = ref Unsafe.As<T, ulong>(ref MemoryMarshal.GetArrayDataReference(data));
+        ulong itemNumericValue = Unsafe.As<T, ulong>(ref item);
+        for (int i = 0; i != count; ++i)
+        {
+          if (itemNumericValue == Unsafe.Add(ref data0, i))
+          {
+            return i;
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int FirstOfEnum64Object<T>(T[] data, int count, object item) where T : struct, Enum
+      {
+        if (item is T itemValue)
+        {
+          count = ((uint)count < (uint)data.Length ? count : data.Length);
+          ref ulong data0 = ref Unsafe.As<T, ulong>(ref MemoryMarshal.GetArrayDataReference(data));
+          ulong itemNumericValue = Unsafe.As<T, ulong>(ref itemValue);
+          for (int i = 0; i != count; ++i)
+          {
+            if (itemNumericValue == Unsafe.Add(ref data0, i))
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int LastOfEnum64Generic<T>(T[] data, int count, T item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref ulong data0 = ref Unsafe.As<T, ulong>(ref MemoryMarshal.GetArrayDataReference(data));
+        ulong itemNumericValue = Unsafe.As<T, ulong>(ref item);
+        while (count-- != 0)
+        {
+          if (itemNumericValue == Unsafe.Add(ref data0, count))
+          {
+            break;
+          }
+        }
+        return count;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int FirstOfEnumNativeGeneric<T>(T[] data, int count, T item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref nuint data0 = ref Unsafe.As<T, nuint>(ref MemoryMarshal.GetArrayDataReference(data));
+        nuint itemNumericValue = Unsafe.As<T, nuint>(ref item);
+        for (int i = 0; i != count; ++i)
+        {
+          if (itemNumericValue == Unsafe.Add(ref data0, i))
+          {
+            return i;
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int FirstOfEnumNativeObject<T>(T[] data, int count, object item) where T : struct, Enum
+      {
+        if (item is T itemValue)
+        {
+          count = ((uint)count < (uint)data.Length ? count : data.Length);
+          ref nuint data0 = ref Unsafe.As<T, nuint>(ref MemoryMarshal.GetArrayDataReference(data));
+          nuint itemNumericValue = Unsafe.As<T, nuint>(ref itemValue);
+          for (int i = 0; i != count; ++i)
+          {
+            if (itemNumericValue == Unsafe.Add(ref data0, i))
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int LastOfEnumNativeGeneric<T>(T[] data, int count, T item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref nuint data0 = ref Unsafe.As<T, nuint>(ref MemoryMarshal.GetArrayDataReference(data));
+        nuint itemNumericValue = Unsafe.As<T, nuint>(ref item);
+        while (count-- != 0)
+        {
+          if (itemNumericValue == Unsafe.Add(ref data0, count))
+          {
+            break;
+          }
+        }
+        return count;
+      }
+
+      #endregion enum T : sbyte, byte, short, ushort, int, uint, long, ulong, nint, nuint
+
+      #region Nullable<T> where enum T : sbyte, byte, short, ushort, int, uint, long, ulong, nint, nuint
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int FirstOfNullableEnum8Generic<T>(T?[] data, int count, T? item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item.HasValue)
+        {
+          T itemValue = item.GetValueOrDefault();
+          byte itemNumericValue = Unsafe.As<T, byte>(ref itemValue);
+          for (int i = 0; i != count; ++i)
+          {
+            ref T? datai = ref Unsafe.Add(ref data0, i);
+            T dataiValue = datai.GetValueOrDefault();
+            if (datai.HasValue && itemNumericValue == Unsafe.As<T, byte>(ref dataiValue))
+            {
+              return i;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; i != count; ++i)
+          {
+            if (!Unsafe.Add(ref data0, i).HasValue)
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int FirstOfNullableEnum8Object<T>(T?[] data, int count, object item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item is T itemValue)
+        {
+          byte itemNumericValue = Unsafe.As<T, byte>(ref itemValue);
+          for (int i = 0; i != count; ++i)
+          {
+            ref T? datai = ref Unsafe.Add(ref data0, i);
+            T dataiValue = datai.GetValueOrDefault();
+            if (datai.HasValue && itemNumericValue == Unsafe.As<T, byte>(ref dataiValue))
+            {
+              return i;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; i != count; ++i)
+          {
+            if (!Unsafe.Add(ref data0, i).HasValue)
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int LastOfNullableEnum8Generic<T>(T?[] data, int count, T? item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item.HasValue)
+        {
+          T itemValue = item.GetValueOrDefault();
+          byte itemNumericValue = Unsafe.As<T, byte>(ref itemValue);
+          while (count-- != 0)
+          {
+            ref T? datai = ref Unsafe.Add(ref data0, count);
+            T dataiValue = datai.GetValueOrDefault();
+            if (datai.HasValue && itemNumericValue == Unsafe.As<T, byte>(ref dataiValue))
+            {
+              break;
+            }
+          }
+        }
+        else
+        {
+          while (count-- != 0)
+          {
+            if (!Unsafe.Add(ref data0, count).HasValue)
+            {
+              break;
+            }
+          }
+        }
+        return count;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int FirstOfNullableEnum16Generic<T>(T?[] data, int count, T? item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item.HasValue)
+        {
+          T itemValue = item.GetValueOrDefault();
+          ushort itemNumericValue = Unsafe.As<T, ushort>(ref itemValue);
+          for (int i = 0; i != count; ++i)
+          {
+            ref T? datai = ref Unsafe.Add(ref data0, i);
+            T dataiValue = datai.GetValueOrDefault();
+            if (datai.HasValue && itemNumericValue == Unsafe.As<T, ushort>(ref dataiValue))
+            {
+              return i;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; i != count; ++i)
+          {
+            if (!Unsafe.Add(ref data0, i).HasValue)
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int FirstOfNullableEnum16Object<T>(T?[] data, int count, object item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item is T itemValue)
+        {
+          ushort itemNumericValue = Unsafe.As<T, ushort>(ref itemValue);
+          for (int i = 0; i != count; ++i)
+          {
+            ref T? datai = ref Unsafe.Add(ref data0, i);
+            T dataiValue = datai.GetValueOrDefault();
+            if (datai.HasValue && itemNumericValue == Unsafe.As<T, ushort>(ref dataiValue))
+            {
+              return i;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; i != count; ++i)
+          {
+            if (!Unsafe.Add(ref data0, i).HasValue)
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int LastOfNullableEnum16Generic<T>(T?[] data, int count, T? item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item.HasValue)
+        {
+          T itemValue = item.GetValueOrDefault();
+          ushort itemNumericValue = Unsafe.As<T, ushort>(ref itemValue);
+          while (count-- != 0)
+          {
+            ref T? datai = ref Unsafe.Add(ref data0, count);
+            T dataiValue = datai.GetValueOrDefault();
+            if (datai.HasValue && itemNumericValue == Unsafe.As<T, ushort>(ref dataiValue))
+            {
+              break;
+            }
+          }
+        }
+        else
+        {
+          while (count-- != 0)
+          {
+            if (!Unsafe.Add(ref data0, count).HasValue)
+            {
+              break;
+            }
+          }
+        }
+        return count;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int FirstOfNullableEnum32Generic<T>(T?[] data, int count, T? item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item.HasValue)
+        {
+          T itemValue = item.GetValueOrDefault();
+          uint itemNumericValue = Unsafe.As<T, uint>(ref itemValue);
+          for (int i = 0; i != count; ++i)
+          {
+            ref T? datai = ref Unsafe.Add(ref data0, i);
+            T dataiValue = datai.GetValueOrDefault();
+            if (datai.HasValue && itemNumericValue == Unsafe.As<T, uint>(ref dataiValue))
+            {
+              return i;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; i != count; ++i)
+          {
+            if (!Unsafe.Add(ref data0, i).HasValue)
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int FirstOfNullableEnum32Object<T>(T?[] data, int count, object item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item is T itemValue)
+        {
+          uint itemNumericValue = Unsafe.As<T, uint>(ref itemValue);
+          for (int i = 0; i != count; ++i)
+          {
+            ref T? datai = ref Unsafe.Add(ref data0, i);
+            T dataiValue = datai.GetValueOrDefault();
+            if (datai.HasValue && itemNumericValue == Unsafe.As<T, uint>(ref dataiValue))
+            {
+              return i;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; i != count; ++i)
+          {
+            if (!Unsafe.Add(ref data0, i).HasValue)
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int LastOfNullableEnum32Generic<T>(T?[] data, int count, T? item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item.HasValue)
+        {
+          T itemValue = item.GetValueOrDefault();
+          uint itemNumericValue = Unsafe.As<T, uint>(ref itemValue);
+          while (count-- != 0)
+          {
+            ref T? datai = ref Unsafe.Add(ref data0, count);
+            T dataiValue = datai.GetValueOrDefault();
+            if (datai.HasValue && itemNumericValue == Unsafe.As<T, uint>(ref dataiValue))
+            {
+              break;
+            }
+          }
+        }
+        else
+        {
+          while (count-- != 0)
+          {
+            if (!Unsafe.Add(ref data0, count).HasValue)
+            {
+              break;
+            }
+          }
+        }
+        return count;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int FirstOfNullableEnum64Generic<T>(T?[] data, int count, T? item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item.HasValue)
+        {
+          T itemValue = item.GetValueOrDefault();
+          ulong itemNumericValue = Unsafe.As<T, ulong>(ref itemValue);
+          for (int i = 0; i != count; ++i)
+          {
+            ref T? datai = ref Unsafe.Add(ref data0, i);
+            T dataiValue = datai.GetValueOrDefault();
+            if (datai.HasValue && itemNumericValue == Unsafe.As<T, ulong>(ref dataiValue))
+            {
+              return i;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; i != count; ++i)
+          {
+            if (!Unsafe.Add(ref data0, i).HasValue)
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int FirstOfNullableEnum64Object<T>(T?[] data, int count, object item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item is T itemValue)
+        {
+          ulong itemNumericValue = Unsafe.As<T, ulong>(ref itemValue);
+          for (int i = 0; i != count; ++i)
+          {
+            ref T? datai = ref Unsafe.Add(ref data0, i);
+            T dataiValue = datai.GetValueOrDefault();
+            if (datai.HasValue && itemNumericValue == Unsafe.As<T, ulong>(ref dataiValue))
+            {
+              return i;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; i != count; ++i)
+          {
+            if (!Unsafe.Add(ref data0, i).HasValue)
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int LastOfNullableEnum64Generic<T>(T?[] data, int count, T? item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item.HasValue)
+        {
+          T itemValue = item.GetValueOrDefault();
+          ulong itemNumericValue = Unsafe.As<T, ulong>(ref itemValue);
+          while (count-- != 0)
+          {
+            ref T? datai = ref Unsafe.Add(ref data0, count);
+            T dataiValue = datai.GetValueOrDefault();
+            if (datai.HasValue && itemNumericValue == Unsafe.As<T, ulong>(ref dataiValue))
+            {
+              break;
+            }
+          }
+        }
+        else
+        {
+          while (count-- != 0)
+          {
+            if (!Unsafe.Add(ref data0, count).HasValue)
+            {
+              break;
+            }
+          }
+        }
+        return count;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int FirstOfNullableEnumNativeGeneric<T>(T?[] data, int count, T? item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item.HasValue)
+        {
+          T itemValue = item.GetValueOrDefault();
+          nuint itemNumericValue = Unsafe.As<T, nuint>(ref itemValue);
+          for (int i = 0; i != count; ++i)
+          {
+            ref T? datai = ref Unsafe.Add(ref data0, i);
+            T dataiValue = datai.GetValueOrDefault();
+            if (datai.HasValue && itemNumericValue == Unsafe.As<T, nuint>(ref dataiValue))
+            {
+              return i;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; i != count; ++i)
+          {
+            if (!Unsafe.Add(ref data0, i).HasValue)
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int FirstOfNullableEnumNativeObject<T>(T?[] data, int count, object item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item is T itemValue)
+        {
+          nuint itemNumericValue = Unsafe.As<T, nuint>(ref itemValue);
+          for (int i = 0; i != count; ++i)
+          {
+            ref T? datai = ref Unsafe.Add(ref data0, i);
+            T dataiValue = datai.GetValueOrDefault();
+            if (datai.HasValue && itemNumericValue == Unsafe.As<T, nuint>(ref dataiValue))
+            {
+              return i;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; i != count; ++i)
+          {
+            if (!Unsafe.Add(ref data0, i).HasValue)
+            {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      [MethodImpl(Helper.OptimizeNoInline)]
+      public int LastOfNullableEnumNativeGeneric<T>(T?[] data, int count, T? item) where T : struct, Enum
+      {
+        count = ((uint)count < (uint)data.Length ? count : data.Length);
+        ref T? data0 = ref MemoryMarshal.GetArrayDataReference(data);
+        if (item.HasValue)
+        {
+          T itemValue = item.GetValueOrDefault();
+          nuint itemNumericValue = Unsafe.As<T, nuint>(ref itemValue);
+          while (count-- != 0)
+          {
+            ref T? datai = ref Unsafe.Add(ref data0, count);
+            T dataiValue = datai.GetValueOrDefault();
+            if (datai.HasValue && itemNumericValue == Unsafe.As<T, nuint>(ref dataiValue))
+            {
+              break;
+            }
+          }
+        }
+        else
+        {
+          while (count-- != 0)
+          {
+            if (!Unsafe.Add(ref data0, count).HasValue)
+            {
+              break;
+            }
+          }
+        }
+        return count;
+      }
+
+      #endregion Nullable<T> where enum T : sbyte, byte, short, ushort, int, uint, long, ulong, nint, nuint
     }
 
     #endregion IndexOf
