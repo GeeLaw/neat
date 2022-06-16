@@ -404,17 +404,23 @@ namespace Neat.Collections
     /// <summary>
     /// Sets the capacity to <see cref="Count"/> opportunistically.
     /// </summary>
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public void TrimExcess()
     {
 #if LIST2_ENUMERATION_VERSION
       ++myVersion;
 #endif
-      T[] data = myData;
-      int count = myCount;
+      /* The non-inlining tries to protect us from read introduction.
+      /* See https://github.com/dotnet/docs/issues/29696 */
+      TrimExcessImpl(this, myData, myCount);
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private static void TrimExcessImpl(List2<T> that, T[] data, int count)
+    {
       if (count == 0)
       {
-        myData = theEmptyArray;
+        that.myData = theEmptyArray;
         return;
       }
       if (count < (int)(data.Length * 0.9))
@@ -435,7 +441,7 @@ namespace Neat.Collections
         }
         Array.ConstrainedCopy(data, 0, newData, 0, count);
         /* No more exception is possible beyond this point. */
-        myData = newData;
+        that.myData = newData;
       }
     }
 
@@ -476,11 +482,15 @@ namespace Neat.Collections
     /// Gets an array of length <see cref="Count"/> containing the items in this list.
     /// This array is guaranteed to be newly allocated if <see cref="Count"/> is positive.
     /// </summary>
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public T[] ToArray()
     {
-      T[] data = myData;
-      int count = myCount;
+      return ToArrayImpl(myData, myCount);
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private static T[] ToArrayImpl(T[] data, int count)
+    {
       if (count == 0)
       {
         return theEmptyArray;
@@ -499,11 +509,17 @@ namespace Neat.Collections
     /// <param name="start">This value must be non-negative and not exceed <see cref="Count"/>.</param>
     /// <param name="length">This value must be non-negative and not exceed <see cref="Count"/> minus <paramref name="start"/>.</param>
     /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="start"/> or <paramref name="length"/> is out of range.</exception>
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public T[] ToArray(int start, int length)
     {
-      T[] data = myData;
-      int count = myCount;
+      /* Why do we put myData as the first argument but myCount the last?
+      /* To reduce the need to shuffle arguments in case ToArray itself is not inlined. */
+      return ToArrayImpl(myData, start, length, myCount);
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private static T[] ToArrayImpl(T[] data, int start, int length, int count)
+    {
       if ((uint)start > (uint)count)
       {
         List2.ThrowStart();
@@ -529,11 +545,15 @@ namespace Neat.Collections
     /// <param name="start">This value must be non-negative and not exceed <see cref="Count"/>.</param>
     /// <param name="length">This value must be non-negative and not exceed <see cref="Count"/> minus <paramref name="start"/>.</param>
     /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="start"/> or <paramref name="length"/> is out of range.</exception>
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public List2<T> GetRange(int start, int length)
     {
-      T[] data = myData;
-      int count = myCount;
+      return GetRangeImpl(myData, start, length, myCount);
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private static List2<T> GetRangeImpl(T[] data, int start, int length, int count)
+    {
       if ((uint)start > (uint)count)
       {
         List2.ThrowStart();
@@ -1518,17 +1538,21 @@ namespace Neat.Collections
     /// </summary>
     /// <param name="predicate">This argument must not be <see langword="null"/>.</param>
     /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public bool ThereExists<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
+    {
+      return ThereExistsImpl(this, predicate, myData, myCount);
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private static bool ThereExistsImpl<TPredicate>(List2<T> that, TPredicate predicate, T[] data, int count) where TPredicate : IPredicate
     {
       /* A rude predicate.Invoke could mutate the list. */
 #if LIST2_ENUMERATION_VERSION
-      uint version = myVersion;
+      uint version = that.myVersion;
 #endif
-      T[] data = myData;
-      int count = myCount;
-      /* Protect us from instance corruption due to race conditions.
-      /* See Neat.Collections.List2.IndexOfHelper.FirstOfObject method. */
+      /* It is important to adjust "count", because it could come from an instance corrupted by race conditions.
+      /* We want to skip array bounds check while keeping memory safety as far as CLR is concerned. */
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
       if (predicate is null)
@@ -1537,10 +1561,10 @@ namespace Neat.Collections
       }
       for (int index = 0; index != count; ++index)
       {
-        if (predicate.Invoke(this, index, Unsafe.Add(ref data0, index)))
+        if (predicate.Invoke(that, index, Unsafe.Add(ref data0, index)))
         {
 #if LIST2_ENUMERATION_VERSION
-          if (version != myVersion)
+          if (version != that.myVersion)
           {
             List2.ThrowVersion();
           }
@@ -1549,7 +1573,7 @@ namespace Neat.Collections
         }
       }
 #if LIST2_ENUMERATION_VERSION
-      if (version != myVersion)
+      if (version != that.myVersion)
       {
         List2.ThrowVersion();
       }
@@ -1563,14 +1587,18 @@ namespace Neat.Collections
     /// </summary>
     /// <param name="predicate">This argument must not be <see langword="null"/>.</param>
     /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public bool ForAll<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
+      return ForAllImpl(this, predicate, myData, myCount);
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private static bool ForAllImpl<TPredicate>(List2<T> that, TPredicate predicate, T[] data, int count) where TPredicate : IPredicate
+    {
 #if LIST2_ENUMERATION_VERSION
-      uint version = myVersion;
+      uint version = that.myVersion;
 #endif
-      T[] data = myData;
-      int count = myCount;
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
       if (predicate is null)
@@ -1579,10 +1607,10 @@ namespace Neat.Collections
       }
       for (int index = 0; index != count; ++index)
       {
-        if (!predicate.Invoke(this, index, Unsafe.Add(ref data0, index)))
+        if (!predicate.Invoke(that, index, Unsafe.Add(ref data0, index)))
         {
 #if LIST2_ENUMERATION_VERSION
-          if (version != myVersion)
+          if (version != that.myVersion)
           {
             List2.ThrowVersion();
           }
@@ -1591,7 +1619,7 @@ namespace Neat.Collections
         }
       }
 #if LIST2_ENUMERATION_VERSION
-      if (version != myVersion)
+      if (version != that.myVersion)
       {
         List2.ThrowVersion();
       }
@@ -1605,14 +1633,18 @@ namespace Neat.Collections
     /// </summary>
     /// <param name="predicate">This argument must not be <see langword="null"/>.</param>
     /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public int CountSuchThat<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
+      return CountSuchThatImpl(this, predicate, myData, myCount);
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private static int CountSuchThatImpl<TPredicate>(List2<T> that, TPredicate predicate, T[] data, int count) where TPredicate : IPredicate
+    {
 #if LIST2_ENUMERATION_VERSION
-      uint version = myVersion;
+      uint version = that.myVersion;
 #endif
-      T[] data = myData;
-      int count = myCount;
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
       if (predicate is null)
@@ -1622,13 +1654,13 @@ namespace Neat.Collections
       int countSuchThat = 0;
       for (int index = 0; index != count; ++index)
       {
-        if (predicate.Invoke(this, index, Unsafe.Add(ref data0, index)))
+        if (predicate.Invoke(that, index, Unsafe.Add(ref data0, index)))
         {
           ++countSuchThat;
         }
       }
 #if LIST2_ENUMERATION_VERSION
-      if (version != myVersion)
+      if (version != that.myVersion)
       {
         List2.ThrowVersion();
       }
@@ -1647,14 +1679,18 @@ namespace Neat.Collections
     /// </summary>
     /// <param name="predicate">This argument must not be <see langword="null"/>.</param>
     /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public int FirstSuchThat<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
+      return FirstSuchThatImpl(this, predicate, myData, myCount);
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private static int FirstSuchThatImpl<TPredicate>(List2<T> that, TPredicate predicate, T[] data, int count) where TPredicate : IPredicate
+    {
 #if LIST2_ENUMERATION_VERSION
-      uint version = myVersion;
+      uint version = that.myVersion;
 #endif
-      T[] data = myData;
-      int count = myCount;
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
       if (predicate is null)
@@ -1663,10 +1699,10 @@ namespace Neat.Collections
       }
       for (int index = 0; index != count; ++index)
       {
-        if (predicate.Invoke(this, index, Unsafe.Add(ref data0, index)))
+        if (predicate.Invoke(that, index, Unsafe.Add(ref data0, index)))
         {
 #if LIST2_ENUMERATION_VERSION
-          if (version != myVersion)
+          if (version != that.myVersion)
           {
             List2.ThrowVersion();
           }
@@ -1675,7 +1711,7 @@ namespace Neat.Collections
         }
       }
 #if LIST2_ENUMERATION_VERSION
-      if (version != myVersion)
+      if (version != that.myVersion)
       {
         List2.ThrowVersion();
       }
@@ -1692,14 +1728,18 @@ namespace Neat.Collections
     /// <param name="afterInclusive">This value must be non-negative and not exceed <see cref="Count"/>.</param>
     /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">If <paramref name="afterInclusive"/> is out of range.</exception>
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public int FirstSuchThat<TPredicate>(TPredicate predicate, int afterInclusive) where TPredicate : IPredicate
     {
+      return FirstSuchThatImpl(this, predicate, afterInclusive, myData, myCount);
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private static int FirstSuchThatImpl<TPredicate>(List2<T> that, TPredicate predicate, int afterInclusive, T[] data, int count) where TPredicate : IPredicate
+    {
 #if LIST2_ENUMERATION_VERSION
-      uint version = myVersion;
+      uint version = that.myVersion;
 #endif
-      T[] data = myData;
-      int count = myCount;
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
       if (predicate is null)
@@ -1712,10 +1752,10 @@ namespace Neat.Collections
       }
       for (; afterInclusive != count; ++afterInclusive)
       {
-        if (predicate.Invoke(this, afterInclusive, Unsafe.Add(ref data0, afterInclusive)))
+        if (predicate.Invoke(that, afterInclusive, Unsafe.Add(ref data0, afterInclusive)))
         {
 #if LIST2_ENUMERATION_VERSION
-          if (version != myVersion)
+          if (version != that.myVersion)
           {
             List2.ThrowVersion();
           }
@@ -1724,7 +1764,7 @@ namespace Neat.Collections
         }
       }
 #if LIST2_ENUMERATION_VERSION
-      if (version != myVersion)
+      if (version != that.myVersion)
       {
         List2.ThrowVersion();
       }
@@ -1742,14 +1782,18 @@ namespace Neat.Collections
     /// <param name="length">This value must be non-negative and not exceed <see cref="Count"/> minus <paramref name="afterInclusive"/>.</param>
     /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="afterInclusive"/> or <paramref name="length"/> is out of range.</exception>
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public int FirstSuchThat<TPredicate>(TPredicate predicate, int afterInclusive, int length) where TPredicate : IPredicate
     {
+      return FirstSuchThatImpl(this, predicate, afterInclusive, length, myData, myCount);
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private static int FirstSuchThatImpl<TPredicate>(List2<T> that, TPredicate predicate, int afterInclusive, int length, T[] data, int count) where TPredicate : IPredicate
+    {
 #if LIST2_ENUMERATION_VERSION
-      uint version = myVersion;
+      uint version = that.myVersion;
 #endif
-      T[] data = myData;
-      int count = myCount;
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
       if (predicate is null)
@@ -1766,10 +1810,10 @@ namespace Neat.Collections
       }
       for (count = afterInclusive + length; afterInclusive != count; ++afterInclusive)
       {
-        if (predicate.Invoke(this, afterInclusive, Unsafe.Add(ref data0, afterInclusive)))
+        if (predicate.Invoke(that, afterInclusive, Unsafe.Add(ref data0, afterInclusive)))
         {
 #if LIST2_ENUMERATION_VERSION
-          if (version != myVersion)
+          if (version != that.myVersion)
           {
             List2.ThrowVersion();
           }
@@ -1778,7 +1822,7 @@ namespace Neat.Collections
         }
       }
 #if LIST2_ENUMERATION_VERSION
-      if (version != myVersion)
+      if (version != that.myVersion)
       {
         List2.ThrowVersion();
       }
@@ -1793,14 +1837,18 @@ namespace Neat.Collections
     /// </summary>
     /// <param name="predicate">This argument must not be <see langword="null"/>.</param>
     /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public int LastSuchThat<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
+      return LastSuchThatImpl(this, predicate, myData, myCount);
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private static int LastSuchThatImpl<TPredicate>(List2<T> that, TPredicate predicate, T[] data, int count) where TPredicate : IPredicate
+    {
 #if LIST2_ENUMERATION_VERSION
-      uint version = myVersion;
+      uint version = that.myVersion;
 #endif
-      T[] data = myData;
-      int count = myCount;
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
       if (predicate is null)
@@ -1809,13 +1857,13 @@ namespace Neat.Collections
       }
       while (count-- != 0)
       {
-        if (predicate.Invoke(this, count, Unsafe.Add(ref data0, count)))
+        if (predicate.Invoke(that, count, Unsafe.Add(ref data0, count)))
         {
           break;
         }
       }
 #if LIST2_ENUMERATION_VERSION
-      if (version != myVersion)
+      if (version != that.myVersion)
       {
         List2.ThrowVersion();
       }
@@ -1832,14 +1880,18 @@ namespace Neat.Collections
     /// <param name="beforeExclusive">This value must be non-negative and not exceed <see cref="Count"/>.</param>
     /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">If <paramref name="beforeExclusive"/> is out of range.</exception>
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public int LastSuchThat<TPredicate>(TPredicate predicate, int beforeExclusive) where TPredicate : IPredicate
     {
+      return LastSuchThatImpl(this, predicate, beforeExclusive, myData, myCount);
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private static int LastSuchThatImpl<TPredicate>(List2<T> that, TPredicate predicate, int beforeExclusive, T[] data, int count) where TPredicate : IPredicate
+    {
 #if LIST2_ENUMERATION_VERSION
-      uint version = myVersion;
+      uint version = that.myVersion;
 #endif
-      T[] data = myData;
-      int count = myCount;
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
       if (predicate is null)
@@ -1852,13 +1904,13 @@ namespace Neat.Collections
       }
       while (beforeExclusive-- != 0)
       {
-        if (predicate.Invoke(this, beforeExclusive, Unsafe.Add(ref data0, beforeExclusive)))
+        if (predicate.Invoke(that, beforeExclusive, Unsafe.Add(ref data0, beforeExclusive)))
         {
           break;
         }
       }
 #if LIST2_ENUMERATION_VERSION
-      if (version != myVersion)
+      if (version != that.myVersion)
       {
         List2.ThrowVersion();
       }
@@ -1876,14 +1928,19 @@ namespace Neat.Collections
     /// <param name="length">This value must be non-negative and not exceed <paramref name="beforeExclusive"/>.</param>
     /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="beforeExclusive"/> or <paramref name="length"/> is out of range.</exception>
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public int LastSuchThat<TPredicate>(TPredicate predicate, int beforeExclusive, int length) where TPredicate : IPredicate
     {
+      return LastSuchThatImpl(this, predicate, beforeExclusive, length, myData, myCount);
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private static int LastSuchThatImpl<TPredicate>(List2<T> that, TPredicate predicate, int beforeExclusive, int length,
+      T[] data, int count) where TPredicate : IPredicate
+    {
 #if LIST2_ENUMERATION_VERSION
-      uint version = myVersion;
+      uint version = that.myVersion;
 #endif
-      T[] data = myData;
-      int count = myCount;
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
       if (predicate is null)
@@ -1900,11 +1957,11 @@ namespace Neat.Collections
       }
       for (count = beforeExclusive - length; beforeExclusive-- != count;)
       {
-        if (predicate.Invoke(this, beforeExclusive, Unsafe.Add(ref data0, beforeExclusive)))
+        if (predicate.Invoke(that, beforeExclusive, Unsafe.Add(ref data0, beforeExclusive)))
         {
           /* Note that the not-found termination does not have "beforeExclusive == -1". */
 #if LIST2_ENUMERATION_VERSION
-          if (version != myVersion)
+          if (version != that.myVersion)
           {
             List2.ThrowVersion();
           }
@@ -1913,7 +1970,7 @@ namespace Neat.Collections
         }
       }
 #if LIST2_ENUMERATION_VERSION
-      if (version != myVersion)
+      if (version != that.myVersion)
       {
         List2.ThrowVersion();
       }
@@ -1934,14 +1991,18 @@ namespace Neat.Collections
     /// </summary>
     /// <param name="predicate">This argument must not be <see langword="null"/>.</param>
     /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public int RemoveAllSuchThat<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
+      return RemoveAllSuchThatImpl(this, predicate, myData, myCount);
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private static int RemoveAllSuchThatImpl<TPredicate>(List2<T> that, TPredicate predicate, T[] data, int count) where TPredicate : IPredicate
+    {
 #if LIST2_ENUMERATION_VERSION
-      uint version = ++myVersion;
+      uint version = ++that.myVersion;
 #endif
-      T[] data = myData;
-      int count = myCount;
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
       if (predicate is null)
@@ -1952,7 +2013,7 @@ namespace Neat.Collections
       int i = 0;
       while (i != count)
       {
-        if (predicate.Invoke(this, i, Unsafe.Add(ref data0, i)))
+        if (predicate.Invoke(that, i, Unsafe.Add(ref data0, i)))
         {
           break;
         }
@@ -1963,14 +2024,14 @@ namespace Neat.Collections
       int j = i;
       while (i++ != count)
       {
-        if (!predicate.Invoke(this, i, Unsafe.Add(ref data0, i)))
+        if (!predicate.Invoke(that, i, Unsafe.Add(ref data0, i)))
         {
           Unsafe.Add(ref data0, j++) = Unsafe.Add(ref data0, i);
         }
       }
       /* If bad things happen, throw the exception without touching the internal state of the list any more. */
 #if LIST2_ENUMERATION_VERSION
-      if (version != myVersion)
+      if (version != that.myVersion)
       {
         List2.ThrowVersion();
       }
@@ -1983,7 +2044,7 @@ namespace Neat.Collections
         Array.Clear(data, j, count);
       }
       /* No more exception is possible beyond this point. */
-      myCount = j;
+      that.myCount = j;
       return count;
     }
 
@@ -2000,14 +2061,18 @@ namespace Neat.Collections
     /// <param name="length">This value must be non-negative and not exceed <see cref="Count"/> minus <paramref name="start"/>.</param>
     /// <exception cref="ArgumentNullException">If <paramref name="predicate"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">If either <paramref name="start"/> or <paramref name="length"/> is out of range.</exception>
-    [MethodImpl(Helper.JustOptimize)]
+    [MethodImpl(Helper.OptimizeInline)]
     public int RemoveAllSuchThat<TPredicate>(TPredicate predicate, int start, int length) where TPredicate : IPredicate
     {
+      return RemoveAllSuchThatImpl(this, predicate, start, length, myData, myCount);
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private static int RemoveAllSuchThatImpl<TPredicate>(List2<T> that, TPredicate predicate, int start, int length, T[] data, int count) where TPredicate : IPredicate
+    {
 #if LIST2_ENUMERATION_VERSION
-      uint version = ++myVersion;
+      uint version = ++that.myVersion;
 #endif
-      T[] data = myData;
-      int count = myCount;
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
       if (predicate is null)
@@ -2025,7 +2090,7 @@ namespace Neat.Collections
       int end = start + length;
       while (start != end)
       {
-        if (predicate.Invoke(this, start, Unsafe.Add(ref data0, start)))
+        if (predicate.Invoke(that, start, Unsafe.Add(ref data0, start)))
         {
           break;
         }
@@ -2034,13 +2099,13 @@ namespace Neat.Collections
       int j = start;
       while (start++ != end)
       {
-        if (!predicate.Invoke(this, start, Unsafe.Add(ref data0, start)))
+        if (!predicate.Invoke(that, start, Unsafe.Add(ref data0, start)))
         {
           Unsafe.Add(ref data0, j++) = Unsafe.Add(ref data0, start);
         }
       }
 #if LIST2_ENUMERATION_VERSION
-      if (version != myVersion)
+      if (version != that.myVersion)
       {
         List2.ThrowVersion();
       }
@@ -2058,7 +2123,7 @@ namespace Neat.Collections
         Array.Clear(data, j, end);
       }
       /* No more exception is possible beyond this point. */
-      myCount = j;
+      that.myCount = j;
       return end;
     }
 
@@ -2563,7 +2628,7 @@ namespace Neat.Collections
     {
       #region object (all reference types)
 
-      [MethodImpl(Helper.JustOptimize)]
+      [MethodImpl(Helper.OptimizeNoInline)]
       public int FirstOfObject(object[] data, int count, object item)
       {
         /* We do not try IEquatable<T> for T : class because of the following rationales:
@@ -2573,8 +2638,8 @@ namespace Neat.Collections
         /*     makes interface method dispatch on par with class virtual method dispatch
         /*     for monomorphic sites.)
         /* (2) We cannot take advantage of generic delegate contravariance to reduce allocation of delegates.
-        /* It is important to adjust "count", because it could come from an instance corrupted by race conditions.
-        /* And we want to skip array bounds check while keeping memory safety as far as CLR is concerned. */
+        /* Although this method is only called through a delegate, we still require it not be inlined
+        /* in case the JIT compiler becomes clever enough to inline delegates in the future. */
         count = ((uint)count < (uint)data.Length ? count : data.Length);
         ref object data0 = ref MemoryMarshal.GetArrayDataReference(data);
         if (item is null)
@@ -2603,7 +2668,7 @@ namespace Neat.Collections
         return -1;
       }
 
-      [MethodImpl(Helper.JustOptimize)]
+      [MethodImpl(Helper.OptimizeNoInline)]
       public int LastOfObject(object[] data, int count, object item)
       {
         count = ((uint)count < (uint)data.Length ? count : data.Length);
@@ -2635,7 +2700,7 @@ namespace Neat.Collections
 
       #region struct T : IEquatable<T>
 
-      [MethodImpl(Helper.JustOptimize)]
+      [MethodImpl(Helper.OptimizeNoInline)]
       public int FirstOfEquatableValueGeneric<T>(T[] data, int count, T item) where T : struct, IEquatable<T>
       {
         count = ((uint)count < (uint)data.Length ? count : data.Length);
@@ -2654,7 +2719,7 @@ namespace Neat.Collections
         return -1;
       }
 
-      [MethodImpl(Helper.JustOptimize)]
+      [MethodImpl(Helper.OptimizeNoInline)]
       public int FirstOfEquatableValueObject<T>(T[] data, int count, object value) where T : struct, IEquatable<T>
       {
         if (value is T item)
@@ -2672,7 +2737,7 @@ namespace Neat.Collections
         return -1;
       }
 
-      [MethodImpl(Helper.JustOptimize)]
+      [MethodImpl(Helper.OptimizeNoInline)]
       public int LastOfEquatableValueGeneric<T>(T[] data, int count, T item) where T : struct, IEquatable<T>
       {
         count = ((uint)count < (uint)data.Length ? count : data.Length);
@@ -2691,7 +2756,7 @@ namespace Neat.Collections
 
       #region Nullable<T> where T : struct, IEquatable<T>
 
-      [MethodImpl(Helper.JustOptimize)]
+      [MethodImpl(Helper.OptimizeNoInline)]
       public int FirstOfNullableEquatableValueGeneric<T>(T?[] data, int count, T? item) where T : struct, IEquatable<T>
       {
         count = ((uint)count < (uint)data.Length ? count : data.Length);
@@ -2720,7 +2785,7 @@ namespace Neat.Collections
         return -1;
       }
 
-      [MethodImpl(Helper.JustOptimize)]
+      [MethodImpl(Helper.OptimizeNoInline)]
       public int FirstOfNullableEquatableValueObject<T>(T?[] data, int count, object value) where T : struct, IEquatable<T>
       {
         count = ((uint)count < (uint)data.Length ? count : data.Length);
@@ -2749,7 +2814,7 @@ namespace Neat.Collections
         return -1;
       }
 
-      [MethodImpl(Helper.JustOptimize)]
+      [MethodImpl(Helper.OptimizeNoInline)]
       public int LastOfNullableEquatableValueGeneric<T>(T?[] data, int count, T? item) where T : struct, IEquatable<T>
       {
         count = ((uint)count < (uint)data.Length ? count : data.Length);
@@ -2782,7 +2847,7 @@ namespace Neat.Collections
 
       #region struct T not implementing IEquatable<T>
 
-      [MethodImpl(Helper.JustOptimize)]
+      [MethodImpl(Helper.OptimizeNoInline)]
       public int FirstOfValueGeneric<T>(T[] data, int count, T item) where T : struct
       {
         count = ((uint)count < (uint)data.Length ? count : data.Length);
@@ -2813,7 +2878,7 @@ namespace Neat.Collections
         return -1;
       }
 
-      [MethodImpl(Helper.JustOptimize)]
+      [MethodImpl(Helper.OptimizeNoInline)]
       public int FirstOfValueObject<T>(T[] data, int count, object value) where T : struct
       {
         if (value is T)
@@ -2833,7 +2898,7 @@ namespace Neat.Collections
         return -1;
       }
 
-      [MethodImpl(Helper.JustOptimize)]
+      [MethodImpl(Helper.OptimizeNoInline)]
       public int LastOfValueGeneric<T>(T[] data, int count, T item) where T : struct
       {
         count = ((uint)count < (uint)data.Length ? count : data.Length);
@@ -2854,7 +2919,7 @@ namespace Neat.Collections
 
       #region Nullable<T> where T : struct does not implement IEquatable<T>
 
-      [MethodImpl(Helper.JustOptimize)]
+      [MethodImpl(Helper.OptimizeNoInline)]
       public int FirstOfNullableValueGeneric<T>(T?[] data, int count, T? item) where T : struct
       {
         count = ((uint)count < (uint)data.Length ? count : data.Length);
@@ -2884,7 +2949,7 @@ namespace Neat.Collections
         return -1;
       }
 
-      [MethodImpl(Helper.JustOptimize)]
+      [MethodImpl(Helper.OptimizeNoInline)]
       public int FirstOfNullableValueObject<T>(T?[] data, int count, object value) where T : struct
       {
         count = ((uint)count < (uint)data.Length ? count : data.Length);
@@ -2912,7 +2977,7 @@ namespace Neat.Collections
         return -1;
       }
 
-      [MethodImpl(Helper.JustOptimize)]
+      [MethodImpl(Helper.OptimizeNoInline)]
       public int LastOfNullableValueGeneric<T>(T?[] data, int count, T? item) where T : struct
       {
         count = ((uint)count < (uint)data.Length ? count : data.Length);
