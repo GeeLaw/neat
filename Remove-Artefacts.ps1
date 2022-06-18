@@ -23,6 +23,6 @@ Get-ChildItem $src -Include bin, obj, .vs -Directory -Force -Recurse | ForEach-O
     $_.Delete($true);
   }
 };
-Write-Verbose 'Clear-Artefacts.ps1 completed.';
+Write-Verbose 'Remove-Artefacts.ps1 completed.';
 
 }

@@ -5,6 +5,7 @@ End
 {
 
 $txt = @(
+  '.gitattributes',
   '.gitignore',
   '.md',
   '.editorconfig',
