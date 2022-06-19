@@ -255,9 +255,47 @@ namespace Neat.Collections
     /// <returns><see langword="true"/> if defragmentation happened.
     /// The return value can be <see langword="false"/> even if <paramref name="force"/> is <see langword="true"/>,
     /// when there is no fragmentation at all.</returns>
+    [MethodImpl(Helper.JustOptimize)]
     public bool Defragment(bool force)
     {
-      throw new NotImplementedException();
+#if MAP2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      int activeCount = myActiveCount, touchedCount = myTouchedCount;
+      if (myFirstFreeEntry < 0 || (!force && activeCount >= (int)(touchedCount * 0.9)))
+      {
+        return false;
+      }
+      int[] buckets = myBuckets;
+      Entry[] entries = myEntries;
+      Map2.ResetBuckets(buckets);
+      /* Rewire the entries up to the first inactive one. */
+      int i = 0, k, bucketsLength = buckets.Length;
+      for (; entries[i].HashCode >= 0; ++i)
+      {
+        k = entries[i].HashCode % bucketsLength;
+        entries[i].Next = buckets[k];
+        buckets[k] = i;
+      }
+      /* Move active entries to the front and rewire them. */
+      for (int j = i + 1; i != activeCount; ++i, ++j)
+      {
+        while (entries[j].HashCode < 0)
+        {
+          ++j;
+        }
+        entries[i] = entries[j];
+        k = entries[i].HashCode % bucketsLength;
+        entries[i].Next = buckets[k];
+        buckets[k] = i;
+      }
+      if (RuntimeHelpers.IsReferenceOrContainsReferences<Entry>())
+      {
+        Array.Clear(entries, activeCount, touchedCount - activeCount);
+      }
+      myTouchedCount = activeCount;
+      myFirstFreeEntry = -1;
+      return true;
     }
 
     /// <summary>
