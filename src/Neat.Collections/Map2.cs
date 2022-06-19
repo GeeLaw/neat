@@ -2140,9 +2140,41 @@ namespace Neat.Collections
     /// If the key does not exist, <paramref name="value"/> is neither read nor written to.
     /// </summary>
     /// <returns><see langword="true"/> if the key exists.</returns>
+    [SuppressMessage("Style", "IDE0180", Justification = "I do not like this fancy stuff.")]
+    [MethodImpl(Helper.JustOptimize)]
     public new bool TrySwap(TKey key, ref TValue value)
     {
-      throw new NotImplementedException();
+#if MAP2_ENUMERATION_VERSION
+      uint version = ++myVersion, version2 = myVersion2;
+#endif
+      int[] buckets = myBuckets;
+      Entry[] entries = myEntries;
+      int hashCode = myComparer.GetHashCode(key) & Map2.HashCodeMask;
+      int currentEntry = buckets[hashCode % buckets.Length];
+      while (currentEntry >= 0)
+      {
+        if (entries[currentEntry].HashCode == hashCode && myComparer.Equals(key, entries[currentEntry].Key))
+        {
+#if MAP2_ENUMERATION_VERSION
+          if (version != myVersion || version2 != myVersion2)
+          {
+            Map2.ThrowVersion();
+          }
+#endif
+          TValue tmp = entries[currentEntry].Value;
+          entries[currentEntry].Value = value;
+          value = tmp;
+          return true;
+        }
+        currentEntry = entries[currentEntry].Next;
+      }
+#if MAP2_ENUMERATION_VERSION
+      if (version != myVersion || version2 != myVersion2)
+      {
+        Map2.ThrowVersion();
+      }
+#endif
+      return false;
     }
 
     /// <returns><see langword="true"/> if the key existed.</returns>
