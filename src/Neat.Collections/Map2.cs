@@ -2333,9 +2333,44 @@ namespace Neat.Collections
     /// </summary>
     /// <returns><see langword="true"/> if the key did not exist.</returns>
     /// <exception cref="InvalidOperationException">If the number of key/value pairs will exceed <see cref="Map2.MaximumCapacity"/>.</exception>
+    [MethodImpl(Helper.JustOptimize)]
     public new bool TryAddNew(TKey key, TValue value)
     {
-      throw new NotImplementedException();
+#if MAP2_ENUMERATION_VERSION
+      uint version = ++myVersion, version2 = myVersion2;
+#endif
+      int[] buckets = myBuckets;
+      Entry[] entries = myEntries;
+      int hashCode = myComparer.GetHashCode(key) & Map2.HashCodeMask;
+      int currentEntry = buckets[hashCode % buckets.Length];
+      while (currentEntry >= 0)
+      {
+        if (entries[currentEntry].HashCode == hashCode && myComparer.Equals(key, entries[currentEntry].Key))
+        {
+#if MAP2_ENUMERATION_VERSION
+          if (version != myVersion || version2 != myVersion2)
+          {
+            Map2.ThrowVersion();
+          }
+#endif
+          return false;
+        }
+        currentEntry = entries[currentEntry].Next;
+      }
+#if MAP2_ENUMERATION_VERSION
+      if (version != myVersion || version2 != myVersion2)
+      {
+        Map2.ThrowVersion();
+      }
+#endif
+      currentEntry = AllocEntry(out buckets, out entries);
+      entries[currentEntry].HashCode = hashCode;
+      entries[currentEntry].Key = key;
+      entries[currentEntry].Value = value;
+      hashCode %= buckets.Length;
+      entries[currentEntry].Next = buckets[hashCode];
+      buckets[hashCode] = currentEntry;
+      return true;
     }
 
     /// <summary>
@@ -2575,19 +2610,34 @@ namespace Neat.Collections
 
     #region IDictionary<TKey, TValue>.Add, ICollection<KeyValuePair<TKey, TValue>>.Add, IDictionary.Add
 
+    [MethodImpl(Helper.OptimizeInline)]
     void IDictionary<TKey, TValue>.Add(TKey key, TValue value)
     {
-      throw new NotImplementedException();
+      if (!TryAddNew(key, value))
+      {
+        Map2.ThrowKeyExists();
+      }
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item)
     {
-      throw new NotImplementedException();
+      if (!TryAddNew(item.Key, item.Value))
+      {
+        Map2.ThrowKeyExists();
+      }
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     void IDictionary.Add(object key, object value)
     {
-      throw new NotImplementedException();
+#if MAP2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      if (!TryAddNew((TKey)key, (TValue)value))
+      {
+        Map2.ThrowKeyExists();
+      }
     }
 
     #endregion IDictionary<TKey, TValue>.Add, ICollection<KeyValuePair<TKey, TValue>>.Add, IDictionary.Add
