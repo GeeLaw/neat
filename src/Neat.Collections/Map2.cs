@@ -636,6 +636,66 @@ namespace Neat.Collections
       return new Enumerator(this);
     }
 
+    /// <summary>
+    /// The entry at the returned index should be treated as uninitialized.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    private protected int AllocEntry(out int[] outBuckets, out Entry[] outEntries)
+    {
+      Entry[] entries = myEntries;
+      int firstFreeEntry = myFirstFreeEntry;
+      if (firstFreeEntry >= 0)
+      {
+        outBuckets = myBuckets;
+        outEntries = entries;
+        myFirstFreeEntry = entries[firstFreeEntry].Next;
+        return firstFreeEntry;
+      }
+      if ((firstFreeEntry = myTouchedCount) < entries.Length)
+      {
+        outBuckets = myBuckets;
+        outEntries = entries;
+        myTouchedCount = firstFreeEntry + 1;
+        return firstFreeEntry;
+      }
+      return AllocEntryRareImpl(out outBuckets, out outEntries, entries, mySizeIndex + 1);
+    }
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private int AllocEntryRareImpl(out int[] outBuckets, out Entry[] outEntries, Entry[] oldEntries, int newSizeIndex)
+    {
+      Map2.Size[] sizes = Map2.theSizes;
+      if (newSizeIndex >= sizes.Length)
+      {
+        Map2.ThrowTooMany();
+      }
+      Map2.Size sz = sizes[newSizeIndex];
+      int[] buckets = GC.AllocateUninitializedArray<int>(sz.BucketCount, false);
+      Entry[] entries = new Entry[sz.EntryCount];
+      Map2.ResetBuckets(buckets);
+      Array.ConstrainedCopy(oldEntries, 0, entries, 0, oldEntries.Length);
+      ref Entry entry0 = ref MemoryMarshal.GetArrayDataReference(entries);
+      for (int i = 0, j, oldEntriesLength = oldEntries.Length; i != oldEntriesLength; ++i)
+      {
+        /* We should not use unsafe access to "buckets",
+        /* because the entries could have been corrupted by race conditions
+        /* and "j" could be negative. */
+        j = Unsafe.Add(ref entry0, i).HashCode % sz.BucketCount;
+        Unsafe.Add(ref entry0, i).Next = buckets[j];
+        buckets[j] = i;
+      }
+      outBuckets = buckets;
+      outEntries = entries;
+      /* No more exception is possible beyond this point. */
+      myBuckets = buckets;
+      myEntries = entries;
+      mySizeIndex = newSizeIndex;
+      /* Now, newSizeIndex is the newly allocated entry. */
+      newSizeIndex = oldEntries.Length;
+      myTouchedCount = newSizeIndex + 1;
+      return newSizeIndex;
+    }
+
     #region virtual methods
 
     private protected abstract bool ContainsKeyOverride(TKey key);
