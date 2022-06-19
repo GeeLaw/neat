@@ -2178,9 +2178,48 @@ namespace Neat.Collections
     }
 
     /// <returns><see langword="true"/> if the key existed.</returns>
+    [MethodImpl(Helper.JustOptimize)]
     public new bool Remove(TKey key)
     {
-      throw new NotImplementedException();
+#if MAP2_ENUMERATION_VERSION
+      uint version = myVersion, version2 = ++myVersion2;
+#endif
+      int[] buckets = myBuckets;
+      Entry[] entries = myEntries;
+      int hashCode = myComparer.GetHashCode(key) & Map2.HashCodeMask;
+      ref int refNextOfPreviousEntry = ref buckets[hashCode % buckets.Length];
+      while (true)
+      {
+        int currentEntry = refNextOfPreviousEntry;
+        if (currentEntry < 0)
+        {
+          break;
+        }
+        if (entries[currentEntry].HashCode == hashCode && myComparer.Equals(key, entries[currentEntry].Key))
+        {
+#if MAP2_ENUMERATION_VERSION
+          if (version != myVersion || version2 != myVersion2)
+          {
+            Map2.ThrowVersion();
+          }
+#endif
+          refNextOfPreviousEntry = entries[currentEntry].Next;
+          entries[currentEntry].Next = myFirstFreeEntry;
+          entries[currentEntry].HashCode = -1;
+          entries[currentEntry].Key = default(TKey);
+          entries[currentEntry].Value = default(TValue);
+          myFirstFreeEntry = currentEntry;
+          return true;
+        }
+        refNextOfPreviousEntry = ref entries[currentEntry].Next;
+      }
+#if MAP2_ENUMERATION_VERSION
+      if (version != myVersion || version2 != myVersion2)
+      {
+        Map2.ThrowVersion();
+      }
+#endif
+      return false;
     }
 
     /// <summary>
@@ -2519,9 +2558,10 @@ namespace Neat.Collections
 
     #region IDictionary<TKey, TValue>.Remove, ICollection<KeyValuePair<TKey, TValue>>.Remove, IDictionary.Remove
 
+    [MethodImpl(Helper.OptimizeInline)]
     bool IDictionary<TKey, TValue>.Remove(TKey key)
     {
-      throw new NotImplementedException();
+      return Remove(key);
     }
 
     bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
@@ -2529,9 +2569,17 @@ namespace Neat.Collections
       throw new NotImplementedException();
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     void IDictionary.Remove(object key)
     {
-      throw new NotImplementedException();
+      if (key is TKey tKey)
+      {
+        Remove(tKey);
+      }
+      else if (default(TKey) is null && key is null)
+      {
+        Remove(default(TKey));
+      }
     }
 
     #endregion IDictionary<TKey, TValue>.Remove, ICollection<KeyValuePair<TKey, TValue>>.Remove, IDictionary.Remove
