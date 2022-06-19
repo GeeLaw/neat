@@ -2016,9 +2016,38 @@ namespace Neat.Collections
     }
 
     /// <returns><see langword="true"/> if the key exists.</returns>
+    [MethodImpl(Helper.JustOptimize)]
     public new bool ContainsKey(TKey key)
     {
-      throw new NotImplementedException();
+      /* We guard against the rude behavior of mutating the map instance in the user-implemented IEqualityComparer2. */
+#if MAP2_ENUMERATION_VERSION
+      uint version = myVersion, version2 = myVersion2;
+#endif
+      int[] buckets = myBuckets;
+      Entry[] entries = myEntries;
+      int hashCode = myComparer.GetHashCode(key) & Map2.HashCodeMask;
+      int currentEntry = buckets[hashCode % buckets.Length];
+      while (currentEntry >= 0)
+      {
+        if (entries[currentEntry].HashCode == hashCode && myComparer.Equals(key, entries[currentEntry].Key))
+        {
+#if MAP2_ENUMERATION_VERSION
+          if (version != myVersion || version2 != myVersion2)
+          {
+            Map2.ThrowVersion();
+          }
+#endif
+          return true;
+        }
+        currentEntry = entries[currentEntry].Next;
+      }
+#if MAP2_ENUMERATION_VERSION
+      if (version != myVersion || version2 != myVersion2)
+      {
+        Map2.ThrowVersion();
+      }
+#endif
+      return false;
     }
 
     /// <summary>
@@ -2368,14 +2397,16 @@ namespace Neat.Collections
 
     #region IReadOnlyDictionary<TKey, TValue>.ContainsKey, IDictionary<TKey, TValue>.ContainsKey, ICollection<KeyValuePair<TKey, TValue>>.Contains, IDictionary.Contains
 
+    [MethodImpl(Helper.OptimizeInline)]
     bool IReadOnlyDictionary<TKey, TValue>.ContainsKey(TKey key)
     {
-      throw new NotImplementedException();
+      return ContainsKey(key);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     bool IDictionary<TKey, TValue>.ContainsKey(TKey key)
     {
-      throw new NotImplementedException();
+      return ContainsKey(key);
     }
 
     bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)
@@ -2383,9 +2414,12 @@ namespace Neat.Collections
       throw new NotImplementedException();
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     bool IDictionary.Contains(object key)
     {
-      throw new NotImplementedException();
+      return key is TKey tKey
+        ? ContainsKey(tKey)
+        : default(TKey) is null && key is null && ContainsKey(default(TKey));
     }
 
     #endregion IReadOnlyDictionary<TKey, TValue>.ContainsKey, IDictionary<TKey, TValue>.ContainsKey, ICollection<KeyValuePair<TKey, TValue>>.Contains, IDictionary.Contains
@@ -2735,6 +2769,8 @@ namespace Neat.Collections
 
   public static class Map2
   {
+    internal const int HashCodeMask = 0x7FFFFFFF;
+
     public const int MaximumCapacity = 881646013;
 
     [SuppressMessage("Performance", "CA1825", Justification = "Avoid excessive generic instantiations.")]
