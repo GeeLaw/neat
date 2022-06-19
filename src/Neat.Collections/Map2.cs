@@ -367,9 +367,22 @@ namespace Neat.Collections
       }
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
+    public KeyEnumerator GetKeyEnumerator()
+    {
+      return new KeyEnumerator(this);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    public ValueEnumerator GetValueEnumerator()
+    {
+      return new ValueEnumerator(this);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
     public Enumerator GetEnumerator()
     {
-      throw new NotImplementedException();
+      return new Enumerator(this);
     }
 
     #region virtual methods
@@ -696,45 +709,213 @@ namespace Neat.Collections
     /// </summary>
     public struct Enumerator : IEnumerator2<KeyValuePair<TKey, TValue>>
     {
+      [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
+      private Entry[] myEntries;
+
+      [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
+      private int myTouchedCount;
+
+      private int myIndexAfterCurrent;
+
+      private KeyValuePair<TKey, TValue> myCurrent;
+
+#if MAP2_ENUMERATION_VERSION
+
+      [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
+      private Map2<TKey, TValue> myTarget;
+
+      [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
+      private uint myVersion;
+
+#endif
+
+#if MAP2_ENUMERATOR_DISPOSE
+      private bool myNotDisposed;
+#endif
+
+      [MethodImpl(Helper.OptimizeInline)]
+      internal Enumerator(Map2<TKey, TValue> target)
+      {
+        myEntries = target.myEntries;
+        myTouchedCount = target.myTouchedCount;
+        myIndexAfterCurrent = 0;
+        myCurrent = default(KeyValuePair<TKey, TValue>);
+#if MAP2_ENUMERATION_VERSION
+        myTarget = target;
+        myVersion = target.myVersion;
+#endif
+#if MAP2_ENUMERATOR_DISPOSE
+        myNotDisposed = true;
+#endif
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
       void IEnumerator.Reset()
       {
-        throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+        if (!myNotDisposed)
+        {
+          Map2.ThrowEnumeratorDisposed();
+        }
+#endif
+#if MAP2_ENUMERATION_VERSION
+        if (myVersion != myTarget.myVersion)
+        {
+          Map2.ThrowVersion();
+        }
+#endif
+        myIndexAfterCurrent = 0;
       }
 
+      [MethodImpl(Helper.JustOptimize)]
       public bool MoveNext(out KeyValuePair<TKey, TValue> item)
       {
-        throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+        if (!myNotDisposed)
+        {
+          Map2.ThrowEnumeratorDisposed();
+        }
+#endif
+#if MAP2_ENUMERATION_VERSION
+        if (myVersion != myTarget.myVersion)
+        {
+          Map2.ThrowVersion();
+        }
+#endif
+        Entry[] entries = myEntries;
+        int touchedCount = myTouchedCount;
+        int index = myIndexAfterCurrent;
+        while (index != touchedCount && entries[index].HashCode < 0)
+        {
+          ++index;
+        }
+        if (index == touchedCount)
+        {
+#if MAP2_ENUMERATOR_DISPOSE
+          myNotDisposed = false;
+#endif
+          item = default(KeyValuePair<TKey, TValue>);
+          return false;
+        }
+        myIndexAfterCurrent = index + 1;
+        item = myCurrent = entries[index].KeyValuePair;
+        return true;
       }
 
+      [MethodImpl(Helper.JustOptimize)]
       bool IEnumerator2.MoveNext(out object item)
       {
-        throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+        if (!myNotDisposed)
+        {
+          Map2.ThrowEnumeratorDisposed();
+        }
+#endif
+#if MAP2_ENUMERATION_VERSION
+        if (myVersion != myTarget.myVersion)
+        {
+          Map2.ThrowVersion();
+        }
+#endif
+        Entry[] entries = myEntries;
+        int touchedCount = myTouchedCount;
+        int index = myIndexAfterCurrent;
+        while (index != touchedCount && entries[index].HashCode < 0)
+        {
+          ++index;
+        }
+        if (index == touchedCount)
+        {
+#if MAP2_ENUMERATOR_DISPOSE
+          myNotDisposed = false;
+#endif
+          item = null;
+          return false;
+        }
+        myIndexAfterCurrent = index + 1;
+        item = myCurrent = entries[index].KeyValuePair;
+        return true;
       }
 
+      [MethodImpl(Helper.JustOptimize)]
       public bool MoveNext()
       {
-        throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+        if (!myNotDisposed)
+        {
+          Map2.ThrowEnumeratorDisposed();
+        }
+#endif
+#if MAP2_ENUMERATION_VERSION
+        if (myVersion != myTarget.myVersion)
+        {
+          Map2.ThrowVersion();
+        }
+#endif
+        Entry[] entries = myEntries;
+        int touchedCount = myTouchedCount;
+        int index = myIndexAfterCurrent;
+        while (index != touchedCount && entries[index].HashCode < 0)
+        {
+          ++index;
+        }
+        if (index == touchedCount)
+        {
+          return false;
+        }
+        myIndexAfterCurrent = index + 1;
+        myCurrent = entries[index].KeyValuePair;
+        return true;
       }
 
       public KeyValuePair<TKey, TValue> Current
       {
+        [MethodImpl(Helper.OptimizeInline)]
         get
         {
-          throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+          if (!myNotDisposed)
+          {
+            Map2.ThrowEnumeratorDisposed();
+          }
+#endif
+#if MAP2_ENUMERATION_VERSION
+          if (myVersion != myTarget.myVersion)
+          {
+            Map2.ThrowVersion();
+          }
+#endif
+          return myCurrent;
         }
       }
 
       object IEnumerator.Current
       {
+        [MethodImpl(Helper.OptimizeInline)]
         get
         {
-          throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+          if (!myNotDisposed)
+          {
+            Map2.ThrowEnumeratorDisposed();
+          }
+#endif
+#if MAP2_ENUMERATION_VERSION
+          if (myVersion != myTarget.myVersion)
+          {
+            Map2.ThrowVersion();
+          }
+#endif
+          return myCurrent;
         }
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       void IDisposable.Dispose()
       {
-        throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+        myNotDisposed = false;
+#endif
       }
     }
 
@@ -743,45 +924,213 @@ namespace Neat.Collections
     /// </summary>
     public struct KeyEnumerator : IEnumerator2<TKey>
     {
+      [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
+      private Entry[] myEntries;
+
+      [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
+      private int myTouchedCount;
+
+      private int myIndexAfterCurrent;
+
+      private TKey myCurrent;
+
+#if MAP2_ENUMERATION_VERSION
+
+      [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
+      private Map2<TKey, TValue> myTarget;
+
+      [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
+      private uint myVersion;
+
+#endif
+
+#if MAP2_ENUMERATOR_DISPOSE
+      private bool myNotDisposed;
+#endif
+
+      [MethodImpl(Helper.OptimizeInline)]
+      internal KeyEnumerator(Map2<TKey, TValue> target)
+      {
+        myEntries = target.myEntries;
+        myTouchedCount = target.myTouchedCount;
+        myIndexAfterCurrent = 0;
+        myCurrent = default(TKey);
+#if MAP2_ENUMERATION_VERSION
+        myTarget = target;
+        myVersion = target.myVersion;
+#endif
+#if MAP2_ENUMERATOR_DISPOSE
+        myNotDisposed = true;
+#endif
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
       void IEnumerator.Reset()
       {
-        throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+        if (!myNotDisposed)
+        {
+          Map2.ThrowEnumeratorDisposed();
+        }
+#endif
+#if MAP2_ENUMERATION_VERSION
+        if (myVersion != myTarget.myVersion)
+        {
+          Map2.ThrowVersion();
+        }
+#endif
+        myIndexAfterCurrent = 0;
       }
 
+      [MethodImpl(Helper.JustOptimize)]
       public bool MoveNext(out TKey item)
       {
-        throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+        if (!myNotDisposed)
+        {
+          Map2.ThrowEnumeratorDisposed();
+        }
+#endif
+#if MAP2_ENUMERATION_VERSION
+        if (myVersion != myTarget.myVersion)
+        {
+          Map2.ThrowVersion();
+        }
+#endif
+        Entry[] entries = myEntries;
+        int touchedCount = myTouchedCount;
+        int index = myIndexAfterCurrent;
+        while (index != touchedCount && entries[index].HashCode < 0)
+        {
+          ++index;
+        }
+        if (index == touchedCount)
+        {
+#if MAP2_ENUMERATOR_DISPOSE
+          myNotDisposed = false;
+#endif
+          item = default(TKey);
+          return false;
+        }
+        myIndexAfterCurrent = index + 1;
+        item = myCurrent = entries[index].Key;
+        return true;
       }
 
+      [MethodImpl(Helper.JustOptimize)]
       bool IEnumerator2.MoveNext(out object item)
       {
-        throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+        if (!myNotDisposed)
+        {
+          Map2.ThrowEnumeratorDisposed();
+        }
+#endif
+#if MAP2_ENUMERATION_VERSION
+        if (myVersion != myTarget.myVersion)
+        {
+          Map2.ThrowVersion();
+        }
+#endif
+        Entry[] entries = myEntries;
+        int touchedCount = myTouchedCount;
+        int index = myIndexAfterCurrent;
+        while (index != touchedCount && entries[index].HashCode < 0)
+        {
+          ++index;
+        }
+        if (index == touchedCount)
+        {
+#if MAP2_ENUMERATOR_DISPOSE
+          myNotDisposed = false;
+#endif
+          item = null;
+          return false;
+        }
+        myIndexAfterCurrent = index + 1;
+        item = myCurrent = entries[index].Key;
+        return true;
       }
 
+      [MethodImpl(Helper.JustOptimize)]
       public bool MoveNext()
       {
-        throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+        if (!myNotDisposed)
+        {
+          Map2.ThrowEnumeratorDisposed();
+        }
+#endif
+#if MAP2_ENUMERATION_VERSION
+        if (myVersion != myTarget.myVersion)
+        {
+          Map2.ThrowVersion();
+        }
+#endif
+        Entry[] entries = myEntries;
+        int touchedCount = myTouchedCount;
+        int index = myIndexAfterCurrent;
+        while (index != touchedCount && entries[index].HashCode < 0)
+        {
+          ++index;
+        }
+        if (index == touchedCount)
+        {
+          return false;
+        }
+        myIndexAfterCurrent = index + 1;
+        myCurrent = entries[index].Key;
+        return true;
       }
 
       public TKey Current
       {
+        [MethodImpl(Helper.OptimizeInline)]
         get
         {
-          throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+          if (!myNotDisposed)
+          {
+            Map2.ThrowEnumeratorDisposed();
+          }
+#endif
+#if MAP2_ENUMERATION_VERSION
+          if (myVersion != myTarget.myVersion)
+          {
+            Map2.ThrowVersion();
+          }
+#endif
+          return myCurrent;
         }
       }
 
       object IEnumerator.Current
       {
+        [MethodImpl(Helper.OptimizeInline)]
         get
         {
-          throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+          if (!myNotDisposed)
+          {
+            Map2.ThrowEnumeratorDisposed();
+          }
+#endif
+#if MAP2_ENUMERATION_VERSION
+          if (myVersion != myTarget.myVersion)
+          {
+            Map2.ThrowVersion();
+          }
+#endif
+          return myCurrent;
         }
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       void IDisposable.Dispose()
       {
-        throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+        myNotDisposed = false;
+#endif
       }
     }
 
@@ -790,45 +1139,346 @@ namespace Neat.Collections
     /// </summary>
     public struct ValueEnumerator : IEnumerator2<TValue>
     {
+      [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
+      private Entry[] myEntries;
+
+      [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
+      private int myTouchedCount;
+
+      private int myIndexAfterCurrent;
+
+      private TValue myCurrent;
+
+#if MAP2_ENUMERATION_VERSION
+
+      [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
+      private Map2<TKey, TValue> myTarget;
+
+      [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
+      private uint myVersion;
+
+#endif
+
+#if MAP2_ENUMERATOR_DISPOSE
+      private bool myNotDisposed;
+#endif
+
+      [MethodImpl(Helper.OptimizeInline)]
+      internal ValueEnumerator(Map2<TKey, TValue> target)
+      {
+        myEntries = target.myEntries;
+        myTouchedCount = target.myTouchedCount;
+        myIndexAfterCurrent = 0;
+        myCurrent = default(TValue);
+#if MAP2_ENUMERATION_VERSION
+        myTarget = target;
+        myVersion = target.myVersion;
+#endif
+#if MAP2_ENUMERATOR_DISPOSE
+        myNotDisposed = true;
+#endif
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
       void IEnumerator.Reset()
       {
-        throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+        if (!myNotDisposed)
+        {
+          Map2.ThrowEnumeratorDisposed();
+        }
+#endif
+#if MAP2_ENUMERATION_VERSION
+        if (myVersion != myTarget.myVersion)
+        {
+          Map2.ThrowVersion();
+        }
+#endif
+        myIndexAfterCurrent = 0;
       }
 
+      [MethodImpl(Helper.JustOptimize)]
       public bool MoveNext(out TValue item)
       {
-        throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+        if (!myNotDisposed)
+        {
+          Map2.ThrowEnumeratorDisposed();
+        }
+#endif
+#if MAP2_ENUMERATION_VERSION
+        if (myVersion != myTarget.myVersion)
+        {
+          Map2.ThrowVersion();
+        }
+#endif
+        Entry[] entries = myEntries;
+        int touchedCount = myTouchedCount;
+        int index = myIndexAfterCurrent;
+        while (index != touchedCount && entries[index].HashCode < 0)
+        {
+          ++index;
+        }
+        if (index == touchedCount)
+        {
+#if MAP2_ENUMERATOR_DISPOSE
+          myNotDisposed = false;
+#endif
+          item = default(TValue);
+          return false;
+        }
+        myIndexAfterCurrent = index + 1;
+        item = myCurrent = entries[index].Value;
+        return true;
       }
 
+      [MethodImpl(Helper.JustOptimize)]
       bool IEnumerator2.MoveNext(out object item)
       {
-        throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+        if (!myNotDisposed)
+        {
+          Map2.ThrowEnumeratorDisposed();
+        }
+#endif
+#if MAP2_ENUMERATION_VERSION
+        if (myVersion != myTarget.myVersion)
+        {
+          Map2.ThrowVersion();
+        }
+#endif
+        Entry[] entries = myEntries;
+        int touchedCount = myTouchedCount;
+        int index = myIndexAfterCurrent;
+        while (index != touchedCount && entries[index].HashCode < 0)
+        {
+          ++index;
+        }
+        if (index == touchedCount)
+        {
+#if MAP2_ENUMERATOR_DISPOSE
+          myNotDisposed = false;
+#endif
+          item = null;
+          return false;
+        }
+        myIndexAfterCurrent = index + 1;
+        item = myCurrent = entries[index].Value;
+        return true;
       }
 
+      [MethodImpl(Helper.JustOptimize)]
       public bool MoveNext()
       {
-        throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+        if (!myNotDisposed)
+        {
+          Map2.ThrowEnumeratorDisposed();
+        }
+#endif
+#if MAP2_ENUMERATION_VERSION
+        if (myVersion != myTarget.myVersion)
+        {
+          Map2.ThrowVersion();
+        }
+#endif
+        Entry[] entries = myEntries;
+        int touchedCount = myTouchedCount;
+        int index = myIndexAfterCurrent;
+        while (index != touchedCount && entries[index].HashCode < 0)
+        {
+          ++index;
+        }
+        if (index == touchedCount)
+        {
+          return false;
+        }
+        myIndexAfterCurrent = index + 1;
+        myCurrent = entries[index].Value;
+        return true;
       }
 
       public TValue Current
       {
+        [MethodImpl(Helper.OptimizeInline)]
         get
         {
-          throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+          if (!myNotDisposed)
+          {
+            Map2.ThrowEnumeratorDisposed();
+          }
+#endif
+#if MAP2_ENUMERATION_VERSION
+          if (myVersion != myTarget.myVersion)
+          {
+            Map2.ThrowVersion();
+          }
+#endif
+          return myCurrent;
         }
       }
 
       object IEnumerator.Current
       {
+        [MethodImpl(Helper.OptimizeInline)]
         get
         {
-          throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+          if (!myNotDisposed)
+          {
+            Map2.ThrowEnumeratorDisposed();
+          }
+#endif
+#if MAP2_ENUMERATION_VERSION
+          if (myVersion != myTarget.myVersion)
+          {
+            Map2.ThrowVersion();
+          }
+#endif
+          return myCurrent;
         }
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       void IDisposable.Dispose()
       {
-        throw new NotImplementedException();
+#if MAP2_ENUMERATOR_DISPOSE
+        myNotDisposed = false;
+#endif
+      }
+    }
+
+    private protected sealed class DictionaryEnumerator : IDictionaryEnumerator
+    {
+      [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
+      private Entry[] myEntries;
+
+      [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
+      private int myTouchedCount;
+
+      private int myIndexAfterCurrent;
+
+      private DictionaryEntry myCurrent;
+
+#if MAP2_ENUMERATION_VERSION
+
+      [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
+      private Map2<TKey, TValue> myTarget;
+
+      [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
+      private uint myVersion;
+
+#endif
+
+      [MethodImpl(Helper.OptimizeInline)]
+      internal DictionaryEnumerator(Map2<TKey, TValue> target)
+      {
+        myEntries = target.myEntries;
+        myTouchedCount = target.myTouchedCount;
+        myIndexAfterCurrent = 0;
+        myCurrent = default(DictionaryEntry);
+#if MAP2_ENUMERATION_VERSION
+        myTarget = target;
+        myVersion = target.myVersion;
+#endif
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      void IEnumerator.Reset()
+      {
+#if MAP2_ENUMERATION_VERSION
+        if (myVersion != myTarget.myVersion)
+        {
+          Map2.ThrowVersion();
+        }
+#endif
+        myIndexAfterCurrent = 0;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public bool MoveNext()
+      {
+#if MAP2_ENUMERATION_VERSION
+        if (myVersion != myTarget.myVersion)
+        {
+          Map2.ThrowVersion();
+        }
+#endif
+        Entry[] entries = myEntries;
+        int touchedCount = myTouchedCount;
+        int index = myIndexAfterCurrent;
+        while (index != touchedCount && entries[index].HashCode < 0)
+        {
+          ++index;
+        }
+        if (index == touchedCount)
+        {
+          return false;
+        }
+        myIndexAfterCurrent = index + 1;
+        myCurrent = entries[index].DictionaryEntry;
+        return true;
+      }
+
+      public DictionaryEntry Entry
+      {
+        [MethodImpl(Helper.OptimizeInline)]
+        get
+        {
+#if MAP2_ENUMERATION_VERSION
+          if (myVersion != myTarget.myVersion)
+          {
+            Map2.ThrowVersion();
+          }
+#endif
+          return myCurrent;
+        }
+      }
+
+      public object Key
+      {
+        [MethodImpl(Helper.OptimizeInline)]
+        get
+        {
+#if MAP2_ENUMERATION_VERSION
+          if (myVersion != myTarget.myVersion)
+          {
+            Map2.ThrowVersion();
+          }
+#endif
+          return myCurrent.Key;
+        }
+      }
+
+      public object Value
+      {
+        [MethodImpl(Helper.OptimizeInline)]
+        get
+        {
+#if MAP2_ENUMERATION_VERSION
+          if (myVersion != myTarget.myVersion)
+          {
+            Map2.ThrowVersion();
+          }
+#endif
+          return myCurrent.Value;
+        }
+      }
+
+      public object Current
+      {
+        [MethodImpl(Helper.OptimizeInline)]
+        get
+        {
+#if MAP2_ENUMERATION_VERSION
+          if (myVersion != myTarget.myVersion)
+          {
+            Map2.ThrowVersion();
+          }
+#endif
+          return myCurrent;
+        }
       }
     }
 
@@ -1521,34 +2171,40 @@ namespace Neat.Collections
 
     #region GetEnumerator (explicit implementations)
 
+    [MethodImpl(Helper.OptimizeInline)]
     Enumerator IEnumerable2<KeyValuePair<TKey, TValue>, Enumerator>.GetEnumerator()
     {
-      throw new NotImplementedException();
+      return new Enumerator(this);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     IEnumerator2<KeyValuePair<TKey, TValue>> IEnumerable2<KeyValuePair<TKey, TValue>>.GetEnumerator()
     {
-      throw new NotImplementedException();
+      return new Enumerator(this);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     IEnumerator2 IEnumerable2.GetEnumerator()
     {
-      throw new NotImplementedException();
+      return new Enumerator(this);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
     {
-      throw new NotImplementedException();
+      return new Enumerator(this);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     IEnumerator IEnumerable.GetEnumerator()
     {
-      throw new NotImplementedException();
+      return new Enumerator(this);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     IDictionaryEnumerator IDictionary.GetEnumerator()
     {
-      throw new NotImplementedException();
+      return new DictionaryEnumerator(this);
     }
 
     #endregion GetEnumerator (explicit implementations)
