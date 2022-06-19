@@ -2603,9 +2603,10 @@ namespace Neat.Collections
     /// </summary>
     public new KeyView Keys
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return new KeyView(this);
       }
     }
 
@@ -2679,9 +2680,10 @@ namespace Neat.Collections
       return AddOrSwap(key, ref value);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     private protected sealed override ICollection<TKey> KeysOverride()
     {
-      throw new NotImplementedException();
+      return new KeyView(this);
     }
 
     #endregion virtual methods
@@ -3100,126 +3102,185 @@ namespace Neat.Collections
 
     /// <summary>
     /// Represents a view of the keys in a <see cref="Map2{TKey, TValue, TEqualityComparer}"/> instance.
+    /// Among instance members,
+    /// only those of <see cref="IEquatable{T}"/> and <see cref="object"/> can be invoked on <see langword="default"/> instances.
     /// </summary>
-    public struct KeyView : IEquatable<KeyView>, IEnumerable2<TKey, KeyEnumerator>, ICollection<TKey>, IReadOnlyCollection<TKey>, ICollection
+    public readonly struct KeyView : IEquatable<KeyView>, IEnumerable2<TKey, KeyEnumerator>, ICollection<TKey>, IReadOnlyCollection<TKey>, ICollection
     {
+      private readonly Map2<TKey, TValue, TEqualityComparer> myTarget;
+
+      [MethodImpl(Helper.OptimizeInline)]
+      internal KeyView(Map2<TKey, TValue, TEqualityComparer> target)
+      {
+        myTarget = target;
+      }
+
       public int Count
       {
+        [MethodImpl(Helper.OptimizeInline)]
         get
         {
-          throw new NotImplementedException();
+          return myTarget.myActiveCount;
         }
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public bool Contains(TKey item)
       {
-        throw new NotImplementedException();
+        return myTarget.ContainsKey(item);
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public void CopyTo(TKey[] array, int arrayIndex)
       {
-        throw new NotImplementedException();
+        myTarget.CopyKeysTo(array, arrayIndex);
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public KeyEnumerator GetEnumerator()
       {
-        throw new NotImplementedException();
+        return new KeyEnumerator(myTarget);
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public bool Equals(KeyView other)
       {
-        throw new NotImplementedException();
+        return ReferenceEquals(myTarget, other.myTarget);
       }
 
       #region static Equals, operator ==, operator !=
 
+      [MethodImpl(Helper.OptimizeInline)]
       public static bool Equals(KeyView x, KeyView y)
       {
-        throw new NotImplementedException();
+        return ReferenceEquals(x.myTarget, y.myTarget);
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public static bool operator ==(KeyView x, KeyView y)
       {
-        throw new NotImplementedException();
+        return ReferenceEquals(x.myTarget, y.myTarget);
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public static bool operator !=(KeyView x, KeyView y)
       {
-        throw new NotImplementedException();
+        return !ReferenceEquals(x.myTarget, y.myTarget);
       }
 
       #endregion static Equals, operator ==, operator !=
 
       #region object members
 
+      [MethodImpl(Helper.OptimizeInline)]
       public override bool Equals(object obj)
       {
-        throw new NotImplementedException();
+        return (obj is KeyView other) && ReferenceEquals(myTarget, other.myTarget);
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public override int GetHashCode()
       {
-        throw new NotImplementedException();
+        return RuntimeHelpers.GetHashCode(myTarget);
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public override string ToString()
       {
-        throw new NotImplementedException();
+        return typeof(KeyView).FullName;
       }
 
       #endregion object members
 
       #region ICollection.CopyTo
 
+      [MethodImpl(Helper.OptimizeInline)]
       void ICollection.CopyTo(Array array, int index)
       {
-        throw new NotImplementedException();
+        Map2<TKey, TValue, TEqualityComparer> target = myTarget;
+        int activeCount = target.myActiveCount;
+        if (array is TKey[] kArray)
+        {
+          CopyKeysToImpl(target.myEntries, kArray, index, activeCount, nameof(index));
+        }
+        else
+        {
+          Map2.ThrowCopyKeysToArrayType();
+        }
       }
 
       #endregion ICollection.CopyTo
 
       #region ICollection<TKey>.Add, ICollection<TKey>.Clear, ICollection<TKey>.Remove
 
+      [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+      [MethodImpl(Helper.OptimizeNoInline)]
       void ICollection<TKey>.Add(TKey item)
       {
-        throw new NotImplementedException();
+        int unused = myTarget.myActiveCount;
+        throw new NotSupportedException();
       }
 
+      [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+      [MethodImpl(Helper.OptimizeNoInline)]
       void ICollection<TKey>.Clear()
       {
-        throw new NotImplementedException();
+        int unused = myTarget.myActiveCount;
+        throw new NotSupportedException();
       }
 
+      [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+      [MethodImpl(Helper.OptimizeNoInline)]
       bool ICollection<TKey>.Remove(TKey item)
       {
-        throw new NotImplementedException();
+        int unused = myTarget.myActiveCount;
+        throw new NotSupportedException();
       }
 
       #endregion ICollection<TKey>.Add, ICollection<TKey>.Clear, ICollection<TKey>.Remove
 
       #region ICollection<TKey>.IsReadOnly, ICollection.IsSynchronized, ICollection.SyncRoot
 
+      /// <summary>
+      /// This member is thread-safe.
+      /// </summary>
       bool ICollection<TKey>.IsReadOnly
       {
+        [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+        [MethodImpl(Helper.OptimizeInline)]
         get
         {
-          throw new NotImplementedException();
+          int unused = myTarget.myActiveCount;
+          return true;
         }
       }
 
+      /// <summary>
+      /// This member is thread-safe.
+      /// </summary>
       bool ICollection.IsSynchronized
       {
+        [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+        [MethodImpl(Helper.OptimizeInline)]
         get
         {
-          throw new NotImplementedException();
+          int unused = myTarget.myActiveCount;
+          return false;
         }
       }
 
+      /// <summary>
+      /// This member is thread-safe.
+      /// This member is not supported.
+      /// </summary>
       object ICollection.SyncRoot
       {
+        [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+        [MethodImpl(Helper.JustOptimize)]
         get
         {
-          throw new NotImplementedException();
+          int unused = myTarget.myActiveCount;
+          throw new NotSupportedException("SyncRoot is not supported.");
         }
       }
 
@@ -3227,24 +3288,28 @@ namespace Neat.Collections
 
       #region GetEnumerator (explicit implementations)
 
+      [MethodImpl(Helper.OptimizeInline)]
       IEnumerator2<TKey> IEnumerable2<TKey>.GetEnumerator()
       {
-        throw new NotImplementedException();
+        return new KeyEnumerator(myTarget);
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       IEnumerator2 IEnumerable2.GetEnumerator()
       {
-        throw new NotImplementedException();
+        return new KeyEnumerator(myTarget);
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       IEnumerator<TKey> IEnumerable<TKey>.GetEnumerator()
       {
-        throw new NotImplementedException();
+        return new KeyEnumerator(myTarget);
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       IEnumerator IEnumerable.GetEnumerator()
       {
-        throw new NotImplementedException();
+        return new KeyEnumerator(myTarget);
       }
 
       #endregion GetEnumerator (explicit implementations)
