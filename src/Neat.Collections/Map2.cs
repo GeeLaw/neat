@@ -18,6 +18,11 @@ namespace Neat.Collections
       IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, IDictionary
   {
     /// <summary>
+    /// Makes it impossible to create non-abstract derived classes outside this assembly.
+    /// </summary>
+    private protected abstract void InternalInheritance();
+
+    /// <summary>
     /// Gets the number of key/value pairs.
     /// </summary>
     public int Count
@@ -532,7 +537,7 @@ namespace Neat.Collections
     #endregion GetEnumerator (explicit implementations)
 
     /// <summary>
-    /// Enumerates key/value pairs in <see cref="Map2{TKey, TValue, TEqualityComparer}"/>.
+    /// Enumerates key/value pairs in <see cref="Map2{TKey, TValue}"/>.
     /// </summary>
     public struct Enumerator : IEnumerator2<KeyValuePair<TKey, TValue>>
     {
@@ -579,7 +584,7 @@ namespace Neat.Collections
     }
 
     /// <summary>
-    /// Enumerates keys in <see cref="Map2{TKey, TValue, TEqualityComparer}"/>.
+    /// Enumerates keys in <see cref="Map2{TKey, TValue}"/>.
     /// </summary>
     public struct KeyEnumerator : IEnumerator2<TKey>
     {
@@ -626,7 +631,7 @@ namespace Neat.Collections
     }
 
     /// <summary>
-    /// Enumerates values in <see cref="Map2{TKey, TValue, TEqualityComparer}"/>.
+    /// Enumerates values in <see cref="Map2{TKey, TValue}"/>.
     /// </summary>
     public struct ValueEnumerator : IEnumerator2<TValue>
     {
@@ -673,7 +678,7 @@ namespace Neat.Collections
     }
 
     /// <summary>
-    /// Represents a view of the keys in a <see cref="Map2{TKey, TValue, TEqualityComparer}"/> instance.
+    /// Represents a view of the keys in a <see cref="Map2{TKey, TValue}"/> instance.
     /// </summary>
     public struct KeyView : IEquatable<KeyView>, IEnumerable2<TKey, KeyEnumerator>, ICollection<TKey>, IReadOnlyCollection<TKey>, ICollection
     {
@@ -825,7 +830,7 @@ namespace Neat.Collections
     }
 
     /// <summary>
-    /// Represents a view of the values in a <see cref="Map2{TKey, TValue, TEqualityComparer}"/> instance.
+    /// Represents a view of the values in a <see cref="Map2{TKey, TValue}"/> instance.
     /// </summary>
     public struct ValueView : IEquatable<ValueView>, IEnumerable2<TValue, ValueEnumerator>, ICollection<TValue>, IReadOnlyCollection<TValue>, ICollection
     {
