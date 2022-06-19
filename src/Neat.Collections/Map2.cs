@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Neat.Collections
 {
@@ -73,26 +75,37 @@ namespace Neat.Collections
       throw new NotImplementedException();
     }
 
+    #region public members that call virtual methods and are hidden in the derived classes
+
     /// <summary>
     /// Gets or sets the value corresponding to the specified key.
     /// </summary>
     /// <exception cref="KeyNotFoundException">If the key does not exist when getting the value.</exception>
     public TValue this[TKey key]
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        TValue value;
+        Unsafe.SkipInit(out value);
+        if (!TryGetOverride(key, ref value))
+        {
+          Map2.ThrowKeyNotFound();
+        }
+        return value;
       }
+      [MethodImpl(Helper.OptimizeInline)]
       set
       {
-        throw new NotImplementedException();
+        AddOrReplaceOverride(key, value);
       }
     }
 
     /// <returns><see langword="true"/> if the key exists.</returns>
+    [MethodImpl(Helper.OptimizeInline)]
     public bool ContainsKey(TKey key)
     {
-      throw new NotImplementedException();
+      return ContainsKeyOverride(key);
     }
 
     /// <summary>
@@ -102,9 +115,10 @@ namespace Neat.Collections
     /// This method never reads <paramref name="value"/>.
     /// </summary>
     /// <returns><see langword="true"/> if the key exists.</returns>
+    [MethodImpl(Helper.OptimizeInline)]
     public bool TryGet(TKey key, ref TValue value)
     {
-      throw new NotImplementedException();
+      return TryGetOverride(key, ref value);
     }
 
     /// <summary>
@@ -114,9 +128,10 @@ namespace Neat.Collections
     /// This method never reads <paramref name="value"/>.
     /// </summary>
     /// <returns><see langword="true"/> if the key exists.</returns>
+    [MethodImpl(Helper.OptimizeInline)]
     public bool GetOrDefault(TKey key, out TValue value)
     {
-      throw new NotImplementedException();
+      return GetOrDefaultOverride(key, out value);
     }
 
     /// <summary>
@@ -126,15 +141,17 @@ namespace Neat.Collections
     /// If the key does not exist, <paramref name="value"/> is neither read nor written to.
     /// </summary>
     /// <returns><see langword="true"/> if the key exists.</returns>
+    [MethodImpl(Helper.OptimizeInline)]
     public bool TrySwap(TKey key, ref TValue value)
     {
-      throw new NotImplementedException();
+      return TrySwapOverride(key, ref value);
     }
 
     /// <returns><see langword="true"/> if the key existed.</returns>
+    [MethodImpl(Helper.OptimizeInline)]
     public bool Remove(TKey key)
     {
-      throw new NotImplementedException();
+      return RemoveOverride(key);
     }
 
     /// <summary>
@@ -144,9 +161,10 @@ namespace Neat.Collections
     /// This method never reads <paramref name="value"/>.
     /// </summary>
     /// <returns><see langword="true"/> if the key existed.</returns>
+    [MethodImpl(Helper.OptimizeInline)]
     public bool TryGetAndRemove(TKey key, ref TValue value)
     {
-      throw new NotImplementedException();
+      return TryGetAndRemoveOverride(key, ref value);
     }
 
     /// <summary>
@@ -156,9 +174,10 @@ namespace Neat.Collections
     /// This method never reads <paramref name="value"/>.
     /// </summary>
     /// <returns><see langword="true"/> if the key existed.</returns>
+    [MethodImpl(Helper.OptimizeInline)]
     public bool GetAndRemoveOrDefault(TKey key, out TValue value)
     {
-      throw new NotImplementedException();
+      return GetAndRemoveOrDefaultOverride(key, out value);
     }
 
     /// <summary>
@@ -167,9 +186,10 @@ namespace Neat.Collections
     /// </summary>
     /// <returns><see langword="true"/> if the key did not exist.</returns>
     /// <exception cref="InvalidOperationException">If the number of key/value pairs will exceed <see cref="Map2.MaximumCapacity"/>.</exception>
+    [MethodImpl(Helper.OptimizeInline)]
     public bool TryAddNew(TKey key, TValue value)
     {
-      throw new NotImplementedException();
+      return TryAddNewOverride(key, value);
     }
 
     /// <summary>
@@ -177,9 +197,10 @@ namespace Neat.Collections
     /// </summary>
     /// <returns><see langword="true"/> if the key did not exist.</returns>
     /// <exception cref="InvalidOperationException">If the number of key/value pairs will exceed <see cref="Map2.MaximumCapacity"/>.</exception>
+    [MethodImpl(Helper.OptimizeInline)]
     public bool AddOrReplace(TKey key, TValue value)
     {
-      throw new NotImplementedException();
+      return AddOrReplaceOverride(key, value);
     }
 
     /// <summary>
@@ -188,9 +209,10 @@ namespace Neat.Collections
     /// </summary>
     /// <returns><see langword="true"/> if the key did not exist.</returns>
     /// <exception cref="InvalidOperationException">If the number of key/value pairs will exceed <see cref="Map2.MaximumCapacity"/>.</exception>
+    [MethodImpl(Helper.OptimizeInline)]
     public bool AddOrGet(TKey key, ref TValue value)
     {
-      throw new NotImplementedException();
+      return AddOrGetOverride(key, ref value);
     }
 
     /// <summary>
@@ -200,22 +222,26 @@ namespace Neat.Collections
     /// </summary>
     /// <returns><see langword="true"/> if the key did not exist.</returns>
     /// <exception cref="InvalidOperationException">If the number of key/value pairs will exceed <see cref="Map2.MaximumCapacity"/>.</exception>
+    [MethodImpl(Helper.OptimizeInline)]
     public bool AddOrSwap(TKey key, ref TValue value)
     {
-      throw new NotImplementedException();
+      return AddOrSwapOverride(key, ref value);
     }
 
     /// <summary>
     /// Gets a view of the keys.
     /// Obtaining such a view is thread-safe.
     /// </summary>
-    public KeyView Keys
+    public ICollection<TKey> Keys
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return KeysOverride();
       }
     }
+
+    #endregion public members that call virtual methods and are hidden in the derived classes
 
     /// <summary>
     /// Gets a view of the values.
@@ -233,6 +259,23 @@ namespace Neat.Collections
     {
       throw new NotImplementedException();
     }
+
+    #region virtual methods
+
+    private protected abstract bool ContainsKeyOverride(TKey key);
+    private protected abstract bool TryGetOverride(TKey key, ref TValue value);
+    private protected abstract bool GetOrDefaultOverride(TKey key, out TValue value);
+    private protected abstract bool TrySwapOverride(TKey key, ref TValue value);
+    private protected abstract bool RemoveOverride(TKey key);
+    private protected abstract bool TryGetAndRemoveOverride(TKey key, ref TValue value);
+    private protected abstract bool GetAndRemoveOrDefaultOverride(TKey key, out TValue value);
+    private protected abstract bool TryAddNewOverride(TKey key, TValue value);
+    private protected abstract bool AddOrReplaceOverride(TKey key, TValue value);
+    private protected abstract bool AddOrGetOverride(TKey key, ref TValue value);
+    private protected abstract bool AddOrSwapOverride(TKey key, ref TValue value);
+    private protected abstract ICollection<TKey> KeysOverride();
+
+    #endregion virtual methods
 
     #region IReadOnlyCollection<KeyValuePair<TKey, TValue>>.Count, ICollection<KeyValuePair<TKey, TValue>>.Count, ICollection.Count
 
@@ -675,158 +718,6 @@ namespace Neat.Collections
       {
         throw new NotImplementedException();
       }
-    }
-
-    /// <summary>
-    /// Represents a view of the keys in a <see cref="Map2{TKey, TValue}"/> instance.
-    /// </summary>
-    public struct KeyView : IEquatable<KeyView>, IEnumerable2<TKey, KeyEnumerator>, ICollection<TKey>, IReadOnlyCollection<TKey>, ICollection
-    {
-      public int Count
-      {
-        get
-        {
-          throw new NotImplementedException();
-        }
-      }
-
-      public bool Contains(TKey item)
-      {
-        throw new NotImplementedException();
-      }
-
-      public void CopyTo(TKey[] array, int arrayIndex)
-      {
-        throw new NotImplementedException();
-      }
-
-      public KeyEnumerator GetEnumerator()
-      {
-        throw new NotImplementedException();
-      }
-
-      public bool Equals(KeyView other)
-      {
-        throw new NotImplementedException();
-      }
-
-      #region static Equals, operator ==, operator !=
-
-      public static bool Equals(KeyView x, KeyView y)
-      {
-        throw new NotImplementedException();
-      }
-
-      public static bool operator ==(KeyView x, KeyView y)
-      {
-        throw new NotImplementedException();
-      }
-
-      public static bool operator !=(KeyView x, KeyView y)
-      {
-        throw new NotImplementedException();
-      }
-
-      #endregion static Equals, operator ==, operator !=
-
-      #region object members
-
-      public override bool Equals(object obj)
-      {
-        throw new NotImplementedException();
-      }
-
-      public override int GetHashCode()
-      {
-        throw new NotImplementedException();
-      }
-
-      public override string ToString()
-      {
-        throw new NotImplementedException();
-      }
-
-      #endregion object members
-
-      #region ICollection.CopyTo
-
-      void ICollection.CopyTo(Array array, int index)
-      {
-        throw new NotImplementedException();
-      }
-
-      #endregion ICollection.CopyTo
-
-      #region ICollection<TKey>.Add, ICollection<TKey>.Clear, ICollection<TKey>.Remove
-
-      void ICollection<TKey>.Add(TKey item)
-      {
-        throw new NotImplementedException();
-      }
-
-      void ICollection<TKey>.Clear()
-      {
-        throw new NotImplementedException();
-      }
-
-      bool ICollection<TKey>.Remove(TKey item)
-      {
-        throw new NotImplementedException();
-      }
-
-      #endregion ICollection<TKey>.Add, ICollection<TKey>.Clear, ICollection<TKey>.Remove
-
-      #region ICollection<TKey>.IsReadOnly, ICollection.IsSynchronized, ICollection.SyncRoot
-
-      bool ICollection<TKey>.IsReadOnly
-      {
-        get
-        {
-          throw new NotImplementedException();
-        }
-      }
-
-      bool ICollection.IsSynchronized
-      {
-        get
-        {
-          throw new NotImplementedException();
-        }
-      }
-
-      object ICollection.SyncRoot
-      {
-        get
-        {
-          throw new NotImplementedException();
-        }
-      }
-
-      #endregion ICollection<TKey>.IsReadOnly, ICollection.IsSynchronized, ICollection.SyncRoot
-
-      #region GetEnumerator (explicit implementations)
-
-      IEnumerator2<TKey> IEnumerable2<TKey>.GetEnumerator()
-      {
-        throw new NotImplementedException();
-      }
-
-      IEnumerator2 IEnumerable2.GetEnumerator()
-      {
-        throw new NotImplementedException();
-      }
-
-      IEnumerator<TKey> IEnumerable<TKey>.GetEnumerator()
-      {
-        throw new NotImplementedException();
-      }
-
-      IEnumerator IEnumerable.GetEnumerator()
-      {
-        throw new NotImplementedException();
-      }
-
-      #endregion GetEnumerator (explicit implementations)
     }
 
     /// <summary>
@@ -1962,5 +1853,12 @@ namespace Neat.Collections
     /// Not implemented yet.
     /// </summary>
     public const int MaximumCapacity = 0;
+
+    [DoesNotReturn]
+    [MethodImpl(Helper.OptimizeInline)]
+    internal static void ThrowKeyNotFound()
+    {
+      throw new KeyNotFoundException();
+    }
   }
 }
