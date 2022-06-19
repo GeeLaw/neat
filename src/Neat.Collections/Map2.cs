@@ -1760,10 +1760,64 @@ namespace Neat.Collections
     };
 
     [DoesNotReturn]
-    [MethodImpl(Helper.OptimizeInline)]
+    [MethodImpl(Helper.OptimizeNoInline)]
     internal static void ThrowKeyNotFound()
     {
       throw new KeyNotFoundException();
     }
+
+    [DoesNotReturn]
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ThrowKeyExists()
+    {
+      throw new ArgumentException("The key already exists in the map.", "key");
+    }
+
+    [DoesNotReturn]
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ThrowTooMany()
+    {
+      throw new InvalidOperationException("There will be more than MaximumCapacity number of key/value pairs in the map.");
+    }
+
+#if MAP2_ENUMERATION_VERSION
+
+    [DoesNotReturn]
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ThrowVersion()
+    {
+      throw new InvalidOperationException("The map is modified during enumeration. (This check is enabled by MAP2_ENUMERATION_VERSION.)");
+    }
+
+#endif
+
+
+#if MAP2_ENUMERATOR_DISPOSE
+
+    [DoesNotReturn]
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ThrowEnumeratorDisposed()
+    {
+      throw new ObjectDisposedException(typeof(Map2<,>.Enumerator).FullName,
+        "The enumerator is already disposed. (This check is enabled by MAP2_ENUMERATOR_DISPOSE.)");
+    }
+
+    [DoesNotReturn]
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ThrowKeyEnumeratorDisposed()
+    {
+      throw new ObjectDisposedException(typeof(Map2<,>.KeyEnumerator).FullName,
+        "The enumerator is already disposed. (This check is enabled by MAP2_ENUMERATOR_DISPOSE.)");
+    }
+
+    [DoesNotReturn]
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ThrowValueEnumeratorDisposed()
+    {
+      throw new ObjectDisposedException(typeof(Map2<,>.ValueEnumerator).FullName,
+        "The enumerator is already disposed. (This check is enabled by MAP2_ENUMERATOR_DISPOSE.)");
+    }
+
+#endif
   }
 }
