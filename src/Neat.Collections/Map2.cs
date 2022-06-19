@@ -1299,7 +1299,7 @@ namespace Neat.Collections
 #if MAP2_ENUMERATOR_DISPOSE
         if (!myNotDisposed)
         {
-          Map2.ThrowEnumeratorDisposed();
+          Map2.ThrowKeyEnumeratorDisposed();
         }
 #endif
 #if MAP2_ENUMERATION_VERSION
@@ -1317,7 +1317,7 @@ namespace Neat.Collections
 #if MAP2_ENUMERATOR_DISPOSE
         if (!myNotDisposed)
         {
-          Map2.ThrowEnumeratorDisposed();
+          Map2.ThrowKeyEnumeratorDisposed();
         }
 #endif
 #if MAP2_ENUMERATION_VERSION
@@ -1352,7 +1352,7 @@ namespace Neat.Collections
 #if MAP2_ENUMERATOR_DISPOSE
         if (!myNotDisposed)
         {
-          Map2.ThrowEnumeratorDisposed();
+          Map2.ThrowKeyEnumeratorDisposed();
         }
 #endif
 #if MAP2_ENUMERATION_VERSION
@@ -1387,7 +1387,7 @@ namespace Neat.Collections
 #if MAP2_ENUMERATOR_DISPOSE
         if (!myNotDisposed)
         {
-          Map2.ThrowEnumeratorDisposed();
+          Map2.ThrowKeyEnumeratorDisposed();
         }
 #endif
 #if MAP2_ENUMERATION_VERSION
@@ -1420,7 +1420,7 @@ namespace Neat.Collections
 #if MAP2_ENUMERATOR_DISPOSE
           if (!myNotDisposed)
           {
-            Map2.ThrowEnumeratorDisposed();
+            Map2.ThrowKeyEnumeratorDisposed();
           }
 #endif
 #if MAP2_ENUMERATION_VERSION
@@ -1441,7 +1441,7 @@ namespace Neat.Collections
 #if MAP2_ENUMERATOR_DISPOSE
           if (!myNotDisposed)
           {
-            Map2.ThrowEnumeratorDisposed();
+            Map2.ThrowKeyEnumeratorDisposed();
           }
 #endif
 #if MAP2_ENUMERATION_VERSION
@@ -1514,7 +1514,7 @@ namespace Neat.Collections
 #if MAP2_ENUMERATOR_DISPOSE
         if (!myNotDisposed)
         {
-          Map2.ThrowEnumeratorDisposed();
+          Map2.ThrowValueEnumeratorDisposed();
         }
 #endif
 #if MAP2_ENUMERATION_VERSION
@@ -1532,7 +1532,7 @@ namespace Neat.Collections
 #if MAP2_ENUMERATOR_DISPOSE
         if (!myNotDisposed)
         {
-          Map2.ThrowEnumeratorDisposed();
+          Map2.ThrowValueEnumeratorDisposed();
         }
 #endif
 #if MAP2_ENUMERATION_VERSION
@@ -1567,7 +1567,7 @@ namespace Neat.Collections
 #if MAP2_ENUMERATOR_DISPOSE
         if (!myNotDisposed)
         {
-          Map2.ThrowEnumeratorDisposed();
+          Map2.ThrowValueEnumeratorDisposed();
         }
 #endif
 #if MAP2_ENUMERATION_VERSION
@@ -1602,7 +1602,7 @@ namespace Neat.Collections
 #if MAP2_ENUMERATOR_DISPOSE
         if (!myNotDisposed)
         {
-          Map2.ThrowEnumeratorDisposed();
+          Map2.ThrowValueEnumeratorDisposed();
         }
 #endif
 #if MAP2_ENUMERATION_VERSION
@@ -1635,7 +1635,7 @@ namespace Neat.Collections
 #if MAP2_ENUMERATOR_DISPOSE
           if (!myNotDisposed)
           {
-            Map2.ThrowEnumeratorDisposed();
+            Map2.ThrowValueEnumeratorDisposed();
           }
 #endif
 #if MAP2_ENUMERATION_VERSION
@@ -1656,7 +1656,7 @@ namespace Neat.Collections
 #if MAP2_ENUMERATOR_DISPOSE
           if (!myNotDisposed)
           {
-            Map2.ThrowEnumeratorDisposed();
+            Map2.ThrowValueEnumeratorDisposed();
           }
 #endif
 #if MAP2_ENUMERATION_VERSION
