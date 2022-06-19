@@ -940,6 +940,9 @@ namespace Neat.Collections
 
     #region ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly, IDictionary.IsReadOnly, IDictionary.IsFixedSize, ICollection.IsSynchronized, ICollection.SyncRoot
 
+    /// <summary>
+    /// This member is thread-safe.
+    /// </summary>
     bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly
     {
       get
@@ -948,6 +951,9 @@ namespace Neat.Collections
       }
     }
 
+    /// <summary>
+    /// This member is thread-safe.
+    /// </summary>
     bool IDictionary.IsReadOnly
     {
       get
@@ -956,6 +962,9 @@ namespace Neat.Collections
       }
     }
 
+    /// <summary>
+    /// This member is thread-safe.
+    /// </summary>
     bool IDictionary.IsFixedSize
     {
       get
@@ -964,6 +973,9 @@ namespace Neat.Collections
       }
     }
 
+    /// <summary>
+    /// This member is thread-safe.
+    /// </summary>
     bool ICollection.IsSynchronized
     {
       get
@@ -972,6 +984,10 @@ namespace Neat.Collections
       }
     }
 
+    /// <summary>
+    /// This member is thread-safe.
+    /// This member is not supported.
+    /// </summary>
     object ICollection.SyncRoot
     {
       get
@@ -2915,43 +2931,64 @@ namespace Neat.Collections
 
     #region ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly, IDictionary.IsReadOnly, IDictionary.IsFixedSize, ICollection.IsSynchronized, ICollection.SyncRoot
 
+    /// <summary>
+    /// This member is thread-safe.
+    /// </summary>
     bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return false;
       }
     }
 
+    /// <summary>
+    /// This member is thread-safe.
+    /// </summary>
     bool IDictionary.IsReadOnly
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return false;
       }
     }
 
+    /// <summary>
+    /// This member is thread-safe.
+    /// </summary>
     bool IDictionary.IsFixedSize
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return false;
       }
     }
 
+    /// <summary>
+    /// This member is thread-safe.
+    /// </summary>
     bool ICollection.IsSynchronized
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return false;
       }
     }
 
+    /// <summary>
+    /// This member is thread-safe.
+    /// This member is not supported.
+    /// </summary>
     object ICollection.SyncRoot
     {
+      [MethodImpl(Helper.JustOptimize)]
       get
       {
-        throw new NotImplementedException();
+        throw new NotSupportedException("SyncRoot is not supported.");
       }
     }
 
