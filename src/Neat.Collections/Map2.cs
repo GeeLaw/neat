@@ -171,9 +171,81 @@ namespace Neat.Collections
     /// Reduces the memory usage opportunistically.
     /// </summary>
     /// <returns><see langword="true"/> if reallocation happened.</returns>
+    [MethodImpl(Helper.JustOptimize)]
     public bool TrimExcess()
     {
-      throw new NotImplementedException();
+#if MAP2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      int activeCount = myActiveCount;
+      if (activeCount == 0)
+      {
+        myBuckets = Map2.theEmptyBuckets;
+        myEntries = theEmptyEntryList;
+        myTouchedCount = 0;
+        myFirstFreeEntry = -1;
+        mySizeIndex = -1;
+        return true;
+      }
+      int oldSizeIndex = mySizeIndex;
+      int newSizeIndex = oldSizeIndex;
+      Map2.Size[] sizes = Map2.theSizes;
+      while (newSizeIndex >= 0 && sizes[newSizeIndex].EntryCount >= activeCount)
+      {
+        --newSizeIndex;
+      }
+      ++newSizeIndex;
+      if (newSizeIndex == oldSizeIndex)
+      {
+        return false;
+      }
+      return TrimExcessImpl(myEntries, activeCount, newSizeIndex);
+    }
+
+    /// <summary>
+    /// Race conditions could have corrupted this instance, and
+    /// we want unsafe code in this method to be safe as far as CLR is concerned.
+    /// However, unsafe access after user-performed bounds checks
+    /// might still break CLR type safety due to read introduction
+    /// (e.g., when an index is re-read after it has been checked).
+    /// This method is non-inlining to reduce such risk.
+    /// See <a href="https://github.com/dotnet/docs/issues/29696">dotnet/docs#29696</a>.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private bool TrimExcessImpl(Entry[] oldEntries, int activeCount, int sizeIndex)
+    {
+      Map2.Size size = Map2.theSizes[sizeIndex];
+      /* This check ensures that unsafe access to "entries" is safe. */
+      if ((uint)size.EntryCount < (uint)activeCount)
+      {
+        return false;
+      }
+      int[] buckets = GC.AllocateUninitializedArray<int>(size.BucketCount, false);
+      Entry[] entries = new Entry[size.EntryCount];
+      Map2.ResetBuckets(buckets);
+      ref Entry entry0 = ref MemoryMarshal.GetArrayDataReference(entries);
+      for (int i = 0, j = 0, k; i != activeCount; ++i, ++j)
+      {
+        /* Access to "oldEntries" and "buckets" should be safe,
+        /* due to potential corruption of the entries.
+        /* So "j" could be out of range, and "k" could be negative. */
+        while (oldEntries[j].HashCode < 0)
+        {
+          ++j;
+        }
+        Unsafe.Add(ref entry0, i) = oldEntries[j];
+        k = Unsafe.Add(ref entry0, i).HashCode % size.BucketCount;
+        Unsafe.Add(ref entry0, i).Next = buckets[k];
+        buckets[k] = i;
+      }
+      /* No more exception is possible beyond this point. */
+      myBuckets = buckets;
+      myEntries = entries;
+      /* myActiveCount = activeCount; */
+      myTouchedCount = activeCount;
+      myFirstFreeEntry = -1;
+      mySizeIndex = sizeIndex;
+      return true;
     }
 
     /// <summary>
