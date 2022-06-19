@@ -230,14 +230,6 @@ namespace Neat.Collections
       throw new NotImplementedException();
     }
 
-    public struct KeyView
-    {
-    }
-
-    public struct ValueView
-    {
-    }
-
     #region IReadOnlyCollection<KeyValuePair<TKey, TValue>>.Count, ICollection<KeyValuePair<TKey, TValue>>.Count, ICollection.Count
 
     int IReadOnlyCollection<KeyValuePair<TKey, TValue>>.Count
@@ -585,6 +577,404 @@ namespace Neat.Collections
       {
         throw new NotImplementedException();
       }
+    }
+
+    /// <summary>
+    /// Enumerates keys in <see cref="Map2{TKey, TValue, TEqualityComparer}"/>.
+    /// </summary>
+    public struct KeyEnumerator : IEnumerator2<TKey>
+    {
+      void IEnumerator.Reset()
+      {
+        throw new NotImplementedException();
+      }
+
+      public bool MoveNext(out TKey item)
+      {
+        throw new NotImplementedException();
+      }
+
+      bool IEnumerator2.MoveNext(out object item)
+      {
+        throw new NotImplementedException();
+      }
+
+      public bool MoveNext()
+      {
+        throw new NotImplementedException();
+      }
+
+      public TKey Current
+      {
+        get
+        {
+          throw new NotImplementedException();
+        }
+      }
+
+      object IEnumerator.Current
+      {
+        get
+        {
+          throw new NotImplementedException();
+        }
+      }
+
+      void IDisposable.Dispose()
+      {
+        throw new NotImplementedException();
+      }
+    }
+
+    /// <summary>
+    /// Enumerates values in <see cref="Map2{TKey, TValue, TEqualityComparer}"/>.
+    /// </summary>
+    public struct ValueEnumerator : IEnumerator2<TValue>
+    {
+      void IEnumerator.Reset()
+      {
+        throw new NotImplementedException();
+      }
+
+      public bool MoveNext(out TValue item)
+      {
+        throw new NotImplementedException();
+      }
+
+      bool IEnumerator2.MoveNext(out object item)
+      {
+        throw new NotImplementedException();
+      }
+
+      public bool MoveNext()
+      {
+        throw new NotImplementedException();
+      }
+
+      public TValue Current
+      {
+        get
+        {
+          throw new NotImplementedException();
+        }
+      }
+
+      object IEnumerator.Current
+      {
+        get
+        {
+          throw new NotImplementedException();
+        }
+      }
+
+      void IDisposable.Dispose()
+      {
+        throw new NotImplementedException();
+      }
+    }
+
+    /// <summary>
+    /// Represents a view of the keys in a <see cref="Map2{TKey, TValue, TEqualityComparer}"/> instance.
+    /// </summary>
+    public struct KeyView : IEquatable<KeyView>, IEnumerable2<TKey, KeyEnumerator>, ICollection<TKey>, IReadOnlyCollection<TKey>, ICollection
+    {
+      public int Count
+      {
+        get
+        {
+          throw new NotImplementedException();
+        }
+      }
+
+      public bool Contains(TKey item)
+      {
+        throw new NotImplementedException();
+      }
+
+      public void CopyTo(TKey[] array, int arrayIndex)
+      {
+        throw new NotImplementedException();
+      }
+
+      public KeyEnumerator GetEnumerator()
+      {
+        throw new NotImplementedException();
+      }
+
+      public bool Equals(KeyView other)
+      {
+        throw new NotImplementedException();
+      }
+
+      #region static Equals, operator ==, operator !=
+
+      public static bool Equals(KeyView x, KeyView y)
+      {
+        throw new NotImplementedException();
+      }
+
+      public static bool operator ==(KeyView x, KeyView y)
+      {
+        throw new NotImplementedException();
+      }
+
+      public static bool operator !=(KeyView x, KeyView y)
+      {
+        throw new NotImplementedException();
+      }
+
+      #endregion static Equals, operator ==, operator !=
+
+      #region object members
+
+      public override bool Equals(object obj)
+      {
+        throw new NotImplementedException();
+      }
+
+      public override int GetHashCode()
+      {
+        throw new NotImplementedException();
+      }
+
+      public override string ToString()
+      {
+        throw new NotImplementedException();
+      }
+
+      #endregion object members
+
+      #region ICollection.CopyTo
+
+      void ICollection.CopyTo(Array array, int index)
+      {
+        throw new NotImplementedException();
+      }
+
+      #endregion ICollection.CopyTo
+
+      #region ICollection<TKey>.Add, ICollection<TKey>.Clear, ICollection<TKey>.Remove
+
+      void ICollection<TKey>.Add(TKey item)
+      {
+        throw new NotImplementedException();
+      }
+
+      void ICollection<TKey>.Clear()
+      {
+        throw new NotImplementedException();
+      }
+
+      bool ICollection<TKey>.Remove(TKey item)
+      {
+        throw new NotImplementedException();
+      }
+
+      #endregion ICollection<TKey>.Add, ICollection<TKey>.Clear, ICollection<TKey>.Remove
+
+      #region ICollection<TKey>.IsReadOnly, ICollection.IsSynchronized, ICollection.SyncRoot
+
+      bool ICollection<TKey>.IsReadOnly
+      {
+        get
+        {
+          throw new NotImplementedException();
+        }
+      }
+
+      bool ICollection.IsSynchronized
+      {
+        get
+        {
+          throw new NotImplementedException();
+        }
+      }
+
+      object ICollection.SyncRoot
+      {
+        get
+        {
+          throw new NotImplementedException();
+        }
+      }
+
+      #endregion ICollection<TKey>.IsReadOnly, ICollection.IsSynchronized, ICollection.SyncRoot
+
+      #region GetEnumerator (explicit implementations)
+
+      IEnumerator2<TKey> IEnumerable2<TKey>.GetEnumerator()
+      {
+        throw new NotImplementedException();
+      }
+
+      IEnumerator2 IEnumerable2.GetEnumerator()
+      {
+        throw new NotImplementedException();
+      }
+
+      IEnumerator<TKey> IEnumerable<TKey>.GetEnumerator()
+      {
+        throw new NotImplementedException();
+      }
+
+      IEnumerator IEnumerable.GetEnumerator()
+      {
+        throw new NotImplementedException();
+      }
+
+      #endregion GetEnumerator (explicit implementations)
+    }
+
+    /// <summary>
+    /// Represents a view of the values in a <see cref="Map2{TKey, TValue, TEqualityComparer}"/> instance.
+    /// </summary>
+    public struct ValueView : IEquatable<ValueView>, IEnumerable2<TValue, ValueEnumerator>, ICollection<TValue>, IReadOnlyCollection<TValue>, ICollection
+    {
+      public int Count
+      {
+        get
+        {
+          throw new NotImplementedException();
+        }
+      }
+
+      public bool Contains(TValue item)
+      {
+        throw new NotImplementedException();
+      }
+
+      public void CopyTo(TValue[] array, int arrayIndex)
+      {
+        throw new NotImplementedException();
+      }
+
+      public ValueEnumerator GetEnumerator()
+      {
+        throw new NotImplementedException();
+      }
+
+      public bool Equals(ValueView other)
+      {
+        throw new NotImplementedException();
+      }
+
+      #region static Equals, operator ==, operator !=
+
+      public static bool Equals(ValueView x, ValueView y)
+      {
+        throw new NotImplementedException();
+      }
+
+      public static bool operator ==(ValueView x, ValueView y)
+      {
+        throw new NotImplementedException();
+      }
+
+      public static bool operator !=(ValueView x, ValueView y)
+      {
+        throw new NotImplementedException();
+      }
+
+      #endregion static Equals, operator ==, operator !=
+
+      #region object members
+
+      public override bool Equals(object obj)
+      {
+        throw new NotImplementedException();
+      }
+
+      public override int GetHashCode()
+      {
+        throw new NotImplementedException();
+      }
+
+      public override string ToString()
+      {
+        throw new NotImplementedException();
+      }
+
+      #endregion object members
+
+      #region ICollection.CopyTo
+
+      void ICollection.CopyTo(Array array, int index)
+      {
+        throw new NotImplementedException();
+      }
+
+      #endregion ICollection.CopyTo
+
+      #region ICollection<TValue>.Add, ICollection<TValue>.Clear, ICollection<TValue>.Remove
+
+      void ICollection<TValue>.Add(TValue item)
+      {
+        throw new NotImplementedException();
+      }
+
+      void ICollection<TValue>.Clear()
+      {
+        throw new NotImplementedException();
+      }
+
+      bool ICollection<TValue>.Remove(TValue item)
+      {
+        throw new NotImplementedException();
+      }
+
+      #endregion ICollection<TValue>.Add, ICollection<TValue>.Clear, ICollection<TValue>.Remove
+
+      #region ICollection<TValue>.IsReadOnly, ICollection.IsSynchronized, ICollection.SyncRoot
+
+      bool ICollection<TValue>.IsReadOnly
+      {
+        get
+        {
+          throw new NotImplementedException();
+        }
+      }
+
+      bool ICollection.IsSynchronized
+      {
+        get
+        {
+          throw new NotImplementedException();
+        }
+      }
+
+      object ICollection.SyncRoot
+      {
+        get
+        {
+          throw new NotImplementedException();
+        }
+      }
+
+      #endregion ICollection<TValue>.IsReadOnly, ICollection.IsSynchronized, ICollection.SyncRoot
+
+      #region GetEnumerator (explicit implementations)
+
+      IEnumerator2<TValue> IEnumerable2<TValue>.GetEnumerator()
+      {
+        throw new NotImplementedException();
+      }
+
+      IEnumerator2 IEnumerable2.GetEnumerator()
+      {
+        throw new NotImplementedException();
+      }
+
+      IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator()
+      {
+        throw new NotImplementedException();
+      }
+
+      IEnumerator IEnumerable.GetEnumerator()
+      {
+        throw new NotImplementedException();
+      }
+
+      #endregion GetEnumerator (explicit implementations)
     }
   }
 
