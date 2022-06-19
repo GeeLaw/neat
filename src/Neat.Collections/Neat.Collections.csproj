@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
-    <DefineConstants>$(DefineConstants);LIST2_ENUMERATION_VERSION;LIST2_ENUMERATOR_DISPOSE</DefineConstants>
+    <DefineConstants>$(DefineConstants);LIST2_ENUMERATION_VERSION;LIST2_ENUMERATOR_DISPOSE;MAP2_ENUMERATION_VERSION</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

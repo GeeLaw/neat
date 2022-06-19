@@ -24,6 +24,117 @@ namespace Neat.Collections
     /// </summary>
     private protected abstract void InternalInheritance();
 
+    internal struct Entry
+    {
+      /// <summary>
+      /// Points to the next entry in the bucket or the free entry list (negative if there are no more entries),
+      /// if this entry is initialized (among the first <see cref="myTouchedCount"/> entries).
+      /// Otherwise, this field is indeterminate.
+      /// </summary>
+      public int Next;
+
+      /// <summary>
+      /// Non-negative if initialized and in use, negative if initialized and free.
+      /// Otherwise, this field is indeterminate.
+      /// </summary>
+      public int HashCode;
+
+      /// <summary>
+      /// The key if initialized and in use.
+      /// Otherwise, this field is indeterminate.
+      /// </summary>
+      public TKey Key;
+
+      /// <summary>
+      /// The value if initialized and in use.
+      /// Otherwise, this field is indeterminate.
+      /// </summary>
+      public TValue Value;
+
+      public KeyValuePair<TKey, TValue> KeyValuePair
+      {
+        [MethodImpl(Helper.OptimizeInline)]
+        get
+        {
+          return new KeyValuePair<TKey, TValue>(Key, Value);
+        }
+      }
+
+      public DictionaryEntry DictionaryEntry
+      {
+        [MethodImpl(Helper.OptimizeInline)]
+        get
+        {
+          return new DictionaryEntry(Key, Value);
+        }
+      }
+    }
+
+    /// <summary>
+    /// <c>myBuckets[entry.HashCode % myBuckets.Length]</c> points to the first entry in this bucket
+    /// (negative if there are no entries in this bucket).
+    /// </summary>
+    private protected int[] myBuckets;
+
+    /// <summary>
+    /// The first <see cref="myTouchedCount"/> entries are initialized, among which <see cref="myActiveCount"/> are in use (not free).
+    /// The entries beyond the <see cref="myTouchedCount"/> ones are not initialized.
+    /// </summary>
+    private protected Entry[] myEntries;
+
+    /// <summary>
+    /// The number of key/value pairs in this map.
+    /// </summary>
+    private protected int myActiveCount;
+
+    /// <summary>
+    /// The number of initialized entries.
+    /// </summary>
+    private protected int myTouchedCount;
+
+    /// <summary>
+    /// Points to the first free entry
+    /// (negative if there are no initialized free entries).
+    /// </summary>
+    private protected int myFirstFreeEntry;
+
+    /// <summary>
+    /// Index into <see cref="Map2.theSizes"/>.
+    /// Negative if no storage has been allocated.
+    /// </summary>
+    private protected int mySizeIndex;
+
+#if MAP2_ENUMERATION_VERSION
+
+    /// <summary>
+    /// The version number to invalidate <see cref="Enumerator"/>, <see cref="KeyEnumerator"/>, <see cref="ValueEnumerator"/>.
+    /// </summary>
+    private protected uint myVersion;
+
+    /// <summary>
+    /// The version number to detect rude equality comparers.
+    /// </summary>
+    private protected uint myVersion2;
+
+#endif
+
+    [SuppressMessage("Performance", "CA1825", Justification = "Avoid excessive generic instantiations.")]
+    private static readonly Entry[] theEmptyEntryList = new Entry[0];
+
+    private protected Map2()
+    {
+      myBuckets = Map2.theEmptyBuckets;
+      myEntries = theEmptyEntryList;
+      myActiveCount = 0;
+      myTouchedCount = 0;
+      myFirstFreeEntry = 0;
+      mySizeIndex = -1;
+#if MAP2_ENUMERATION_VERSION
+      myVersion = 0;
+      myVersion2 = 0;
+#endif
+    }
+
     /// <summary>
     /// Gets the number of key/value pairs.
     /// </summary>
@@ -888,6 +999,27 @@ namespace Neat.Collections
       IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, IDictionary
     where TEqualityComparer : IEqualityComparer2<TKey>
   {
+    [SuppressMessage("Style", "IDE0044", Justification = "The equality comparer could be a mutable structure.")]
+    private TEqualityComparer myComparer;
+
+    /// <summary>
+    /// Initializes the instance with a specific equality comparer.
+    /// </summary>
+    public Map2(TEqualityComparer comparer)
+    {
+      myComparer = comparer;
+    }
+
+    /// <summary>
+    /// Initializes the instance with the <see langword="default"/> comparer.
+    /// This constructor should only be used
+    /// if <typeparamref name="TEqualityComparer"/> is a value type and requires no initialization.
+    /// </summary>
+    public Map2()
+    {
+      myComparer = default(TEqualityComparer);
+    }
+
     private protected sealed override void InternalInheritance()
     {
     }
@@ -1572,10 +1704,60 @@ namespace Neat.Collections
 
   public static class Map2
   {
-    /// <summary>
-    /// Not implemented yet.
-    /// </summary>
-    public const int MaximumCapacity = 0;
+    public const int MaximumCapacity = 881646013;
+
+    [SuppressMessage("Performance", "CA1825", Justification = "Avoid excessive generic instantiations.")]
+    internal static readonly int[] theEmptyBuckets = new int[0];
+
+    internal readonly struct Size
+    {
+      public readonly int BucketCount;
+      public readonly int EntryCount;
+
+      public Size(int bucketCount, int entryCount)
+      {
+        BucketCount = bucketCount;
+        EntryCount = entryCount;
+      }
+    }
+
+    internal static readonly Size[] theSizes = new Size[]
+    {
+      new Size(17, 12),
+      new Size(37, 27),
+      new Size(79, 59),
+      new Size(163, 122),
+      new Size(331, 248),
+      new Size(673, 504),
+      new Size(1361, 1020),
+      new Size(2729, 2046),
+      new Size(5471, 4103),
+      new Size(10949, 8211),
+      new Size(21911, 16433),
+      new Size(43853, 32889),
+      new Size(87719, 65789),
+      new Size(175447, 131585),
+      new Size(350899, 263174),
+      new Size(701819, 526364),
+      new Size(1052731, 894821),
+      new Size(1579099, 1342234),
+      new Size(2368649, 2013351),
+      new Size(3552977, 3020030),
+      new Size(5329469, 4530048),
+      new Size(7994213, 6795081),
+      new Size(11991373, 10192667),
+      new Size(17987089, 15289025),
+      new Size(26980697, 22933592),
+      new Size(40471061, 34400401),
+      new Size(60706627, 51600632),
+      new Size(91059949, 77400956),
+      new Size(136590001, 116101500),
+      new Size(204885013, 174152261),
+      new Size(307327523, 261228394),
+      new Size(460991303, 391842607),
+      new Size(691487003, 587763952),
+      new Size(881646013, 881646013)
+    };
 
     [DoesNotReturn]
     [MethodImpl(Helper.OptimizeInline)]
