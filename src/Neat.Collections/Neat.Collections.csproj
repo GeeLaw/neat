@@ -8,6 +8,8 @@
     <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
 
+  <!-- Define LIST2_SYNCROOT, MAP2_SYNCROOT to enable SyncRoot for List2<T>, Map2<TKey, TValue, TEqualityComparer>. -->
+  
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <DefineConstants>$(DefineConstants);LIST2_ENUMERATION_VERSION;LIST2_ENUMERATOR_DISPOSE;MAP2_ENUMERATION_VERSION;MAP2_ENUMERATOR_DISPOSE</DefineConstants>
   </PropertyGroup>

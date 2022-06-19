@@ -8,6 +8,9 @@ using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+#if LIST2_SYNCROOT
+using System.Threading;
+#endif
 
 namespace Neat.Collections
 {
@@ -22,6 +25,10 @@ namespace Neat.Collections
   {
     private T[] myData;
     private int myCount;
+
+#if LIST2_SYNCROOT
+    private object mySyncRoot;
+#endif
 
 #if LIST2_ENUMERATION_VERSION
     private uint myVersion;
@@ -71,6 +78,9 @@ namespace Neat.Collections
     {
       myData = theEmptyArray;
       myCount = 0;
+#if LIST2_SYNCROOT
+      mySyncRoot = null;
+#endif
 #if LIST2_ENUMERATION_VERSION
       myVersion = 0;
 #endif
@@ -88,6 +98,9 @@ namespace Neat.Collections
       }
       myData = (capacity == 0 ? theEmptyArray : new T[capacity]);
       myCount = 0;
+#if LIST2_SYNCROOT
+      mySyncRoot = null;
+#endif
 #if LIST2_ENUMERATION_VERSION
       myVersion = 0;
 #endif
@@ -103,6 +116,9 @@ namespace Neat.Collections
     {
       myData = data;
       myCount = count;
+#if LIST2_SYNCROOT
+      mySyncRoot = null;
+#endif
 #if LIST2_ENUMERATION_VERSION
       myVersion = 0;
 #endif
@@ -2184,11 +2200,23 @@ namespace Neat.Collections
     /// </summary>
     object ICollection.SyncRoot
     {
+#if LIST2_SYNCROOT
       [MethodImpl(Helper.JustOptimize)]
       get
       {
-        throw new NotSupportedException("SyncRoot is not supported.");
+        if (mySyncRoot is null)
+        {
+          Interlocked.CompareExchange(ref mySyncRoot, new object(), null);
+        }
+        return mySyncRoot;
       }
+#else
+      [MethodImpl(Helper.OptimizeNoInline)]
+      get
+      {
+        throw new NotSupportedException("SyncRoot is not supported (the support can be enabled by LIST2_SYNCROOT).");
+      }
+#endif
     }
 
     #endregion IList.IsFixedSize, ICollection<T>.IsReadOnly, IList.IsReadOnly, ICollection.IsSynchronized, ICollection.SyncRoot
@@ -2444,8 +2472,35 @@ namespace Neat.Collections
     #endregion GetEnumerator
   }
 
+  /// <summary>
+  /// Provides information about <see cref="List2{T}"/>.
+  /// </summary>
   public static class List2
   {
+#if LIST2_ENUMERATION_VERSION
+    public static readonly bool LoadedWithEnumerationVersion = true;
+    public const bool CompiledWithEnumerationVersion = true;
+#else
+    public static readonly bool LoadedWithEnumerationVersion = false;
+    public const bool CompiledWithEnumerationVersion = false;
+#endif
+
+#if LIST2_ENUMERATOR_DISPOSE
+    public static readonly bool LoadedWithEnumeratorDispose = true;
+    public const bool CompiledWithEnumeratorDispose = true;
+#else
+    public static readonly bool LoadedWithEnumeratorDispose = false;
+    public const bool CompiledWithEnumeratorDispose = false;
+#endif
+
+#if LIST2_SYNCROOT
+    public static readonly bool LoadedWithSyncRoot = true;
+    public const bool CompiledWithSyncRoot = true;
+#else
+    public static readonly bool LoadedWithSyncRoot = false;
+    public const bool CompiledWithSyncRoot = false;
+#endif
+
     public const int StartingCapacity = 8;
     public const int MaximumCapacityOneByte = 0x7FFFFFC7;
     public const int MaximumCapacityOther = 0x7FEFFFFF;

@@ -5,6 +5,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+#if MAP2_SYNCROOT
+using System.Threading;
+#endif
 
 namespace Neat.Collections
 {
@@ -16,6 +19,7 @@ namespace Neat.Collections
   /// As an example, enumerator-invalidating operations include clearing, trimming, and defragmenting.
   /// The equality comparer must not mutate the instance to which it belongs, even if that mutation does not invalidate existing enumerators
   /// (i.e., even if the mutation is removing a particular key).
+  /// This class is <see langword="abstract"/> and the concrete type is <see cref="Map2{TKey, TValue, TEqualityComparer}"/>.
   /// </summary>
   public abstract class Map2<TKey, TValue>
     : IEnumerable2<KeyValuePair<TKey, TValue>, Map2<TKey, TValue>.Enumerator>,
@@ -106,6 +110,10 @@ namespace Neat.Collections
     /// </summary>
     private protected int mySizeIndex;
 
+#if MAP2_SYNCROOT
+    private object mySyncRoot;
+#endif
+
 #if MAP2_ENUMERATION_VERSION
 
     /// <summary>
@@ -132,6 +140,9 @@ namespace Neat.Collections
       myTouchedCount = 0;
       myFirstFreeEntry = 0;
       mySizeIndex = -1;
+#if MAP2_SYNCROOT
+      mySyncRoot = null;
+#endif
 #if MAP2_ENUMERATION_VERSION
       myVersion = 0;
       myVersion2 = 0;
@@ -988,7 +999,6 @@ namespace Neat.Collections
 
     /// <summary>
     /// This member is thread-safe.
-    /// This member is not supported.
     /// </summary>
     object ICollection.SyncRoot
     {
@@ -999,6 +1009,28 @@ namespace Neat.Collections
     }
 
     #endregion ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly, IDictionary.IsReadOnly, IDictionary.IsFixedSize, ICollection.IsSynchronized, ICollection.SyncRoot
+
+#if MAP2_SYNCROOT
+
+    [MethodImpl(Helper.JustOptimize)]
+    private protected object SyncRootImpl()
+    {
+      if (mySyncRoot is null)
+      {
+        Interlocked.CompareExchange(ref mySyncRoot, new object(), null);
+      }
+      return mySyncRoot;
+    }
+
+#else
+
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private protected object SyncRootImpl()
+    {
+      throw new NotSupportedException("SyncRoot is not supported (the support can be enabled by MAP2_SYNCROOT).");
+    }
+
+#endif
 
     #region GetEnumerator (explicit implementations)
 
@@ -1987,16 +2019,13 @@ namespace Neat.Collections
 
       /// <summary>
       /// This member is thread-safe.
-      /// This member is not supported.
       /// </summary>
       object ICollection.SyncRoot
       {
-        [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
-        [MethodImpl(Helper.JustOptimize)]
+        [MethodImpl(Helper.OptimizeInline)]
         get
         {
-          int unused = myTarget.myActiveCount;
-          throw new NotSupportedException("SyncRoot is not supported.");
+          return myTarget.SyncRootImpl();
         }
       }
 
@@ -2040,6 +2069,7 @@ namespace Neat.Collections
   /// As an example, enumerator-invalidating operations include clearing, trimming, and defragmenting.
   /// The equality comparer must not mutate the instance to which it belongs, even if that mutation does not invalidate existing enumerators
   /// (i.e., even if the mutation is removing a particular key).
+  /// This class derives from <see cref="Map2{TKey, TValue}"/>.
   /// </summary>
   public sealed class Map2<TKey, TValue, TEqualityComparer>
     : Map2<TKey, TValue>,
@@ -3132,14 +3162,13 @@ namespace Neat.Collections
 
     /// <summary>
     /// This member is thread-safe.
-    /// This member is not supported.
     /// </summary>
     object ICollection.SyncRoot
     {
-      [MethodImpl(Helper.JustOptimize)]
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotSupportedException("SyncRoot is not supported.");
+        return SyncRootImpl();
       }
     }
 
@@ -3356,16 +3385,13 @@ namespace Neat.Collections
 
       /// <summary>
       /// This member is thread-safe.
-      /// This member is not supported.
       /// </summary>
       object ICollection.SyncRoot
       {
-        [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
-        [MethodImpl(Helper.JustOptimize)]
+        [MethodImpl(Helper.OptimizeInline)]
         get
         {
-          int unused = myTarget.myActiveCount;
-          throw new NotSupportedException("SyncRoot is not supported.");
+          return myTarget.SyncRootImpl();
         }
       }
 
@@ -3401,8 +3427,35 @@ namespace Neat.Collections
     }
   }
 
+  /// <summary>
+  /// Provides information about <see cref="Map2{TKey, TValue}"/> and <see cref="Map2{TKey, TValue, TEqualityComparer}"/>.
+  /// </summary>
   public static class Map2
   {
+#if MAP2_ENUMERATION_VERSION
+    public static readonly bool LoadedWithEnumerationVersion = true;
+    public const bool CompiledWithEnumerationVersion = true;
+#else
+    public static readonly bool LoadedWithEnumerationVersion = false;
+    public const bool CompiledWithEnumerationVersion = false;
+#endif
+
+#if MAP2_ENUMERATOR_DISPOSE
+    public static readonly bool LoadedWithEnumeratorDispose = true;
+    public const bool CompiledWithEnumeratorDispose = true;
+#else
+    public static readonly bool LoadedWithEnumeratorDispose = false;
+    public const bool CompiledWithEnumeratorDispose = false;
+#endif
+
+#if MAP2_SYNCROOT
+    public static readonly bool LoadedWithSyncRoot = true;
+    public const bool CompiledWithSyncRoot = true;
+#else
+    public static readonly bool LoadedWithSyncRoot = false;
+    public const bool CompiledWithSyncRoot = false;
+#endif
+
     internal const int HashCodeMask = 0x7FFFFFFF;
 
     public const int MaximumCapacity = 881646013;
@@ -3533,7 +3586,6 @@ namespace Neat.Collections
     }
 
 #endif
-
 
 #if MAP2_ENUMERATOR_DISPOSE
 
