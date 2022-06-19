@@ -613,9 +613,10 @@ namespace Neat.Collections
     /// </summary>
     public ValueView Values
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return new ValueView(this);
       }
     }
 
@@ -1812,14 +1813,25 @@ namespace Neat.Collections
 
     /// <summary>
     /// Represents a view of the values in a <see cref="Map2{TKey, TValue}"/> instance.
+    /// Among instance members,
+    /// only those of <see cref="IEquatable{T}"/> and <see cref="object"/> can be invoked on <see langword="default"/> instances.
     /// </summary>
-    public struct ValueView : IEquatable<ValueView>, IEnumerable2<TValue, ValueEnumerator>, ICollection<TValue>, IReadOnlyCollection<TValue>, ICollection
+    public readonly struct ValueView : IEquatable<ValueView>, IEnumerable2<TValue, ValueEnumerator>, ICollection<TValue>, IReadOnlyCollection<TValue>, ICollection
     {
+      private readonly Map2<TKey, TValue> myTarget;
+
+      [MethodImpl(Helper.OptimizeInline)]
+      internal ValueView(Map2<TKey, TValue> target)
+      {
+        myTarget = target;
+      }
+
       public int Count
       {
+        [MethodImpl(Helper.OptimizeInline)]
         get
         {
-          throw new NotImplementedException();
+          return myTarget.myActiveCount;
         }
       }
 
@@ -1828,110 +1840,158 @@ namespace Neat.Collections
         throw new NotImplementedException();
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public void CopyTo(TValue[] array, int arrayIndex)
       {
-        throw new NotImplementedException();
+        myTarget.CopyValuesTo(array, arrayIndex);
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public ValueEnumerator GetEnumerator()
       {
-        throw new NotImplementedException();
+        return new ValueEnumerator(myTarget);
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public bool Equals(ValueView other)
       {
-        throw new NotImplementedException();
+        return ReferenceEquals(myTarget, other.myTarget);
       }
 
       #region static Equals, operator ==, operator !=
 
+      [MethodImpl(Helper.OptimizeInline)]
       public static bool Equals(ValueView x, ValueView y)
       {
-        throw new NotImplementedException();
+        return ReferenceEquals(x.myTarget, y.myTarget);
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public static bool operator ==(ValueView x, ValueView y)
       {
-        throw new NotImplementedException();
+        return ReferenceEquals(x.myTarget, y.myTarget);
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public static bool operator !=(ValueView x, ValueView y)
       {
-        throw new NotImplementedException();
+        return !ReferenceEquals(x.myTarget, y.myTarget);
       }
 
       #endregion static Equals, operator ==, operator !=
 
       #region object members
 
+      [MethodImpl(Helper.OptimizeInline)]
       public override bool Equals(object obj)
       {
-        throw new NotImplementedException();
+        return (obj is ValueView other) && ReferenceEquals(myTarget, other.myTarget);
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public override int GetHashCode()
       {
-        throw new NotImplementedException();
+        return RuntimeHelpers.GetHashCode(myTarget);
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public override string ToString()
       {
-        throw new NotImplementedException();
+        return typeof(ValueView).FullName;
       }
 
       #endregion object members
 
       #region ICollection.CopyTo
 
+      [MethodImpl(Helper.OptimizeInline)]
       void ICollection.CopyTo(Array array, int index)
       {
-        throw new NotImplementedException();
+        /* First, (implicitly) check whether "myTarget" is null. */
+        Map2<TKey, TValue> target = myTarget;
+        int activeCount = target.myActiveCount;
+        if (array is TValue[] vArray)
+        {
+          CopyValuesToImpl(target.myEntries, vArray, index, activeCount, nameof(index));
+        }
+        else
+        {
+          Map2.ThrowCopyValuesToArrayType();
+        }
       }
 
       #endregion ICollection.CopyTo
 
       #region ICollection<TValue>.Add, ICollection<TValue>.Clear, ICollection<TValue>.Remove
 
+      [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+      [MethodImpl(Helper.OptimizeNoInline)]
       void ICollection<TValue>.Add(TValue item)
       {
-        throw new NotImplementedException();
+        int unused = myTarget.myActiveCount;
+        throw new NotSupportedException();
       }
 
+      [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+      [MethodImpl(Helper.OptimizeNoInline)]
       void ICollection<TValue>.Clear()
       {
-        throw new NotImplementedException();
+        int unused = myTarget.myActiveCount;
+        throw new NotSupportedException();
       }
 
+      [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+      [MethodImpl(Helper.OptimizeNoInline)]
       bool ICollection<TValue>.Remove(TValue item)
       {
-        throw new NotImplementedException();
+        int unused = myTarget.myActiveCount;
+        throw new NotSupportedException();
       }
 
       #endregion ICollection<TValue>.Add, ICollection<TValue>.Clear, ICollection<TValue>.Remove
 
       #region ICollection<TValue>.IsReadOnly, ICollection.IsSynchronized, ICollection.SyncRoot
 
+      /// <summary>
+      /// This member is thread-safe.
+      /// </summary>
       bool ICollection<TValue>.IsReadOnly
       {
+        [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+        [MethodImpl(Helper.OptimizeInline)]
         get
         {
-          throw new NotImplementedException();
+          int unused = myTarget.myActiveCount;
+          return true;
         }
       }
 
+      /// <summary>
+      /// This member is thread-safe.
+      /// </summary>
       bool ICollection.IsSynchronized
       {
+        [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+        [MethodImpl(Helper.OptimizeInline)]
         get
         {
-          throw new NotImplementedException();
+          int unused = myTarget.myActiveCount;
+          return false;
         }
       }
 
+      /// <summary>
+      /// This member is thread-safe.
+      /// This member is not supported.
+      /// </summary>
       object ICollection.SyncRoot
       {
+        [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
+        [MethodImpl(Helper.JustOptimize)]
         get
         {
-          throw new NotImplementedException();
+          int unused = myTarget.myActiveCount;
+          throw new NotSupportedException("SyncRoot is not supported.");
         }
       }
 
@@ -1939,24 +1999,28 @@ namespace Neat.Collections
 
       #region GetEnumerator (explicit implementations)
 
+      [MethodImpl(Helper.OptimizeInline)]
       IEnumerator2<TValue> IEnumerable2<TValue>.GetEnumerator()
       {
-        throw new NotImplementedException();
+        return new ValueEnumerator(myTarget);
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       IEnumerator2 IEnumerable2.GetEnumerator()
       {
-        throw new NotImplementedException();
+        return new ValueEnumerator(myTarget);
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator()
       {
-        throw new NotImplementedException();
+        return new ValueEnumerator(myTarget);
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       IEnumerator IEnumerable.GetEnumerator()
       {
-        throw new NotImplementedException();
+        return new ValueEnumerator(myTarget);
       }
 
       #endregion GetEnumerator (explicit implementations)
