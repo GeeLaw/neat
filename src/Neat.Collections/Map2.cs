@@ -2943,25 +2943,28 @@ namespace Neat.Collections
 
     IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return new KeyView(this);
       }
     }
 
     ICollection<TKey> IDictionary<TKey, TValue>.Keys
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return new KeyView(this);
       }
     }
 
     ICollection IDictionary.Keys
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return new KeyView(this);
       }
     }
 
@@ -2971,25 +2974,28 @@ namespace Neat.Collections
 
     IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return new ValueView(this);
       }
     }
 
     ICollection<TValue> IDictionary<TKey, TValue>.Values
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return new ValueView(this);
       }
     }
 
     ICollection IDictionary.Values
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return new ValueView(this);
       }
     }
 
