@@ -283,7 +283,7 @@ namespace Neat.Collections
     {
       get
       {
-        throw new NotImplementedException();
+        throw new NotReimplementedException();
       }
     }
 
@@ -291,7 +291,7 @@ namespace Neat.Collections
     {
       get
       {
-        throw new NotImplementedException();
+        throw new NotReimplementedException();
       }
     }
 
@@ -299,7 +299,7 @@ namespace Neat.Collections
     {
       get
       {
-        throw new NotImplementedException();
+        throw new NotReimplementedException();
       }
     }
 
@@ -309,12 +309,12 @@ namespace Neat.Collections
 
     void ICollection<KeyValuePair<TKey, TValue>>.Clear()
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     void IDictionary.Clear()
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     #endregion ICollection<KeyValuePair<TKey, TValue>>.Clear, IDictionary.Clear
@@ -325,7 +325,7 @@ namespace Neat.Collections
     {
       get
       {
-        throw new NotImplementedException();
+        throw new NotReimplementedException();
       }
     }
 
@@ -333,11 +333,11 @@ namespace Neat.Collections
     {
       get
       {
-        throw new NotImplementedException();
+        throw new NotReimplementedException();
       }
       set
       {
-        throw new NotImplementedException();
+        throw new NotReimplementedException();
       }
     }
 
@@ -345,11 +345,11 @@ namespace Neat.Collections
     {
       get
       {
-        throw new NotImplementedException();
+        throw new NotReimplementedException();
       }
       set
       {
-        throw new NotImplementedException();
+        throw new NotReimplementedException();
       }
     }
 
@@ -359,17 +359,17 @@ namespace Neat.Collections
 
     void IDictionary<TKey, TValue>.Add(TKey key, TValue value)
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item)
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     void IDictionary.Add(object key, object value)
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     #endregion IDictionary<TKey, TValue>.Add, ICollection<KeyValuePair<TKey, TValue>>.Add, IDictionary.Add
@@ -378,12 +378,12 @@ namespace Neat.Collections
 
     bool IReadOnlyDictionary<TKey, TValue>.TryGetValue(TKey key, out TValue value)
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     bool IDictionary<TKey, TValue>.TryGetValue(TKey key, out TValue value)
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     #endregion IReadOnlyDictionary<TKey, TValue>.TryGetValue, IDictionary<TKey, TValue>.TryGetValue
@@ -392,22 +392,22 @@ namespace Neat.Collections
 
     bool IReadOnlyDictionary<TKey, TValue>.ContainsKey(TKey key)
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     bool IDictionary<TKey, TValue>.ContainsKey(TKey key)
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     bool IDictionary.Contains(object key)
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     #endregion IReadOnlyDictionary<TKey, TValue>.ContainsKey, IDictionary<TKey, TValue>.ContainsKey, ICollection<KeyValuePair<TKey, TValue>>.Contains, IDictionary.Contains
@@ -416,17 +416,17 @@ namespace Neat.Collections
 
     bool IDictionary<TKey, TValue>.Remove(TKey key)
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     void IDictionary.Remove(object key)
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     #endregion IDictionary<TKey, TValue>.Remove, ICollection<KeyValuePair<TKey, TValue>>.Remove, IDictionary.Remove
@@ -435,12 +435,12 @@ namespace Neat.Collections
 
     void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     void ICollection.CopyTo(Array array, int index)
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     #endregion ICollection<KeyValuePair<TKey, TValue>>.CopyTo, ICollection.CopyTo
@@ -451,7 +451,7 @@ namespace Neat.Collections
     {
       get
       {
-        throw new NotImplementedException();
+        throw new NotReimplementedException();
       }
     }
 
@@ -459,7 +459,7 @@ namespace Neat.Collections
     {
       get
       {
-        throw new NotImplementedException();
+        throw new NotReimplementedException();
       }
     }
 
@@ -467,7 +467,7 @@ namespace Neat.Collections
     {
       get
       {
-        throw new NotImplementedException();
+        throw new NotReimplementedException();
       }
     }
 
@@ -479,7 +479,7 @@ namespace Neat.Collections
     {
       get
       {
-        throw new NotImplementedException();
+        throw new NotReimplementedException();
       }
     }
 
@@ -487,7 +487,7 @@ namespace Neat.Collections
     {
       get
       {
-        throw new NotImplementedException();
+        throw new NotReimplementedException();
       }
     }
 
@@ -495,7 +495,7 @@ namespace Neat.Collections
     {
       get
       {
-        throw new NotImplementedException();
+        throw new NotReimplementedException();
       }
     }
 
@@ -507,7 +507,7 @@ namespace Neat.Collections
     {
       get
       {
-        throw new NotImplementedException();
+        throw new NotReimplementedException();
       }
     }
 
@@ -515,7 +515,7 @@ namespace Neat.Collections
     {
       get
       {
-        throw new NotImplementedException();
+        throw new NotReimplementedException();
       }
     }
 
@@ -523,7 +523,7 @@ namespace Neat.Collections
     {
       get
       {
-        throw new NotImplementedException();
+        throw new NotReimplementedException();
       }
     }
 
@@ -531,7 +531,7 @@ namespace Neat.Collections
     {
       get
       {
-        throw new NotImplementedException();
+        throw new NotReimplementedException();
       }
     }
 
@@ -539,7 +539,7 @@ namespace Neat.Collections
     {
       get
       {
-        throw new NotImplementedException();
+        throw new NotReimplementedException();
       }
     }
 
@@ -549,32 +549,32 @@ namespace Neat.Collections
 
     Enumerator IEnumerable2<KeyValuePair<TKey, TValue>, Enumerator>.GetEnumerator()
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     IEnumerator2<KeyValuePair<TKey, TValue>> IEnumerable2<KeyValuePair<TKey, TValue>>.GetEnumerator()
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     IEnumerator2 IEnumerable2.GetEnumerator()
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     IDictionaryEnumerator IDictionary.GetEnumerator()
     {
-      throw new NotImplementedException();
+      throw new NotReimplementedException();
     }
 
     #endregion GetEnumerator (explicit implementations)
