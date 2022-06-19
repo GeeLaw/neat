@@ -882,19 +882,23 @@ namespace Neat.Collections
   /// The equality comparer must not mutate the instance to which it belongs, even if that mutation does not invalidate existing enumerators
   /// (i.e., even if the mutation is removing a particular key).
   /// </summary>
-  public abstract class Map2<TKey, TValue, TEqualityComparer>
+  public sealed class Map2<TKey, TValue, TEqualityComparer>
     : Map2<TKey, TValue>,
       IEnumerable2<KeyValuePair<TKey, TValue>, Map2<TKey, TValue>.Enumerator>,
       IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, IDictionary
     where TEqualityComparer : IEqualityComparer2<TKey>
   {
+    private protected sealed override void InternalInheritance()
+    {
+    }
+
     #region public members that hide those from the base class
 
     /// <summary>
     /// Gets or sets the value corresponding to the specified key.
     /// </summary>
     /// <exception cref="KeyNotFoundException">If the key does not exist when getting the value.</exception>
-    public TValue this[TKey key]
+    public new TValue this[TKey key]
     {
       get
       {
@@ -907,7 +911,7 @@ namespace Neat.Collections
     }
 
     /// <returns><see langword="true"/> if the key exists.</returns>
-    public bool ContainsKey(TKey key)
+    public new bool ContainsKey(TKey key)
     {
       throw new NotImplementedException();
     }
@@ -919,7 +923,7 @@ namespace Neat.Collections
     /// This method never reads <paramref name="value"/>.
     /// </summary>
     /// <returns><see langword="true"/> if the key exists.</returns>
-    public bool TryGet(TKey key, ref TValue value)
+    public new bool TryGet(TKey key, ref TValue value)
     {
       throw new NotImplementedException();
     }
@@ -931,7 +935,7 @@ namespace Neat.Collections
     /// This method never reads <paramref name="value"/>.
     /// </summary>
     /// <returns><see langword="true"/> if the key exists.</returns>
-    public bool GetOrDefault(TKey key, out TValue value)
+    public new bool GetOrDefault(TKey key, out TValue value)
     {
       throw new NotImplementedException();
     }
@@ -943,13 +947,13 @@ namespace Neat.Collections
     /// If the key does not exist, <paramref name="value"/> is neither read nor written to.
     /// </summary>
     /// <returns><see langword="true"/> if the key exists.</returns>
-    public bool TrySwap(TKey key, ref TValue value)
+    public new bool TrySwap(TKey key, ref TValue value)
     {
       throw new NotImplementedException();
     }
 
     /// <returns><see langword="true"/> if the key existed.</returns>
-    public bool Remove(TKey key)
+    public new bool Remove(TKey key)
     {
       throw new NotImplementedException();
     }
@@ -961,7 +965,7 @@ namespace Neat.Collections
     /// This method never reads <paramref name="value"/>.
     /// </summary>
     /// <returns><see langword="true"/> if the key existed.</returns>
-    public bool TryGetAndRemove(TKey key, ref TValue value)
+    public new bool TryGetAndRemove(TKey key, ref TValue value)
     {
       throw new NotImplementedException();
     }
@@ -973,7 +977,7 @@ namespace Neat.Collections
     /// This method never reads <paramref name="value"/>.
     /// </summary>
     /// <returns><see langword="true"/> if the key existed.</returns>
-    public bool GetAndRemoveOrDefault(TKey key, out TValue value)
+    public new bool GetAndRemoveOrDefault(TKey key, out TValue value)
     {
       throw new NotImplementedException();
     }
@@ -984,7 +988,7 @@ namespace Neat.Collections
     /// </summary>
     /// <returns><see langword="true"/> if the key did not exist.</returns>
     /// <exception cref="InvalidOperationException">If the number of key/value pairs will exceed <see cref="Map2.MaximumCapacity"/>.</exception>
-    public bool TryAddNew(TKey key, TValue value)
+    public new bool TryAddNew(TKey key, TValue value)
     {
       throw new NotImplementedException();
     }
@@ -994,7 +998,7 @@ namespace Neat.Collections
     /// </summary>
     /// <returns><see langword="true"/> if the key did not exist.</returns>
     /// <exception cref="InvalidOperationException">If the number of key/value pairs will exceed <see cref="Map2.MaximumCapacity"/>.</exception>
-    public bool AddOrReplace(TKey key, TValue value)
+    public new bool AddOrReplace(TKey key, TValue value)
     {
       throw new NotImplementedException();
     }
@@ -1005,7 +1009,7 @@ namespace Neat.Collections
     /// </summary>
     /// <returns><see langword="true"/> if the key did not exist.</returns>
     /// <exception cref="InvalidOperationException">If the number of key/value pairs will exceed <see cref="Map2.MaximumCapacity"/>.</exception>
-    public bool AddOrGet(TKey key, ref TValue value)
+    public new bool AddOrGet(TKey key, ref TValue value)
     {
       throw new NotImplementedException();
     }
@@ -1017,7 +1021,7 @@ namespace Neat.Collections
     /// </summary>
     /// <returns><see langword="true"/> if the key did not exist.</returns>
     /// <exception cref="InvalidOperationException">If the number of key/value pairs will exceed <see cref="Map2.MaximumCapacity"/>.</exception>
-    public bool AddOrSwap(TKey key, ref TValue value)
+    public new bool AddOrSwap(TKey key, ref TValue value)
     {
       throw new NotImplementedException();
     }
@@ -1026,7 +1030,7 @@ namespace Neat.Collections
     /// Gets a view of the keys.
     /// Obtaining such a view is thread-safe.
     /// </summary>
-    public KeyView Keys
+    public new KeyView Keys
     {
       get
       {
@@ -1035,6 +1039,81 @@ namespace Neat.Collections
     }
 
     #endregion public members that hide those from the base class
+
+    #region virtual methods
+
+    [MethodImpl(Helper.OptimizeInline)]
+    private protected sealed override bool ContainsKeyOverride(TKey key)
+    {
+      return ContainsKey(key);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    private protected sealed override bool TryGetOverride(TKey key, ref TValue value)
+    {
+      return TryGet(key, ref value);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    private protected sealed override bool GetOrDefaultOverride(TKey key, out TValue value)
+    {
+      return GetOrDefault(key, out value);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    private protected sealed override bool TrySwapOverride(TKey key, ref TValue value)
+    {
+      return TrySwap(key, ref value);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    private protected sealed override bool RemoveOverride(TKey key)
+    {
+      return Remove(key);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    private protected sealed override bool TryGetAndRemoveOverride(TKey key, ref TValue value)
+    {
+      return TryGetAndRemove(key, ref value);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    private protected sealed override bool GetAndRemoveOrDefaultOverride(TKey key, out TValue value)
+    {
+      return GetAndRemoveOrDefault(key, out value);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    private protected sealed override bool TryAddNewOverride(TKey key, TValue value)
+    {
+      return TryAddNew(key, value);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    private protected sealed override bool AddOrReplaceOverride(TKey key, TValue value)
+    {
+      return AddOrReplace(key, value);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    private protected sealed override bool AddOrGetOverride(TKey key, ref TValue value)
+    {
+      return AddOrGet(key, ref value);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    private protected sealed override bool AddOrSwapOverride(TKey key, ref TValue value)
+    {
+      return AddOrSwap(key, ref value);
+    }
+
+    private protected sealed override ICollection<TKey> KeysOverride()
+    {
+      throw new NotImplementedException();
+    }
+
+    #endregion virtual methods
 
     #region IReadOnlyCollection<KeyValuePair<TKey, TValue>>.Count, ICollection<KeyValuePair<TKey, TValue>>.Count, ICollection.Count
 
