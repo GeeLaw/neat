@@ -1997,13 +1997,21 @@ namespace Neat.Collections
     /// <exception cref="KeyNotFoundException">If the key does not exist when getting the value.</exception>
     public new TValue this[TKey key]
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        TValue value;
+        Unsafe.SkipInit(out value);
+        if (!TryGet(key, ref value))
+        {
+          Map2.ThrowKeyNotFound();
+        }
+        return value;
       }
+      [MethodImpl(Helper.OptimizeInline)]
       set
       {
-        throw new NotImplementedException();
+        AddOrReplace(key, value);
       }
     }
 
@@ -2263,33 +2271,63 @@ namespace Neat.Collections
 
     TValue IReadOnlyDictionary<TKey, TValue>.this[TKey key]
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        TValue value;
+        Unsafe.SkipInit(out value);
+        if (!TryGet(key, ref value))
+        {
+          Map2.ThrowKeyNotFound();
+        }
+        return value;
       }
     }
 
     TValue IDictionary<TKey, TValue>.this[TKey key]
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        TValue value;
+        Unsafe.SkipInit(out value);
+        if (!TryGet(key, ref value))
+        {
+          Map2.ThrowKeyNotFound();
+        }
+        return value;
       }
+      [MethodImpl(Helper.OptimizeInline)]
       set
       {
-        throw new NotImplementedException();
+        AddOrReplace(key, value);
       }
     }
 
     object IDictionary.this[object key]
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        TValue value;
+        Unsafe.SkipInit(out value);
+        if (!(key is TKey tKey
+          ? TryGet(tKey, ref value)
+          : default(TKey) is null && key is null && TryGet(default(TKey), ref value)))
+        {
+          Map2.ThrowKeyNotFound();
+        }
+        return value;
       }
+      [MethodImpl(Helper.OptimizeInline)]
       set
       {
-        throw new NotImplementedException();
+        /* The attempt is modify the map has been made upon entering this method,
+        /* even if the key or the value cannot be cast to the right type(s). */
+#if MAP2_ENUMERATION_VERSION
+        ++myVersion;
+#endif
+        AddOrReplace((TKey)key, (TValue)value);
       }
     }
 
