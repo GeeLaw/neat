@@ -122,6 +122,7 @@ namespace Neat.Collections
     [SuppressMessage("Performance", "CA1825", Justification = "Avoid excessive generic instantiations.")]
     private static readonly Entry[] theEmptyEntryList = new Entry[0];
 
+    [MethodImpl(Helper.OptimizeInline)]
     private protected Map2()
     {
       myBuckets = Map2.theEmptyBuckets;
@@ -1967,6 +1968,7 @@ namespace Neat.Collections
     /// <summary>
     /// Initializes the instance with a specific equality comparer.
     /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
     public Map2(TEqualityComparer comparer)
     {
       myComparer = comparer;
@@ -1977,6 +1979,7 @@ namespace Neat.Collections
     /// This constructor should only be used
     /// if <typeparamref name="TEqualityComparer"/> is a value type and requires no initialization.
     /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
     public Map2()
     {
       myComparer = default(TEqualityComparer);
