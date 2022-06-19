@@ -18,6 +18,226 @@ namespace Neat.Collections
       IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, IDictionary
     where TEqualityComparer : IEqualityComparer2<TKey>
   {
+    /// <summary>
+    /// Gets the number of key/value pairs.
+    /// </summary>
+    public int Count
+    {
+      get
+      {
+        throw new NotImplementedException();
+      }
+    }
+
+    /// <summary>
+    /// Clears the key/value pairs.
+    /// </summary>
+    public void Clear()
+    {
+      throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Reduces the memory usage opportunistically.
+    /// </summary>
+    /// <returns><see langword="true"/> if reallocation happened.</returns>
+    public bool TrimExcess()
+    {
+      throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Improves enumeration efficiency.
+    /// </summary>
+    /// <param name="force"><see langword="true"/> if defragmentation is performed as long as there is any fragmentation.</param>
+    /// <returns><see langword="true"/> if defragmentation happened.
+    /// The return value can be <see langword="false"/> even if <paramref name="force"/> is <see langword="true"/>,
+    /// when there is no fragmentation at all.</returns>
+    public bool Defragment(bool force)
+    {
+      throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Copies the key/value pairs to <paramref name="array"/>, starting at <paramref name="arrayIndex"/>.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">If <paramref name="array"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="arrayIndex"/> is negative,
+    /// or greater than the length of <paramref name="array"/> minus <see cref="Count"/>.</exception>
+    public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
+    {
+      throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Gets or sets the value corresponding to the specified key.
+    /// </summary>
+    /// <exception cref="KeyNotFoundException">If the key does not exist when getting the value.</exception>
+    public TValue this[TKey key]
+    {
+      get
+      {
+        throw new NotImplementedException();
+      }
+      set
+      {
+        throw new NotImplementedException();
+      }
+    }
+
+    /// <returns><see langword="true"/> if the key exists.</returns>
+    public bool ContainsKey(TKey key)
+    {
+      throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Tries to copy the value corresponding to <paramref name="key"/> into <paramref name="value"/>.
+    /// If the key exists, <paramref name="value"/> is written to once, with the value corresponding to <paramref name="key"/>.
+    /// If the key does not exist, <paramref name="value"/> is not written to.
+    /// This method never reads <paramref name="value"/>.
+    /// </summary>
+    /// <returns><see langword="true"/> if the key exists.</returns>
+    public bool TryGet(TKey key, ref TValue value)
+    {
+      throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Tries to copy the value corresponding to <paramref name="key"/> into <paramref name="value"/>.
+    /// If the key exists, <paramref name="value"/> is written to once, with the value being the value corresponding to <paramref name="key"/>.
+    /// If the key does not exist, <paramref name="value"/> is written to once, with the value <see langword="default"/>.
+    /// This method never reads <paramref name="value"/>.
+    /// </summary>
+    /// <returns><see langword="true"/> if the key exists.</returns>
+    public bool GetOrDefault(TKey key, out TValue value)
+    {
+      throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Tries to swap the value corresponding to <paramref name="key"/> with <paramref name="value"/>.
+    /// If the key exists, <paramref name="value"/> is read once, whose value becomes the new value corresponding to <paramref name="key"/>,
+    /// and <paramref name="value"/> is written to once afterwards, with the old value corresponding to <paramref name="key"/>.
+    /// If the key does not exist, <paramref name="value"/> is neither read nor written to.
+    /// </summary>
+    /// <returns><see langword="true"/> if the key exists.</returns>
+    public bool TrySwap(TKey key, ref TValue value)
+    {
+      throw new NotImplementedException();
+    }
+
+    /// <returns><see langword="true"/> if the key existed.</returns>
+    public bool Remove(TKey key)
+    {
+      throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Tries to copy the value corresponding to <paramref name="key"/> into <paramref name="value"/> and remove <paramref name="key"/> from the map.
+    /// If the key existed, <paramref name="value"/> is written to once, with the old value corresponding to <paramref name="key"/>.
+    /// If the key did not exist, <paramref name="value"/> is not written to.
+    /// This method never reads <paramref name="value"/>.
+    /// </summary>
+    /// <returns><see langword="true"/> if the key existed.</returns>
+    public bool TryGetAndRemove(TKey key, ref TValue value)
+    {
+      throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Tries to copy the value corresponding to <paramref name="key"/> into <paramref name="value"/> and remove <paramref name="key"/> from the map.
+    /// If the key existed, <paramref name="value"/> is written to once, with the old value corresponding to <paramref name="key"/>.
+    /// If the key did not exist, <paramref name="value"/> is written to once, with the value <see langword="default"/>.
+    /// This method never reads <paramref name="value"/>.
+    /// </summary>
+    /// <returns><see langword="true"/> if the key existed.</returns>
+    public bool GetAndRemoveOrDefault(TKey key, out TValue value)
+    {
+      throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Tries to add <paramref name="key"/> with <paramref name="value"/>.
+    /// If <paramref name="key"/> already exists, its existing value is not updated.
+    /// </summary>
+    /// <returns><see langword="true"/> if the key did not exist.</returns>
+    /// <exception cref="InvalidOperationException">If the number of key/value pairs will exceed <see cref="Map2.MaximumCapacity"/>.</exception>
+    public bool TryAddNew(TKey key, TValue value)
+    {
+      throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Adds or replaces the value correponding to <paramref name="key"/> as/by <paramref name="value"/>.
+    /// </summary>
+    /// <returns><see langword="true"/> if the key did not exist.</returns>
+    /// <exception cref="InvalidOperationException">If the number of key/value pairs will exceed <see cref="Map2.MaximumCapacity"/>.</exception>
+    public bool AddOrReplace(TKey key, TValue value)
+    {
+      throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// If the key existed, <paramref name="value"/> is not read, but written to once, with the existing value corresponding to <paramref name="key"/>.
+    /// If the key did not exist, <paramref name="value"/> is read once, whose value becomes the value corresponding to <paramref name="key"/>, and is never written to.
+    /// </summary>
+    /// <returns><see langword="true"/> if the key did not exist.</returns>
+    /// <exception cref="InvalidOperationException">If the number of key/value pairs will exceed <see cref="Map2.MaximumCapacity"/>.</exception>
+    public bool AddOrGet(TKey key, ref TValue value)
+    {
+      throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// If the key existed, <paramref name="value"/> is read once, whose value becomes the new value corresponding to <paramref name="key"/>,
+    /// and <paramref name="value"/> is written to once afterwards, with the old value corresponding to <paramref name="key"/>.
+    /// If the key did not exist, <paramref name="value"/> is read once, whose value becomes the value corresponding to <paramref name="key"/>, and is never written to.
+    /// </summary>
+    /// <returns><see langword="true"/> if the key did not exist.</returns>
+    /// <exception cref="InvalidOperationException">If the number of key/value pairs will exceed <see cref="Map2.MaximumCapacity"/>.</exception>
+    public bool AddOrSwap(TKey key, ref TValue value)
+    {
+      throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Gets a view of the keys.
+    /// Obtaining such a view is thread-safe.
+    /// </summary>
+    public KeyView Keys
+    {
+      get
+      {
+        throw new NotImplementedException();
+      }
+    }
+
+    /// <summary>
+    /// Gets a view of the values.
+    /// Obtaining such a view is thread-safe.
+    /// </summary>
+    public ValueView Values
+    {
+      get
+      {
+        throw new NotImplementedException();
+      }
+    }
+
+    public Enumerator GetEnumerator()
+    {
+      throw new NotImplementedException();
+    }
+
+    public struct KeyView
+    {
+    }
+
+    public struct ValueView
+    {
+    }
+
     #region IReadOnlyCollection<KeyValuePair<TKey, TValue>>.Count, ICollection<KeyValuePair<TKey, TValue>>.Count, ICollection.Count
 
     int IReadOnlyCollection<KeyValuePair<TKey, TValue>>.Count
@@ -366,5 +586,13 @@ namespace Neat.Collections
         throw new NotImplementedException();
       }
     }
+  }
+
+  public static class Map2
+  {
+    /// <summary>
+    /// Not implemented yet.
+    /// </summary>
+    public const int MaximumCapacity = 0;
   }
 }
