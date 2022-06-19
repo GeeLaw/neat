@@ -140,9 +140,10 @@ namespace Neat.Collections
     /// </summary>
     public int Count
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return myActiveCount;
       }
     }
 
@@ -1251,25 +1252,28 @@ namespace Neat.Collections
 
     int IReadOnlyCollection<KeyValuePair<TKey, TValue>>.Count
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return myActiveCount;
       }
     }
 
     int ICollection<KeyValuePair<TKey, TValue>>.Count
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return myActiveCount;
       }
     }
 
     int ICollection.Count
     {
+      [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        throw new NotImplementedException();
+        return myActiveCount;
       }
     }
 
