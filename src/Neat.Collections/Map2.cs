@@ -2425,9 +2425,45 @@ namespace Neat.Collections
     /// </summary>
     /// <returns><see langword="true"/> if the key did not exist.</returns>
     /// <exception cref="InvalidOperationException">If the number of key/value pairs will exceed <see cref="Map2.MaximumCapacity"/>.</exception>
+    [MethodImpl(Helper.JustOptimize)]
     public new bool AddOrGet(TKey key, ref TValue value)
     {
-      throw new NotImplementedException();
+#if MAP2_ENUMERATION_VERSION
+      uint version = ++myVersion, version2 = myVersion2;
+#endif
+      int[] buckets = myBuckets;
+      Entry[] entries = myEntries;
+      int hashCode = myComparer.GetHashCode(key) & Map2.HashCodeMask;
+      int currentEntry = buckets[hashCode % buckets.Length];
+      while (currentEntry >= 0)
+      {
+        if (entries[currentEntry].HashCode == hashCode && myComparer.Equals(key, entries[currentEntry].Key))
+        {
+#if MAP2_ENUMERATION_VERSION
+          if (version != myVersion || version2 != myVersion2)
+          {
+            Map2.ThrowVersion();
+          }
+#endif
+          value = entries[currentEntry].Value;
+          return false;
+        }
+        currentEntry = entries[currentEntry].Next;
+      }
+#if MAP2_ENUMERATION_VERSION
+      if (version != myVersion || version2 != myVersion2)
+      {
+        Map2.ThrowVersion();
+      }
+#endif
+      currentEntry = AllocEntry(out buckets, out entries);
+      entries[currentEntry].HashCode = hashCode;
+      entries[currentEntry].Key = key;
+      entries[currentEntry].Value = value;
+      hashCode %= buckets.Length;
+      entries[currentEntry].Next = buckets[hashCode];
+      buckets[hashCode] = currentEntry;
+      return true;
     }
 
     /// <summary>
