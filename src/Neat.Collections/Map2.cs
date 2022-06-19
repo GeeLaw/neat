@@ -299,14 +299,143 @@ namespace Neat.Collections
     }
 
     /// <summary>
+    /// Copies the keys to <paramref name="array"/>, starting at <paramref name="arrayIndex"/>.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">If <paramref name="array"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="arrayIndex"/> is negative,
+    /// or greater than the length of <paramref name="array"/> minus <see cref="Count"/>.</exception>
+    [MethodImpl(Helper.OptimizeInline)]
+    public void CopyKeysTo(TKey[] array, int arrayIndex)
+    {
+      if (array is null)
+      {
+        Map2.ThrowCopyToArrayNull();
+      }
+      CopyKeysToImpl(myEntries, array, arrayIndex, myActiveCount, nameof(arrayIndex));
+    }
+
+    /// <summary>
+    /// This method is non-inlining to reduce the risk of read introduction.
+    /// It also assumes that <paramref name="array"/> is not <see langword="null"/>.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private protected static void CopyKeysToImpl(Entry[] entries, TKey[] array, int arrayIndex, int activeCount, string arrayIndexOrIndex)
+    {
+      if ((uint)arrayIndex >= (uint)array.Length || (uint)(array.Length - arrayIndex) < (uint)activeCount)
+      {
+        throw new ArgumentOutOfRangeException(arrayIndexOrIndex);
+      }
+      ref TKey dest0 = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(array), arrayIndex);
+      /* At this point, "activeCount" must be non-negative due to the second condition of "if". */
+      for (int i = 0, j = 0; i != activeCount; ++i, ++j)
+      {
+        while (entries[j].HashCode < 0)
+        {
+          ++j;
+        }
+        Unsafe.Add(ref dest0, i) = entries[j].Key;
+      }
+    }
+
+    /// <summary>
+    /// Copies the values to <paramref name="array"/>, starting at <paramref name="arrayIndex"/>.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">If <paramref name="array"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="arrayIndex"/> is negative,
+    /// or greater than the length of <paramref name="array"/> minus <see cref="Count"/>.</exception>
+    [MethodImpl(Helper.OptimizeInline)]
+    public void CopyValuesTo(TValue[] array, int arrayIndex)
+    {
+      if (array is null)
+      {
+        Map2.ThrowCopyToArrayNull();
+      }
+      CopyValuesToImpl(myEntries, array, arrayIndex, myActiveCount, nameof(arrayIndex));
+    }
+
+    /// <summary>
+    /// This method is non-inlining to reduce the risk of read introduction.
+    /// It also assumes that <paramref name="array"/> is not <see langword="null"/>.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private protected static void CopyValuesToImpl(Entry[] entries, TValue[] array, int arrayIndex, int activeCount, string arrayIndexOrIndex)
+    {
+      if ((uint)arrayIndex >= (uint)array.Length || (uint)(array.Length - arrayIndex) < (uint)activeCount)
+      {
+        throw new ArgumentOutOfRangeException(arrayIndexOrIndex);
+      }
+      ref TValue dest0 = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(array), arrayIndex);
+      /* At this point, "activeCount" must be non-negative due to the second condition of "if". */
+      for (int i = 0, j = 0; i != activeCount; ++i, ++j)
+      {
+        while (entries[j].HashCode < 0)
+        {
+          ++j;
+        }
+        Unsafe.Add(ref dest0, i) = entries[j].Value;
+      }
+    }
+
+    /// <summary>
     /// Copies the key/value pairs to <paramref name="array"/>, starting at <paramref name="arrayIndex"/>.
     /// </summary>
     /// <exception cref="ArgumentNullException">If <paramref name="array"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">If <paramref name="arrayIndex"/> is negative,
     /// or greater than the length of <paramref name="array"/> minus <see cref="Count"/>.</exception>
+    [MethodImpl(Helper.OptimizeInline)]
     public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
     {
-      throw new NotImplementedException();
+      if (array is null)
+      {
+        Map2.ThrowCopyToArrayNull();
+      }
+      CopyPairsToImpl(myEntries, array, arrayIndex, myActiveCount, nameof(arrayIndex));
+    }
+
+    /// <summary>
+    /// This method is non-inlining to reduce the risk of read introduction.
+    /// It also assumes that <paramref name="array"/> is not <see langword="null"/>.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private protected static void CopyPairsToImpl(Entry[] entries, KeyValuePair<TKey, TValue>[] array, int arrayIndex, int activeCount, string arrayIndexOrIndex)
+    {
+      if ((uint)arrayIndex >= (uint)array.Length || (uint)(array.Length - arrayIndex) < (uint)activeCount)
+      {
+        throw new ArgumentOutOfRangeException(arrayIndexOrIndex);
+      }
+      ref KeyValuePair<TKey, TValue> dest0 = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(array), arrayIndex);
+      /* At this point, "activeCount" must be non-negative due to the second condition of "if". */
+      for (int i = 0, j = 0; i != activeCount; ++i, ++j)
+      {
+        while (entries[j].HashCode < 0)
+        {
+          ++j;
+        }
+        Unsafe.Add(ref dest0, i) = entries[j].KeyValuePair;
+      }
+    }
+
+    /// <summary>
+    /// This method is non-inlining to reduce the risk of read introduction.
+    /// It also assumes that <paramref name="array"/> is not <see langword="null"/>.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeNoInline)]
+    private protected static void CopyEntriesToImpl(Entry[] entries, DictionaryEntry[] array, int arrayIndex, int activeCount, string arrayIndexOrIndex)
+    {
+      if ((uint)arrayIndex >= (uint)array.Length || (uint)(array.Length - arrayIndex) < (uint)activeCount)
+      {
+        throw new ArgumentOutOfRangeException(arrayIndexOrIndex);
+      }
+      ref DictionaryEntry dest0 = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(array), arrayIndex);
+      /* At this point, "activeCount" must be non-negative due to the second condition of "if". */
+      for (int i = 0, j = 0; i != activeCount; ++i, ++j)
+      {
+        while (entries[j].HashCode < 0)
+        {
+          ++j;
+        }
+        Unsafe.Add(ref dest0, i) = entries[j].DictionaryEntry;
+      }
     }
 
     #region public members that call virtual methods and are hidden in the derived classes
@@ -2181,14 +2310,31 @@ namespace Neat.Collections
 
     #region ICollection<KeyValuePair<TKey, TValue>>.CopyTo, ICollection.CopyTo
 
+    [MethodImpl(Helper.OptimizeInline)]
     void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
     {
-      throw new NotImplementedException();
+      if (array is null)
+      {
+        Map2.ThrowCopyToArrayNull();
+      }
+      CopyPairsToImpl(myEntries, array, arrayIndex, myActiveCount, nameof(arrayIndex));
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     void ICollection.CopyTo(Array array, int index)
     {
-      throw new NotImplementedException();
+      if (array is KeyValuePair<TKey, TValue>[] kvpArray)
+      {
+        CopyPairsToImpl(myEntries, kvpArray, index, myActiveCount, nameof(index));
+      }
+      else if (array is DictionaryEntry[] deArray)
+      {
+        CopyEntriesToImpl(myEntries, deArray, index, myActiveCount, nameof(index));
+      }
+      else
+      {
+        Map2.ThrowCopyPairsOrEntriesToArrayType();
+      }
     }
 
     #endregion ICollection<KeyValuePair<TKey, TValue>>.CopyTo, ICollection.CopyTo
@@ -2576,6 +2722,34 @@ namespace Neat.Collections
     internal static void ThrowTooMany()
     {
       throw new InvalidOperationException("There will be more than MaximumCapacity number of key/value pairs in the map.");
+    }
+
+    [DoesNotReturn]
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ThrowCopyToArrayNull()
+    {
+      throw new ArgumentNullException("array");
+    }
+
+    [DoesNotReturn]
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ThrowCopyKeysToArrayType()
+    {
+      throw new ArgumentException("The array must be TKey[].", "array");
+    }
+
+    [DoesNotReturn]
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ThrowCopyValuesToArrayType()
+    {
+      throw new ArgumentException("The array must be TValue[].", "array");
+    }
+
+    [DoesNotReturn]
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ThrowCopyPairsOrEntriesToArrayType()
+    {
+      throw new ArgumentException("The array must be either KeyValuePair<TKey, TValue>[] or DictionaryEntry[].", "array");
     }
 
 #if MAP2_ENUMERATION_VERSION
