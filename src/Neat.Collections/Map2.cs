@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Neat.Collections
 {
@@ -150,9 +151,20 @@ namespace Neat.Collections
     /// <summary>
     /// Clears the key/value pairs.
     /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
     public void Clear()
     {
-      throw new NotImplementedException();
+#if MAP2_ENUMERATION_VERSION
+      ++myVersion;
+#endif
+      Map2.ResetBuckets(myBuckets);
+      if (RuntimeHelpers.IsReferenceOrContainsReferences<Entry>())
+      {
+        Array.Clear(myEntries, 0, myTouchedCount);
+      }
+      myActiveCount = 0;
+      myTouchedCount = 0;
+      myFirstFreeEntry = -1;
     }
 
     /// <summary>
@@ -1931,14 +1943,16 @@ namespace Neat.Collections
 
     #region ICollection<KeyValuePair<TKey, TValue>>.Clear, IDictionary.Clear
 
+    [MethodImpl(Helper.OptimizeInline)]
     void ICollection<KeyValuePair<TKey, TValue>>.Clear()
     {
-      throw new NotImplementedException();
+      Clear();
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     void IDictionary.Clear()
     {
-      throw new NotImplementedException();
+      Clear();
     }
 
     #endregion ICollection<KeyValuePair<TKey, TValue>>.Clear, IDictionary.Clear
@@ -2418,6 +2432,20 @@ namespace Neat.Collections
       new Size(691487003, 587763952),
       new Size(881646013, 881646013)
     };
+
+    /// <summary>
+    /// This method assumes <paramref name="buckets"/> is within <see cref="theSizes"/>.
+    /// It is non-inlining to reduce the risk of read introduction.
+    /// See <a href="https://github.com/dotnet/docs/issues/29696">dotnet/docs#29696</a>.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeNoInline)]
+    internal static void ResetBuckets(int[] buckets)
+    {
+      Unsafe.InitBlockUnaligned(
+        ref Unsafe.As<int, byte>(ref MemoryMarshal.GetArrayDataReference(buckets)),
+        0xFF,
+        (uint)buckets.Length * 4u);
+    }
 
     [DoesNotReturn]
     [MethodImpl(Helper.OptimizeNoInline)]
