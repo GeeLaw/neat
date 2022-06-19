@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -1811,6 +1812,8 @@ namespace Neat.Collections
       }
     }
 
+    private static readonly Map2.Contains<TKey, TValue> theContainsTValue = Map2.ContainsTValueHelper<TKey, TValue>.Delegate;
+
     /// <summary>
     /// Represents a view of the values in a <see cref="Map2{TKey, TValue}"/> instance.
     /// Among instance members,
@@ -1835,9 +1838,11 @@ namespace Neat.Collections
         }
       }
 
+      [MethodImpl(Helper.OptimizeInline)]
       public bool Contains(TValue item)
       {
-        throw new NotImplementedException();
+        Map2<TKey, TValue> target = myTarget;
+        return theContainsTValue(target.myEntries, target.myActiveCount, item);
       }
 
       [MethodImpl(Helper.OptimizeInline)]
@@ -2865,9 +2870,40 @@ namespace Neat.Collections
       return ContainsKey(key);
     }
 
+    private static readonly Map2.Equals<TValue> theEqualsTValue = Map2.EqualsTValueHelper<TValue>.Delegate;
+
+    [MethodImpl(Helper.JustOptimize)]
     bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)
     {
-      throw new NotImplementedException();
+#if MAP2_ENUMERATION_VERSION
+      uint version = myVersion, version2 = myVersion2;
+#endif
+      int[] buckets = myBuckets;
+      Entry[] entries = myEntries;
+      int hashCode = myComparer.GetHashCode(item.Key) & Map2.HashCodeMask;
+      int currentEntry = buckets[hashCode % buckets.Length];
+      while (currentEntry >= 0)
+      {
+        if (entries[currentEntry].HashCode == hashCode && myComparer.Equals(item.Key, entries[currentEntry].Key))
+        {
+          bool result = theEqualsTValue(item.Value, entries[currentEntry].Value);
+#if MAP2_ENUMERATION_VERSION
+          if (version != myVersion || version2 != myVersion2)
+          {
+            Map2.ThrowVersion();
+          }
+#endif
+          return result;
+        }
+        currentEntry = entries[currentEntry].Next;
+      }
+#if MAP2_ENUMERATION_VERSION
+      if (version != myVersion || version2 != myVersion2)
+      {
+        Map2.ThrowVersion();
+      }
+#endif
+      return false;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
@@ -2888,9 +2924,52 @@ namespace Neat.Collections
       return Remove(key);
     }
 
+    [MethodImpl(Helper.JustOptimize)]
     bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
     {
-      throw new NotImplementedException();
+#if MAP2_ENUMERATION_VERSION
+      uint version = myVersion, version2 = ++myVersion2;
+#endif
+      int[] buckets = myBuckets;
+      Entry[] entries = myEntries;
+      int hashCode = myComparer.GetHashCode(item.Key) & Map2.HashCodeMask;
+      ref int refNextOfPreviousEntry = ref buckets[hashCode % buckets.Length];
+      while (true)
+      {
+        int currentEntry = refNextOfPreviousEntry;
+        if (currentEntry < 0)
+        {
+          break;
+        }
+        if (entries[currentEntry].HashCode == hashCode && myComparer.Equals(item.Key, entries[currentEntry].Key))
+        {
+          bool result = theEqualsTValue(item.Value, entries[currentEntry].Value);
+#if MAP2_ENUMERATION_VERSION
+          if (version != myVersion || version2 != myVersion2)
+          {
+            Map2.ThrowVersion();
+          }
+#endif
+          if (result)
+          {
+            refNextOfPreviousEntry = entries[currentEntry].Next;
+            entries[currentEntry].Next = myFirstFreeEntry;
+            entries[currentEntry].HashCode = -1;
+            entries[currentEntry].Key = default(TKey);
+            entries[currentEntry].Value = default(TValue);
+            myFirstFreeEntry = currentEntry;
+          }
+          return result;
+        }
+        refNextOfPreviousEntry = ref entries[currentEntry].Next;
+      }
+#if MAP2_ENUMERATION_VERSION
+      if (version != myVersion || version2 != myVersion2)
+      {
+        Map2.ThrowVersion();
+      }
+#endif
+      return false;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
@@ -3483,5 +3562,828 @@ namespace Neat.Collections
     }
 
 #endif
+
+    internal delegate bool Equals<in TValue>(TValue x, TValue y);
+    internal delegate bool Contains<TKey, TValue>(Map2<TKey, TValue>.Entry[] entries, int activeCount, TValue value);
+
+    private static readonly TValueEqualityHelper theHelper;
+    private static readonly Equals<object> theEqualsObject;
+    private static readonly MethodInfo theEqualsEquatableValue;
+    private static readonly MethodInfo theEqualsValue;
+    private static readonly MethodInfo theEqualsEnum8;
+    private static readonly MethodInfo theEqualsEnum16;
+    private static readonly MethodInfo theEqualsEnum32;
+    private static readonly MethodInfo theEqualsEnum64;
+    private static readonly MethodInfo theEqualsEnumNative;
+    private static readonly MethodInfo theEqualsNullableEquatableValue;
+    private static readonly MethodInfo theEqualsNullableValue;
+    private static readonly MethodInfo theEqualsNullableEnum8;
+    private static readonly MethodInfo theEqualsNullableEnum16;
+    private static readonly MethodInfo theEqualsNullableEnum32;
+    private static readonly MethodInfo theEqualsNullableEnum64;
+    private static readonly MethodInfo theEqualsNullableEnumNative;
+    private static readonly MethodInfo theContainsObject;
+    private static readonly MethodInfo theContainsEquatableValue;
+    private static readonly MethodInfo theContainsValue;
+    private static readonly MethodInfo theContainsEnum8;
+    private static readonly MethodInfo theContainsEnum16;
+    private static readonly MethodInfo theContainsEnum32;
+    private static readonly MethodInfo theContainsEnum64;
+    private static readonly MethodInfo theContainsEnumNative;
+    private static readonly MethodInfo theContainsNullableEquatableValue;
+    private static readonly MethodInfo theContainsNullableValue;
+    private static readonly MethodInfo theContainsNullableEnum8;
+    private static readonly MethodInfo theContainsNullableEnum16;
+    private static readonly MethodInfo theContainsNullableEnum32;
+    private static readonly MethodInfo theContainsNullableEnum64;
+    private static readonly MethodInfo theContainsNullableEnumNative;
+
+    static Map2()
+    {
+      TValueEqualityHelper helper = new TValueEqualityHelper();
+      theHelper = helper;
+      theEqualsObject = helper.EqualsObject;
+      Type t = typeof(TValueEqualityHelper);
+      theEqualsEquatableValue = t.GetMethod(nameof(TValueEqualityHelper.EqualsEquatableValue));
+      theEqualsValue = t.GetMethod(nameof(TValueEqualityHelper.EqualsValue));
+      theEqualsEnum8 = t.GetMethod(nameof(TValueEqualityHelper.EqualsEnum8));
+      theEqualsEnum16 = t.GetMethod(nameof(TValueEqualityHelper.EqualsEnum16));
+      theEqualsEnum32 = t.GetMethod(nameof(TValueEqualityHelper.EqualsEnum32));
+      theEqualsEnum64 = t.GetMethod(nameof(TValueEqualityHelper.EqualsEnum64));
+      theEqualsEnumNative = t.GetMethod(nameof(TValueEqualityHelper.EqualsEnumNative));
+      theEqualsNullableEquatableValue = t.GetMethod(nameof(TValueEqualityHelper.EqualsNullableEquatableValue));
+      theEqualsNullableValue = t.GetMethod(nameof(TValueEqualityHelper.EqualsNullableValue));
+      theEqualsNullableEnum8 = t.GetMethod(nameof(TValueEqualityHelper.EqualsNullableEnum8));
+      theEqualsNullableEnum16 = t.GetMethod(nameof(TValueEqualityHelper.EqualsNullableEnum16));
+      theEqualsNullableEnum32 = t.GetMethod(nameof(TValueEqualityHelper.EqualsNullableEnum32));
+      theEqualsNullableEnum64 = t.GetMethod(nameof(TValueEqualityHelper.EqualsNullableEnum64));
+      theEqualsNullableEnumNative = t.GetMethod(nameof(TValueEqualityHelper.EqualsNullableEnumNative));
+      theContainsObject = t.GetMethod(nameof(TValueEqualityHelper.ContainsObject));
+      theContainsEquatableValue = t.GetMethod(nameof(TValueEqualityHelper.ContainsEquatableValue));
+      theContainsValue = t.GetMethod(nameof(TValueEqualityHelper.ContainsValue));
+      theContainsEnum8 = t.GetMethod(nameof(TValueEqualityHelper.ContainsEnum8));
+      theContainsEnum16 = t.GetMethod(nameof(TValueEqualityHelper.ContainsEnum16));
+      theContainsEnum32 = t.GetMethod(nameof(TValueEqualityHelper.ContainsEnum32));
+      theContainsEnum64 = t.GetMethod(nameof(TValueEqualityHelper.ContainsEnum64));
+      theContainsEnumNative = t.GetMethod(nameof(TValueEqualityHelper.ContainsEnumNative));
+      theContainsNullableEquatableValue = t.GetMethod(nameof(TValueEqualityHelper.ContainsNullableEquatableValue));
+      theContainsNullableValue = t.GetMethod(nameof(TValueEqualityHelper.ContainsNullableValue));
+      theContainsNullableEnum8 = t.GetMethod(nameof(TValueEqualityHelper.ContainsNullableEnum8));
+      theContainsNullableEnum16 = t.GetMethod(nameof(TValueEqualityHelper.ContainsNullableEnum16));
+      theContainsNullableEnum32 = t.GetMethod(nameof(TValueEqualityHelper.ContainsNullableEnum32));
+      theContainsNullableEnum64 = t.GetMethod(nameof(TValueEqualityHelper.ContainsNullableEnum64));
+      theContainsNullableEnumNative = t.GetMethod(nameof(TValueEqualityHelper.ContainsNullableEnumNative));
+    }
+
+    internal static class EqualsTValueHelper<TValue>
+    {
+      public static readonly Equals<TValue> Delegate;
+
+      [MethodImpl(Helper.JustOptimize)]
+      static EqualsTValueHelper()
+      {
+        Type t = typeof(TValue);
+        Type[] ts;
+        if (t.IsValueType)
+        {
+          TValueEqualityHelper helper = theHelper;
+          if (!t.IsGenericType || t.GetGenericTypeDefinition() != typeof(Nullable<>))
+          {
+            ts = new Type[1] { t };
+            if (t.IsAssignableTo(typeof(IEquatable<TValue>)))
+            {
+              Delegate = theEqualsEquatableValue.MakeGenericMethod(ts).CreateDelegate<Equals<TValue>>(helper);
+              return;
+            }
+            if (t.IsEnum)
+            {
+              Type u = t.GetEnumUnderlyingType();
+              if (u == typeof(byte) || u == typeof(sbyte))
+              {
+                Delegate = theEqualsEnum8.MakeGenericMethod(ts).CreateDelegate<Equals<TValue>>(helper);
+                return;
+              }
+              if (u == typeof(short) || u == typeof(ushort) || u == typeof(char))
+              {
+                Delegate = theEqualsEnum16.MakeGenericMethod(ts).CreateDelegate<Equals<TValue>>(helper);
+                return;
+              }
+              if (u == typeof(int) || u == typeof(uint))
+              {
+                Delegate = theEqualsEnum32.MakeGenericMethod(ts).CreateDelegate<Equals<TValue>>(helper);
+                return;
+              }
+              if (u == typeof(long) || u == typeof(ulong))
+              {
+                Delegate = theEqualsEnum64.MakeGenericMethod(ts).CreateDelegate<Equals<TValue>>(helper);
+                return;
+              }
+              if (u == typeof(IntPtr) || u == typeof(UIntPtr))
+              {
+                Delegate = theEqualsEnumNative.MakeGenericMethod(ts).CreateDelegate<Equals<TValue>>(helper);
+                return;
+              }
+            }
+            Delegate = theEqualsValue.MakeGenericMethod(ts).CreateDelegate<Equals<TValue>>(helper);
+            return;
+          }
+          else
+          {
+            ts = t.GetGenericArguments();
+            t = ts[0];
+            if (t.IsAssignableTo(typeof(IEquatable<>).MakeGenericType(ts)))
+            {
+              Delegate = theEqualsNullableEquatableValue.MakeGenericMethod(ts).CreateDelegate<Equals<TValue>>(helper);
+              return;
+            }
+            if (t.IsEnum)
+            {
+              Type u = t.GetEnumUnderlyingType();
+              if (u == typeof(byte) || u == typeof(sbyte))
+              {
+                Delegate = theEqualsNullableEnum8.MakeGenericMethod(ts).CreateDelegate<Equals<TValue>>(helper);
+                return;
+              }
+              if (u == typeof(short) || u == typeof(ushort) || u == typeof(char))
+              {
+                Delegate = theEqualsNullableEnum16.MakeGenericMethod(ts).CreateDelegate<Equals<TValue>>(helper);
+                return;
+              }
+              if (u == typeof(int) || u == typeof(uint))
+              {
+                Delegate = theEqualsNullableEnum32.MakeGenericMethod(ts).CreateDelegate<Equals<TValue>>(helper);
+                return;
+              }
+              if (u == typeof(long) || u == typeof(ulong))
+              {
+                Delegate = theEqualsNullableEnum64.MakeGenericMethod(ts).CreateDelegate<Equals<TValue>>(helper);
+                return;
+              }
+              if (u == typeof(IntPtr) || u == typeof(UIntPtr))
+              {
+                Delegate = theEqualsNullableEnumNative.MakeGenericMethod(ts).CreateDelegate<Equals<TValue>>(helper);
+                return;
+              }
+            }
+            Delegate = theEqualsNullableValue.MakeGenericMethod(ts).CreateDelegate<Equals<TValue>>(helper);
+            return;
+          }
+        }
+        else
+        {
+          Delegate = (Equals<TValue>)(object)theEqualsObject;
+        }
+      }
+    }
+
+    internal static class ContainsTValueHelper<TKey, TValue>
+    {
+      public static readonly Contains<TKey, TValue> Delegate;
+
+      [MethodImpl(Helper.JustOptimize)]
+      static ContainsTValueHelper()
+      {
+        Type t = typeof(TValue);
+        Type[] ts = new Type[2] { typeof(TKey), t };
+        TValueEqualityHelper helper = theHelper;
+        if (t.IsValueType)
+        {
+          if (!t.IsGenericType || t.GetGenericTypeDefinition() != typeof(Nullable<>))
+          {
+            if (t.IsAssignableTo(typeof(IEquatable<TValue>)))
+            {
+              Delegate = theContainsEquatableValue.MakeGenericMethod(ts).CreateDelegate<Contains<TKey, TValue>>(helper);
+              return;
+            }
+            if (t.IsEnum)
+            {
+              Type u = t.GetEnumUnderlyingType();
+              if (u == typeof(byte) || u == typeof(sbyte))
+              {
+                Delegate = theContainsEnum8.MakeGenericMethod(ts).CreateDelegate<Contains<TKey, TValue>>(helper);
+                return;
+              }
+              if (u == typeof(short) || u == typeof(ushort) || u == typeof(char))
+              {
+                Delegate = theContainsEnum16.MakeGenericMethod(ts).CreateDelegate<Contains<TKey, TValue>>(helper);
+                return;
+              }
+              if (u == typeof(int) || u == typeof(uint))
+              {
+                Delegate = theContainsEnum32.MakeGenericMethod(ts).CreateDelegate<Contains<TKey, TValue>>(helper);
+                return;
+              }
+              if (u == typeof(long) || u == typeof(ulong))
+              {
+                Delegate = theContainsEnum64.MakeGenericMethod(ts).CreateDelegate<Contains<TKey, TValue>>(helper);
+                return;
+              }
+              if (u == typeof(IntPtr) || u == typeof(UIntPtr))
+              {
+                Delegate = theContainsEnumNative.MakeGenericMethod(ts).CreateDelegate<Contains<TKey, TValue>>(helper);
+                return;
+              }
+            }
+            Delegate = theContainsValue.MakeGenericMethod(ts).CreateDelegate<Contains<TKey, TValue>>(helper);
+            return;
+          }
+          else
+          {
+            t = t.GetGenericArguments()[0];
+            ts[1] = t;
+            if (t.IsAssignableTo(typeof(IEquatable<>).MakeGenericType(ts)))
+            {
+              Delegate = theContainsNullableEquatableValue.MakeGenericMethod(ts).CreateDelegate<Contains<TKey, TValue>>(helper);
+              return;
+            }
+            if (t.IsEnum)
+            {
+              Type u = t.GetEnumUnderlyingType();
+              if (u == typeof(byte) || u == typeof(sbyte))
+              {
+                Delegate = theContainsNullableEnum8.MakeGenericMethod(ts).CreateDelegate<Contains<TKey, TValue>>(helper);
+                return;
+              }
+              if (u == typeof(short) || u == typeof(ushort) || u == typeof(char))
+              {
+                Delegate = theContainsNullableEnum16.MakeGenericMethod(ts).CreateDelegate<Contains<TKey, TValue>>(helper);
+                return;
+              }
+              if (u == typeof(int) || u == typeof(uint))
+              {
+                Delegate = theContainsNullableEnum32.MakeGenericMethod(ts).CreateDelegate<Contains<TKey, TValue>>(helper);
+                return;
+              }
+              if (u == typeof(long) || u == typeof(ulong))
+              {
+                Delegate = theContainsNullableEnum64.MakeGenericMethod(ts).CreateDelegate<Contains<TKey, TValue>>(helper);
+                return;
+              }
+              if (u == typeof(IntPtr) || u == typeof(UIntPtr))
+              {
+                Delegate = theContainsNullableEnumNative.MakeGenericMethod(ts).CreateDelegate<Contains<TKey, TValue>>(helper);
+                return;
+              }
+            }
+            Delegate = theContainsNullableValue.MakeGenericMethod(ts).CreateDelegate<Contains<TKey, TValue>>(helper);
+            return;
+          }
+        }
+        else
+        {
+          Delegate = theContainsObject.MakeGenericMethod(ts).CreateDelegate<Contains<TKey, TValue>>(helper);
+        }
+      }
+    }
+
+    #region methods for obtaining the underlying value of enum
+
+    [MethodImpl(Helper.OptimizeInline)]
+    private static byte GetEnum8Value<TValue>(TValue value) where TValue : struct, Enum
+    {
+      return Unsafe.As<TValue, byte>(ref value);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    private static ushort GetEnum16Value<TValue>(TValue value) where TValue : struct, Enum
+    {
+      return Unsafe.As<TValue, ushort>(ref value);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    private static uint GetEnum32Value<TValue>(TValue value) where TValue : struct, Enum
+    {
+      return Unsafe.As<TValue, uint>(ref value);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    private static ulong GetEnum64Value<TValue>(TValue value) where TValue : struct, Enum
+    {
+      return Unsafe.As<TValue, ulong>(ref value);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    private static nuint GetEnumNativeValue<TValue>(TValue value) where TValue : struct, Enum
+    {
+      return Unsafe.As<TValue, nuint>(ref value);
+    }
+
+    #endregion methods for obtaining the underlying value of enum
+
+    [SuppressMessage("Performance", "CA1822", Justification = "Closed delegates are more performant.")]
+    private sealed class TValueEqualityHelper
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      public bool EqualsObject(object x, object y)
+      {
+        return Equals(x, y);
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public bool EqualsEquatableValue<TValue>(TValue x, TValue y) where TValue : struct, IEquatable<TValue>
+      {
+        return x.Equals(y);
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public bool EqualsValue<TValue>(TValue x, TValue y) where TValue : struct
+      {
+        return x.Equals(y);
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public bool EqualsEnum8<TValue>(TValue x, TValue y) where TValue : struct, Enum
+      {
+        return Unsafe.As<TValue, byte>(ref x) == Unsafe.As<TValue, byte>(ref y);
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public bool EqualsEnum16<TValue>(TValue x, TValue y) where TValue : struct, Enum
+      {
+        return Unsafe.As<TValue, ushort>(ref x) == Unsafe.As<TValue, ushort>(ref y);
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public bool EqualsEnum32<TValue>(TValue x, TValue y) where TValue : struct, Enum
+      {
+        return Unsafe.As<TValue, uint>(ref x) == Unsafe.As<TValue, uint>(ref y);
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public bool EqualsEnum64<TValue>(TValue x, TValue y) where TValue : struct, Enum
+      {
+        return Unsafe.As<TValue, ulong>(ref x) == Unsafe.As<TValue, ulong>(ref y);
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public bool EqualsEnumNative<TValue>(TValue x, TValue y) where TValue : struct, Enum
+      {
+        return Unsafe.As<TValue, nuint>(ref x) == Unsafe.As<TValue, nuint>(ref y);
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public bool EqualsNullableEquatableValue<TValue>(TValue x, TValue y) where TValue : struct, IEquatable<TValue>
+      {
+        return x.Equals(y);
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public bool EqualsNullableValue<TValue>(TValue? x, TValue? y) where TValue : struct
+      {
+        return x.HasValue
+          ? y.HasValue && x.GetValueOrDefault().Equals(y.GetValueOrDefault())
+          : !y.HasValue;
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public bool EqualsNullableEnum8<TValue>(TValue? x, TValue? y) where TValue : struct, Enum
+      {
+        return x.HasValue
+          ? y.HasValue && GetEnum8Value(x.GetValueOrDefault()) == GetEnum8Value(y.GetValueOrDefault())
+          : !y.HasValue;
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public bool EqualsNullableEnum16<TValue>(TValue? x, TValue? y) where TValue : struct, Enum
+      {
+        return x.HasValue
+          ? y.HasValue && GetEnum16Value(x.GetValueOrDefault()) == GetEnum16Value(y.GetValueOrDefault())
+          : !y.HasValue;
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public bool EqualsNullableEnum32<TValue>(TValue? x, TValue? y) where TValue : struct, Enum
+      {
+        return x.HasValue
+          ? y.HasValue && GetEnum32Value(x.GetValueOrDefault()) == GetEnum32Value(y.GetValueOrDefault())
+          : !y.HasValue;
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public bool EqualsNullableEnum64<TValue>(TValue? x, TValue? y) where TValue : struct, Enum
+      {
+        return x.HasValue
+          ? y.HasValue && GetEnum64Value(x.GetValueOrDefault()) == GetEnum64Value(y.GetValueOrDefault())
+          : !y.HasValue;
+      }
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public bool EqualsNullableEnumNative<TValue>(TValue? x, TValue? y) where TValue : struct, Enum
+      {
+        return x.HasValue
+          ? y.HasValue && GetEnumNativeValue(x.GetValueOrDefault()) == GetEnumNativeValue(y.GetValueOrDefault())
+          : !y.HasValue;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public bool ContainsObject<TKey, TValue>(Map2<TKey, TValue>.Entry[] entries, int activeCount, TValue value) where TValue : class
+      {
+        if (value is null)
+        {
+          for (int i = 0; activeCount-- != 0; ++i)
+          {
+            while (entries[i].HashCode < 0)
+            {
+              ++i;
+            }
+            if (entries[i].Value is null)
+            {
+              return true;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; activeCount-- != 0; ++i)
+          {
+            while (entries[i].HashCode < 0)
+            {
+              ++i;
+            }
+            if (value.Equals(entries[i].Value))
+            {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public bool ContainsEquatableValue<TKey, TValue>(Map2<TKey, TValue>.Entry[] entries, int activeCount, TValue value) where TValue : struct, IEquatable<TValue>
+      {
+        for (int i = 0; activeCount-- != 0; ++i)
+        {
+          while (entries[i].HashCode < 0)
+          {
+            ++i;
+          }
+          if (value.Equals(entries[i].Value))
+          {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public bool ContainsValue<TKey, TValue>(Map2<TKey, TValue>.Entry[] entries, int activeCount, TValue value) where TValue : struct
+      {
+        ValueType boxed = value;
+        for (int i = 0; activeCount-- != 0; ++i)
+        {
+          while (entries[i].HashCode < 0)
+          {
+            ++i;
+          }
+          if (boxed.Equals(entries[i].Value))
+          {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public bool ContainsEnum8<TKey, TValue>(Map2<TKey, TValue>.Entry[] entries, int activeCount, TValue value) where TValue : struct, Enum
+      {
+        byte numeric = Unsafe.As<TValue, byte>(ref value);
+        for (int i = 0; activeCount-- != 0; ++i)
+        {
+          while (entries[i].HashCode < 0)
+          {
+            ++i;
+          }
+          if (numeric == GetEnum8Value(entries[i].Value))
+          {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public bool ContainsEnum16<TKey, TValue>(Map2<TKey, TValue>.Entry[] entries, int activeCount, TValue value) where TValue : struct, Enum
+      {
+        ushort numeric = Unsafe.As<TValue, ushort>(ref value);
+        for (int i = 0; activeCount-- != 0; ++i)
+        {
+          while (entries[i].HashCode < 0)
+          {
+            ++i;
+          }
+          if (numeric == GetEnum16Value(entries[i].Value))
+          {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public bool ContainsEnum32<TKey, TValue>(Map2<TKey, TValue>.Entry[] entries, int activeCount, TValue value) where TValue : struct, Enum
+      {
+        uint numeric = Unsafe.As<TValue, uint>(ref value);
+        for (int i = 0; activeCount-- != 0; ++i)
+        {
+          while (entries[i].HashCode < 0)
+          {
+            ++i;
+          }
+          if (numeric == GetEnum32Value(entries[i].Value))
+          {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public bool ContainsEnum64<TKey, TValue>(Map2<TKey, TValue>.Entry[] entries, int activeCount, TValue value) where TValue : struct, Enum
+      {
+        ulong numeric = Unsafe.As<TValue, ulong>(ref value);
+        for (int i = 0; activeCount-- != 0; ++i)
+        {
+          while (entries[i].HashCode < 0)
+          {
+            ++i;
+          }
+          if (numeric == GetEnum64Value(entries[i].Value))
+          {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public bool ContainsEnumNative<TKey, TValue>(Map2<TKey, TValue>.Entry[] entries, int activeCount, TValue value) where TValue : struct, Enum
+      {
+        nuint numeric = Unsafe.As<TValue, nuint>(ref value);
+        for (int i = 0; activeCount-- != 0; ++i)
+        {
+          while (entries[i].HashCode < 0)
+          {
+            ++i;
+          }
+          if (numeric == GetEnumNativeValue(entries[i].Value))
+          {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public bool ContainsNullableEquatableValue<TKey, TValue>(Map2<TKey, TValue?>.Entry[] entries, int activeCount, TValue? value) where TValue : struct, IEquatable<TValue>
+      {
+        if (value.HasValue)
+        {
+          TValue unboxed = value.GetValueOrDefault();
+          for (int i = 0; activeCount-- != 0; ++i)
+          {
+            while (entries[i].HashCode < 0)
+            {
+              ++i;
+            }
+            TValue? other = entries[i].Value;
+            if (other.HasValue && unboxed.Equals(other.GetValueOrDefault()))
+            {
+              return true;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; activeCount-- != 0; ++i)
+          {
+            while (entries[i].HashCode < 0)
+            {
+              ++i;
+            }
+            if (!entries[i].Value.HasValue)
+            {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public bool ContainsNullableValue<TKey, TValue>(Map2<TKey, TValue?>.Entry[] entries, int activeCount, TValue? value) where TValue : struct
+      {
+        ValueType boxed = value;
+        if (boxed is null)
+        {
+          for (int i = 0; activeCount-- != 0; ++i)
+          {
+            while (entries[i].HashCode < 0)
+            {
+              ++i;
+            }
+            if (!entries[i].Value.HasValue)
+            {
+              return true;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; activeCount-- != 0; ++i)
+          {
+            while (entries[i].HashCode < 0)
+            {
+              ++i;
+            }
+            if (boxed.Equals(entries[i].Value))
+            {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public bool ContainsNullableEnum8<TKey, TValue>(Map2<TKey, TValue?>.Entry[] entries, int activeCount, TValue? value) where TValue : struct, Enum
+      {
+        if (value.HasValue)
+        {
+          byte numeric = GetEnum8Value(value.GetValueOrDefault());
+          for (int i = 0; activeCount-- != 0; ++i)
+          {
+            while (entries[i].HashCode < 0)
+            {
+              ++i;
+            }
+            TValue? other = entries[i].Value;
+            if (other.HasValue && numeric == GetEnum8Value(other.GetValueOrDefault()))
+            {
+              return true;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; activeCount-- != 0; ++i)
+          {
+            while (entries[i].HashCode < 0)
+            {
+              ++i;
+            }
+            if (!entries[i].Value.HasValue)
+            {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public bool ContainsNullableEnum16<TKey, TValue>(Map2<TKey, TValue?>.Entry[] entries, int activeCount, TValue? value) where TValue : struct, Enum
+      {
+        if (value.HasValue)
+        {
+          ushort numeric = GetEnum16Value(value.GetValueOrDefault());
+          for (int i = 0; activeCount-- != 0; ++i)
+          {
+            while (entries[i].HashCode < 0)
+            {
+              ++i;
+            }
+            TValue? other = entries[i].Value;
+            if (other.HasValue && numeric == GetEnum16Value(other.GetValueOrDefault()))
+            {
+              return true;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; activeCount-- != 0; ++i)
+          {
+            while (entries[i].HashCode < 0)
+            {
+              ++i;
+            }
+            if (!entries[i].Value.HasValue)
+            {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public bool ContainsNullableEnum32<TKey, TValue>(Map2<TKey, TValue?>.Entry[] entries, int activeCount, TValue? value) where TValue : struct, Enum
+      {
+        if (value.HasValue)
+        {
+          uint numeric = GetEnum32Value(value.GetValueOrDefault());
+          for (int i = 0; activeCount-- != 0; ++i)
+          {
+            while (entries[i].HashCode < 0)
+            {
+              ++i;
+            }
+            TValue? other = entries[i].Value;
+            if (other.HasValue && numeric == GetEnum32Value(other.GetValueOrDefault()))
+            {
+              return true;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; activeCount-- != 0; ++i)
+          {
+            while (entries[i].HashCode < 0)
+            {
+              ++i;
+            }
+            if (!entries[i].Value.HasValue)
+            {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public bool ContainsNullableEnum64<TKey, TValue>(Map2<TKey, TValue?>.Entry[] entries, int activeCount, TValue? value) where TValue : struct, Enum
+      {
+        if (value.HasValue)
+        {
+          ulong numeric = GetEnum64Value(value.GetValueOrDefault());
+          for (int i = 0; activeCount-- != 0; ++i)
+          {
+            while (entries[i].HashCode < 0)
+            {
+              ++i;
+            }
+            TValue? other = entries[i].Value;
+            if (other.HasValue && numeric == GetEnum64Value(other.GetValueOrDefault()))
+            {
+              return true;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; activeCount-- != 0; ++i)
+          {
+            while (entries[i].HashCode < 0)
+            {
+              ++i;
+            }
+            if (!entries[i].Value.HasValue)
+            {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      [MethodImpl(Helper.JustOptimize)]
+      public bool ContainsNullableEnumNative<TKey, TValue>(Map2<TKey, TValue?>.Entry[] entries, int activeCount, TValue? value) where TValue : struct, Enum
+      {
+        if (value.HasValue)
+        {
+          nuint numeric = GetEnumNativeValue(value.GetValueOrDefault());
+          for (int i = 0; activeCount-- != 0; ++i)
+          {
+            while (entries[i].HashCode < 0)
+            {
+              ++i;
+            }
+            TValue? other = entries[i].Value;
+            if (other.HasValue && numeric == GetEnumNativeValue(other.GetValueOrDefault()))
+            {
+              return true;
+            }
+          }
+        }
+        else
+        {
+          for (int i = 0; activeCount-- != 0; ++i)
+          {
+            while (entries[i].HashCode < 0)
+            {
+              ++i;
+            }
+            if (!entries[i].Value.HasValue)
+            {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+    }
   }
 }
