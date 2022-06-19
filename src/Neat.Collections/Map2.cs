@@ -2281,9 +2281,50 @@ namespace Neat.Collections
     /// This method never reads <paramref name="value"/>.
     /// </summary>
     /// <returns><see langword="true"/> if the key existed.</returns>
+    [MethodImpl(Helper.JustOptimize)]
     public new bool GetAndRemoveOrDefault(TKey key, out TValue value)
     {
-      throw new NotImplementedException();
+#if MAP2_ENUMERATION_VERSION
+      uint version = myVersion, version2 = ++myVersion2;
+#endif
+      int[] buckets = myBuckets;
+      Entry[] entries = myEntries;
+      int hashCode = myComparer.GetHashCode(key) & Map2.HashCodeMask;
+      ref int refNextOfPreviousEntry = ref buckets[hashCode % buckets.Length];
+      while (true)
+      {
+        int currentEntry = refNextOfPreviousEntry;
+        if (currentEntry < 0)
+        {
+          break;
+        }
+        if (entries[currentEntry].HashCode == hashCode && myComparer.Equals(key, entries[currentEntry].Key))
+        {
+#if MAP2_ENUMERATION_VERSION
+          if (version != myVersion || version2 != myVersion2)
+          {
+            Map2.ThrowVersion();
+          }
+#endif
+          value = entries[currentEntry].Value;
+          refNextOfPreviousEntry = entries[currentEntry].Next;
+          entries[currentEntry].Next = myFirstFreeEntry;
+          entries[currentEntry].HashCode = -1;
+          entries[currentEntry].Key = default(TKey);
+          entries[currentEntry].Value = default(TValue);
+          myFirstFreeEntry = currentEntry;
+          return true;
+        }
+        refNextOfPreviousEntry = ref entries[currentEntry].Next;
+      }
+#if MAP2_ENUMERATION_VERSION
+      if (version != myVersion || version2 != myVersion2)
+      {
+        Map2.ThrowVersion();
+      }
+#endif
+      value = default(TValue);
+      return false;
     }
 
     /// <summary>
