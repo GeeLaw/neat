@@ -2098,9 +2098,39 @@ namespace Neat.Collections
     /// This method never reads <paramref name="value"/>.
     /// </summary>
     /// <returns><see langword="true"/> if the key exists.</returns>
+    [MethodImpl(Helper.JustOptimize)]
     public new bool GetOrDefault(TKey key, out TValue value)
     {
-      throw new NotImplementedException();
+#if MAP2_ENUMERATION_VERSION
+      uint version = myVersion, version2 = myVersion2;
+#endif
+      int[] buckets = myBuckets;
+      Entry[] entries = myEntries;
+      int hashCode = myComparer.GetHashCode(key) & Map2.HashCodeMask;
+      int currentEntry = buckets[hashCode % buckets.Length];
+      while (currentEntry >= 0)
+      {
+        if (entries[currentEntry].HashCode == hashCode && myComparer.Equals(key, entries[currentEntry].Key))
+        {
+#if MAP2_ENUMERATION_VERSION
+          if (version != myVersion || version2 != myVersion2)
+          {
+            Map2.ThrowVersion();
+          }
+#endif
+          value = entries[currentEntry].Value;
+          return true;
+        }
+        currentEntry = entries[currentEntry].Next;
+      }
+#if MAP2_ENUMERATION_VERSION
+      if (version != myVersion || version2 != myVersion2)
+      {
+        Map2.ThrowVersion();
+      }
+#endif
+      value = default(TValue);
+      return false;
     }
 
     /// <summary>
@@ -2412,14 +2442,16 @@ namespace Neat.Collections
 
     #region IReadOnlyDictionary<TKey, TValue>.TryGetValue, IDictionary<TKey, TValue>.TryGetValue
 
+    [MethodImpl(Helper.OptimizeInline)]
     bool IReadOnlyDictionary<TKey, TValue>.TryGetValue(TKey key, out TValue value)
     {
-      throw new NotImplementedException();
+      return GetOrDefault(key, out value);
     }
 
+    [MethodImpl(Helper.OptimizeInline)]
     bool IDictionary<TKey, TValue>.TryGetValue(TKey key, out TValue value)
     {
-      throw new NotImplementedException();
+      return GetOrDefault(key, out value);
     }
 
     #endregion IReadOnlyDictionary<TKey, TValue>.TryGetValue, IDictionary<TKey, TValue>.TryGetValue
