@@ -138,7 +138,7 @@ namespace Neat.Collections
       myEntries = theEmptyEntryList;
       myActiveCount = 0;
       myTouchedCount = 0;
-      myFirstFreeEntry = 0;
+      myFirstFreeEntry = -1;
       mySizeIndex = -1;
 #if MAP2_SYNCROOT
       mySyncRoot = null;
@@ -247,6 +247,7 @@ namespace Neat.Collections
           ++j;
         }
         Unsafe.Add(ref entry0, i) = oldEntries[j];
+        /* size.BucketCount is never zero. */
         k = Unsafe.Add(ref entry0, i).HashCode % size.BucketCount;
         Unsafe.Add(ref entry0, i).Next = buckets[k];
         buckets[k] = i;
@@ -286,6 +287,8 @@ namespace Neat.Collections
       int i = 0, k, bucketsLength = buckets.Length;
       for (; entries[i].HashCode >= 0; ++i)
       {
+        /* Since "myFirstFreeEntry" >= 0, "myBuckets" cannot be "theEmptyBuckets",
+        /* and "bucketsLength" is never zero (barring race condition corruption). */
         k = entries[i].HashCode % bucketsLength;
         entries[i].Next = buckets[k];
         buckets[k] = i;
@@ -652,6 +655,7 @@ namespace Neat.Collections
 
     /// <summary>
     /// The entry at the returned index should be treated as uninitialized.
+    /// This method updates <see cref="myActiveCount"/>.
     /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     private protected int AllocEntry(out int[] outBuckets, out Entry[] outEntries)
@@ -663,6 +667,7 @@ namespace Neat.Collections
         outBuckets = myBuckets;
         outEntries = entries;
         myFirstFreeEntry = entries[firstFreeEntry].Next;
+        ++myActiveCount;
         return firstFreeEntry;
       }
       if ((firstFreeEntry = myTouchedCount) < entries.Length)
@@ -670,6 +675,7 @@ namespace Neat.Collections
         outBuckets = myBuckets;
         outEntries = entries;
         myTouchedCount = firstFreeEntry + 1;
+        ++myActiveCount;
         return firstFreeEntry;
       }
       return AllocEntryRareImpl(out outBuckets, out outEntries, entries, mySizeIndex + 1);
@@ -693,7 +699,8 @@ namespace Neat.Collections
       {
         /* We should not use unsafe access to "buckets",
         /* because the entries could have been corrupted by race conditions
-        /* and "j" could be negative. */
+        /* and "j" could be negative.
+        /* Also, sz.BucketCount is never zero. */
         j = Unsafe.Add(ref entry0, i).HashCode % sz.BucketCount;
         Unsafe.Add(ref entry0, i).Next = buckets[j];
         buckets[j] = i;
@@ -707,6 +714,7 @@ namespace Neat.Collections
       /* Now, newSizeIndex is the newly allocated entry. */
       newSizeIndex = oldEntries.Length;
       myTouchedCount = newSizeIndex + 1;
+      ++myActiveCount;
       return newSizeIndex;
     }
 
@@ -2140,7 +2148,12 @@ namespace Neat.Collections
 #endif
       int[] buckets = myBuckets;
       Entry[] entries = myEntries;
+      if (myActiveCount == 0)
+      {
+        goto EmptyMapTrivial;
+      }
       int hashCode = myComparer.GetHashCode(key) & Map2.HashCodeMask;
+      /* Reaching here, buckets.Length cannot be zero (barring race condition corruptions). */
       int currentEntry = buckets[hashCode % buckets.Length];
       while (currentEntry >= 0)
       {
@@ -2162,6 +2175,7 @@ namespace Neat.Collections
         Map2.ThrowVersion();
       }
 #endif
+    EmptyMapTrivial:
       return false;
     }
 
@@ -2180,6 +2194,10 @@ namespace Neat.Collections
 #endif
       int[] buckets = myBuckets;
       Entry[] entries = myEntries;
+      if (myActiveCount == 0)
+      {
+        goto EmptyMapTrivial;
+      }
       int hashCode = myComparer.GetHashCode(key) & Map2.HashCodeMask;
       int currentEntry = buckets[hashCode % buckets.Length];
       while (currentEntry >= 0)
@@ -2203,6 +2221,7 @@ namespace Neat.Collections
         Map2.ThrowVersion();
       }
 #endif
+    EmptyMapTrivial:
       return false;
     }
 
@@ -2221,6 +2240,10 @@ namespace Neat.Collections
 #endif
       int[] buckets = myBuckets;
       Entry[] entries = myEntries;
+      if (myActiveCount == 0)
+      {
+        goto EmptyMapTrivial;
+      }
       int hashCode = myComparer.GetHashCode(key) & Map2.HashCodeMask;
       int currentEntry = buckets[hashCode % buckets.Length];
       while (currentEntry >= 0)
@@ -2244,6 +2267,7 @@ namespace Neat.Collections
         Map2.ThrowVersion();
       }
 #endif
+    EmptyMapTrivial:
       value = default(TValue);
       return false;
     }
@@ -2264,6 +2288,10 @@ namespace Neat.Collections
 #endif
       int[] buckets = myBuckets;
       Entry[] entries = myEntries;
+      if (myActiveCount == 0)
+      {
+        goto EmptyMapTrivial;
+      }
       int hashCode = myComparer.GetHashCode(key) & Map2.HashCodeMask;
       int currentEntry = buckets[hashCode % buckets.Length];
       while (currentEntry >= 0)
@@ -2289,6 +2317,7 @@ namespace Neat.Collections
         Map2.ThrowVersion();
       }
 #endif
+    EmptyMapTrivial:
       return false;
     }
 
@@ -2301,6 +2330,10 @@ namespace Neat.Collections
 #endif
       int[] buckets = myBuckets;
       Entry[] entries = myEntries;
+      if (myActiveCount == 0)
+      {
+        goto EmptyMapTrivial;
+      }
       int hashCode = myComparer.GetHashCode(key) & Map2.HashCodeMask;
       ref int refNextOfPreviousEntry = ref buckets[hashCode % buckets.Length];
       while (true)
@@ -2324,6 +2357,7 @@ namespace Neat.Collections
           entries[currentEntry].Key = default(TKey);
           entries[currentEntry].Value = default(TValue);
           myFirstFreeEntry = currentEntry;
+          --myActiveCount;
           return true;
         }
         refNextOfPreviousEntry = ref entries[currentEntry].Next;
@@ -2334,6 +2368,7 @@ namespace Neat.Collections
         Map2.ThrowVersion();
       }
 #endif
+    EmptyMapTrivial:
       return false;
     }
 
@@ -2352,6 +2387,10 @@ namespace Neat.Collections
 #endif
       int[] buckets = myBuckets;
       Entry[] entries = myEntries;
+      if (myActiveCount == 0)
+      {
+        goto EmptyMapTrivial;
+      }
       int hashCode = myComparer.GetHashCode(key) & Map2.HashCodeMask;
       ref int refNextOfPreviousEntry = ref buckets[hashCode % buckets.Length];
       while (true)
@@ -2376,6 +2415,7 @@ namespace Neat.Collections
           entries[currentEntry].Key = default(TKey);
           entries[currentEntry].Value = default(TValue);
           myFirstFreeEntry = currentEntry;
+          --myActiveCount;
           return true;
         }
         refNextOfPreviousEntry = ref entries[currentEntry].Next;
@@ -2386,6 +2426,7 @@ namespace Neat.Collections
         Map2.ThrowVersion();
       }
 #endif
+    EmptyMapTrivial:
       return false;
     }
 
@@ -2404,6 +2445,10 @@ namespace Neat.Collections
 #endif
       int[] buckets = myBuckets;
       Entry[] entries = myEntries;
+      if (myActiveCount == 0)
+      {
+        goto EmptyMapTrivial;
+      }
       int hashCode = myComparer.GetHashCode(key) & Map2.HashCodeMask;
       ref int refNextOfPreviousEntry = ref buckets[hashCode % buckets.Length];
       while (true)
@@ -2428,6 +2473,7 @@ namespace Neat.Collections
           entries[currentEntry].Key = default(TKey);
           entries[currentEntry].Value = default(TValue);
           myFirstFreeEntry = currentEntry;
+          --myActiveCount;
           return true;
         }
         refNextOfPreviousEntry = ref entries[currentEntry].Next;
@@ -2438,6 +2484,7 @@ namespace Neat.Collections
         Map2.ThrowVersion();
       }
 #endif
+    EmptyMapTrivial:
       value = default(TValue);
       return false;
     }
@@ -2457,6 +2504,14 @@ namespace Neat.Collections
       int[] buckets = myBuckets;
       Entry[] entries = myEntries;
       int hashCode = myComparer.GetHashCode(key) & Map2.HashCodeMask;
+      if (myActiveCount == 0)
+      {
+        /* We have called user-implemented GetHashCode,
+        /* so check for rude behavior before proceeding.
+        /* It is also necessary to call GetHashCode,
+        /* because we will add this item. */
+        goto EmptyMapNonTrivial;
+      }
       int currentEntry = buckets[hashCode % buckets.Length];
       while (currentEntry >= 0)
       {
@@ -2472,6 +2527,7 @@ namespace Neat.Collections
         }
         currentEntry = entries[currentEntry].Next;
       }
+    EmptyMapNonTrivial:
 #if MAP2_ENUMERATION_VERSION
       if (version != myVersion || version2 != myVersion2)
       {
@@ -2502,6 +2558,10 @@ namespace Neat.Collections
       int[] buckets = myBuckets;
       Entry[] entries = myEntries;
       int hashCode = myComparer.GetHashCode(key) & Map2.HashCodeMask;
+      if (myActiveCount == 0)
+      {
+        goto EmptyMapNonTrivial;
+      }
       int currentEntry = buckets[hashCode % buckets.Length];
       while (currentEntry >= 0)
       {
@@ -2518,6 +2578,7 @@ namespace Neat.Collections
         }
         currentEntry = entries[currentEntry].Next;
       }
+    EmptyMapNonTrivial:
 #if MAP2_ENUMERATION_VERSION
       if (version != myVersion || version2 != myVersion2)
       {
@@ -2549,6 +2610,10 @@ namespace Neat.Collections
       int[] buckets = myBuckets;
       Entry[] entries = myEntries;
       int hashCode = myComparer.GetHashCode(key) & Map2.HashCodeMask;
+      if (myActiveCount == 0)
+      {
+        goto EmptyMapNonTrivial;
+      }
       int currentEntry = buckets[hashCode % buckets.Length];
       while (currentEntry >= 0)
       {
@@ -2565,6 +2630,7 @@ namespace Neat.Collections
         }
         currentEntry = entries[currentEntry].Next;
       }
+    EmptyMapNonTrivial:
 #if MAP2_ENUMERATION_VERSION
       if (version != myVersion || version2 != myVersion2)
       {
@@ -2598,6 +2664,10 @@ namespace Neat.Collections
       int[] buckets = myBuckets;
       Entry[] entries = myEntries;
       int hashCode = myComparer.GetHashCode(key) & Map2.HashCodeMask;
+      if (myActiveCount == 0)
+      {
+        goto EmptyMapNonTrivial;
+      }
       int currentEntry = buckets[hashCode % buckets.Length];
       while (currentEntry >= 0)
       {
@@ -2616,6 +2686,7 @@ namespace Neat.Collections
         }
         currentEntry = entries[currentEntry].Next;
       }
+    EmptyMapNonTrivial:
 #if MAP2_ENUMERATION_VERSION
       if (version != myVersion || version2 != myVersion2)
       {
@@ -2910,6 +2981,10 @@ namespace Neat.Collections
 #endif
       int[] buckets = myBuckets;
       Entry[] entries = myEntries;
+      if (myActiveCount == 0)
+      {
+        goto EmptyMapTrivial;
+      }
       int hashCode = myComparer.GetHashCode(item.Key) & Map2.HashCodeMask;
       int currentEntry = buckets[hashCode % buckets.Length];
       while (currentEntry >= 0)
@@ -2933,6 +3008,7 @@ namespace Neat.Collections
         Map2.ThrowVersion();
       }
 #endif
+    EmptyMapTrivial:
       return false;
     }
 
@@ -2962,6 +3038,10 @@ namespace Neat.Collections
 #endif
       int[] buckets = myBuckets;
       Entry[] entries = myEntries;
+      if (myActiveCount == 0)
+      {
+        goto EmptyMapTrivial;
+      }
       int hashCode = myComparer.GetHashCode(item.Key) & Map2.HashCodeMask;
       ref int refNextOfPreviousEntry = ref buckets[hashCode % buckets.Length];
       while (true)
@@ -2988,6 +3068,7 @@ namespace Neat.Collections
             entries[currentEntry].Key = default(TKey);
             entries[currentEntry].Value = default(TValue);
             myFirstFreeEntry = currentEntry;
+            --myActiveCount;
           }
           return result;
         }
@@ -2999,6 +3080,7 @@ namespace Neat.Collections
         Map2.ThrowVersion();
       }
 #endif
+    EmptyMapTrivial:
       return false;
     }
 
