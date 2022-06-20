@@ -22,16 +22,20 @@ namespace Neat.Collections
   /// (e.g., setting the capacity to its current value will invalidate all existing enumeration operations).
   /// </summary>
   [DebuggerTypeProxy(typeof(List2<>.DebuggerView))]
-  [DebuggerDisplay("{DebuggerDisplay(),nq}")]
+  [DebuggerDisplay("{DebuggerDisplay,nq}")]
   public sealed class List2<T> : IEnumerable2<T, List2<T>.Enumerator>, IReadOnlyList<T>, IList<T>, IList
   {
-    private string DebuggerDisplay()
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    private string DebuggerDisplay
     {
-      return "Count = " + myCount.ToString(CultureInfo.InvariantCulture)
+      get
+      {
+        return "Count = " + myCount.ToString(CultureInfo.InvariantCulture)
 #if LIST2_ENUMERATION_VERSION
-        + ", Version = " + myVersion.ToString(CultureInfo.InvariantCulture)
+          + ", Version = " + myVersion.ToString(CultureInfo.InvariantCulture)
 #endif
-        ;
+          ;
+      }
     }
 
     private sealed class DebuggerView
@@ -2262,7 +2266,7 @@ namespace Neat.Collections
     /// <summary>
     /// Enumerates items in <see cref="List2{T}"/>.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplay(),nq}")]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Enumerator : IEnumerator2<T>
     {
       [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
@@ -2287,17 +2291,21 @@ namespace Neat.Collections
       private bool myNotDisposed;
 #endif
 
-      private string DebuggerDisplay()
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+      private string DebuggerDisplay
       {
-        return "Count = " + myCount.ToString(CultureInfo.InvariantCulture)
-          + ", Index = " + myIndex.ToString(CultureInfo.InvariantCulture)
+        get
+        {
+          return "Count = " + myCount.ToString(CultureInfo.InvariantCulture)
+            + ", Index = " + myIndex.ToString(CultureInfo.InvariantCulture)
 #if LIST2_ENUMERATION_VERSION
-          + ", Version = " + myVersion.ToString(CultureInfo.InvariantCulture)
+            + ", Version = " + myVersion.ToString(CultureInfo.InvariantCulture)
 #endif
 #if LIST2_ENUMERATOR_DISPOSE
-          + (myNotDisposed ? "" : " <disposed>")
+            + (myNotDisposed ? "" : " <disposed>")
 #endif
-          ;
+            ;
+        }
       }
 
       [MethodImpl(Helper.OptimizeInline)]
