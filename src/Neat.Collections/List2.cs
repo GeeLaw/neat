@@ -21,8 +21,38 @@ namespace Neat.Collections
   /// Any member that could mutate the list will invalidate all existing enumeration operations, even if no actual change is made
   /// (e.g., setting the capacity to its current value will invalidate all existing enumeration operations).
   /// </summary>
+  [DebuggerTypeProxy(typeof(List2<>.DebuggerView))]
+  [DebuggerDisplay("{DebuggerDisplay(),nq}")]
   public sealed class List2<T> : IEnumerable2<T, List2<T>.Enumerator>, IReadOnlyList<T>, IList<T>, IList
   {
+    private string DebuggerDisplay()
+    {
+      return "Count = " + myCount.ToString(CultureInfo.InvariantCulture)
+#if LIST2_ENUMERATION_VERSION
+        + ", Version = " + myVersion.ToString(CultureInfo.InvariantCulture)
+#endif
+        ;
+    }
+
+    private sealed class DebuggerView
+    {
+      private readonly List2<T> myTarget;
+
+      public DebuggerView(List2<T> target)
+      {
+        myTarget = target;
+      }
+
+      [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+      public T[] Items
+      {
+        get
+        {
+          return myTarget.ToArray();
+        }
+      }
+    }
+
     private T[] myData;
     private int myCount;
 
@@ -182,6 +212,7 @@ namespace Neat.Collections
       }
     }
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     int IReadOnlyCollection<T>.Count
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -191,6 +222,7 @@ namespace Neat.Collections
       }
     }
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     int ICollection<T>.Count
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -200,6 +232,7 @@ namespace Neat.Collections
       }
     }
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     int ICollection.Count
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -2162,6 +2195,7 @@ namespace Neat.Collections
     /// <summary>
     /// This member is thread-safe.
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     bool ICollection<T>.IsReadOnly
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -2198,9 +2232,9 @@ namespace Neat.Collections
     /// <summary>
     /// This member is thread-safe.
     /// </summary>
+#if LIST2_SYNCROOT
     object ICollection.SyncRoot
     {
-#if LIST2_SYNCROOT
       [MethodImpl(Helper.JustOptimize)]
       get
       {
@@ -2210,14 +2244,18 @@ namespace Neat.Collections
         }
         return mySyncRoot;
       }
+    }
 #else
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    object ICollection.SyncRoot
+    {
       [MethodImpl(Helper.OptimizeNoInline)]
       get
       {
         throw new NotSupportedException("SyncRoot is not supported (the support can be enabled by LIST2_SYNCROOT).");
       }
-#endif
     }
+#endif
 
     #endregion IList.IsFixedSize, ICollection<T>.IsReadOnly, IList.IsReadOnly, ICollection.IsSynchronized, ICollection.SyncRoot
 
