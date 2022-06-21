@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -21,17 +23,86 @@ namespace Neat.Collections
   /// (i.e., even if the mutation is removing a particular key).
   /// This class is <see langword="abstract"/> and the concrete type is <see cref="Map2{TKey, TValue, TEqualityComparer}"/>.
   /// </summary>
+  [DebuggerTypeProxy(typeof(Map2<,>.DebuggerView))]
+  [DebuggerDisplay("{DebuggerDisplay,nq}")]
   public abstract class Map2<TKey, TValue>
     : IEnumerable2<KeyValuePair<TKey, TValue>, Map2<TKey, TValue>.Enumerator>,
       IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, IDictionary
   {
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    private protected string DebuggerDisplay
+    {
+      get
+      {
+        return "Count = " + myActiveCount.ToString(CultureInfo.InvariantCulture)
+#if MAP2_ENUMERATION_VERSION
+          + ", Version = " + myVersion.ToString(CultureInfo.InvariantCulture) + "." + myVersion2.ToString(CultureInfo.InvariantCulture)
+#endif
+          ;
+      }
+    }
+
+    [DebuggerDisplay("{Value}", Name = "[{Key}]")]
+    private readonly struct EntryDebuggerView
+    {
+      public readonly TKey Key;
+      public readonly TValue Value;
+
+      [MethodImpl(Helper.OptimizeInline)]
+      public EntryDebuggerView(ref Entry entry)
+      {
+        Key = entry.Key;
+        Value = entry.Value;
+      }
+    }
+
+    private sealed class DebuggerView
+    {
+      private readonly Map2<TKey, TValue> myTarget;
+
+      public DebuggerView(Map2<TKey, TValue> target)
+      {
+        myTarget = target;
+      }
+
+      [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+      public EntryDebuggerView[] Items
+      {
+        get
+        {
+          Entry[] entries = myTarget.myEntries;
+          EntryDebuggerView[] items = new EntryDebuggerView[myTarget.myActiveCount];
+          for (int i = 0, j = 0; i < items.Length; ++i, ++j)
+          {
+            while (entries[j].HashCode < 0)
+            {
+              ++j;
+            }
+            items[i] = new EntryDebuggerView(ref entries[j]);
+          }
+          return items;
+        }
+      }
+    }
+
     /// <summary>
     /// Makes it impossible to create non-abstract derived classes outside this assembly.
     /// </summary>
     private protected abstract void InternalInheritance();
 
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     internal struct Entry
     {
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+      private string DebuggerDisplay
+      {
+        get
+        {
+          return string.Format(CultureInfo.InvariantCulture, "{0} ~ 0x{1:X8} @ [{2}] = {3}",
+            Next, HashCode, Key, Value);
+        }
+      }
+
       /// <summary>
       /// Points to the next entry in the bucket or the free entry list (negative if there are no more entries),
       /// if this entry is initialized (among the first <see cref="myTouchedCount"/> entries).
@@ -57,6 +128,7 @@ namespace Neat.Collections
       /// </summary>
       public TValue Value;
 
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
       public KeyValuePair<TKey, TValue> KeyValuePair
       {
         [MethodImpl(Helper.OptimizeInline)]
@@ -66,6 +138,7 @@ namespace Neat.Collections
         }
       }
 
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
       public DictionaryEntry DictionaryEntry
       {
         [MethodImpl(Helper.OptimizeInline)]
@@ -129,6 +202,7 @@ namespace Neat.Collections
 #endif
 
     [SuppressMessage("Performance", "CA1825", Justification = "Avoid excessive generic instantiations.")]
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private static readonly Entry[] theEmptyEntryList = new Entry[0];
 
     [MethodImpl(Helper.OptimizeInline)]
@@ -611,11 +685,14 @@ namespace Neat.Collections
     /// Gets a view of the keys.
     /// Obtaining such a view is thread-safe.
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public ICollection<TKey> Keys
     {
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
+        /* This property is hidden in the derived class by an equivalent, non-boxing one.
+        /* We hide it from the debugger. */
         return KeysOverride();
       }
     }
@@ -737,14 +814,19 @@ namespace Neat.Collections
 
     #region IReadOnlyCollection<KeyValuePair<TKey, TValue>>.Count, ICollection<KeyValuePair<TKey, TValue>>.Count, ICollection.Count
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     int IReadOnlyCollection<KeyValuePair<TKey, TValue>>.Count
     {
       get
       {
+        /* Visual Studio 2022 debugger will invoke this implementation if it is not hidden.
+        /* Technically, this implementation still exists in the derived classes,
+        /* although it is not accessible (it is private and not mapped to any interface member). */
         throw new NotReimplementedException();
       }
     }
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     int ICollection<KeyValuePair<TKey, TValue>>.Count
     {
       get
@@ -753,6 +835,7 @@ namespace Neat.Collections
       }
     }
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     int ICollection.Count
     {
       get
@@ -905,6 +988,7 @@ namespace Neat.Collections
 
     #region IReadOnlyDictionary<TKey, TValue>.Keys, IDictionary<TKey, TValue>.Keys, IDictionary.Keys
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys
     {
       get
@@ -913,6 +997,7 @@ namespace Neat.Collections
       }
     }
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     ICollection<TKey> IDictionary<TKey, TValue>.Keys
     {
       get
@@ -921,6 +1006,7 @@ namespace Neat.Collections
       }
     }
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     ICollection IDictionary.Keys
     {
       get
@@ -933,6 +1019,7 @@ namespace Neat.Collections
 
     #region IReadOnlyDictionary<TKey, TValue>.Values, IDictionary<TKey, TValue>.Values, IDictionary.Values
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values
     {
       get
@@ -941,6 +1028,7 @@ namespace Neat.Collections
       }
     }
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     ICollection<TValue> IDictionary<TKey, TValue>.Values
     {
       get
@@ -949,6 +1037,7 @@ namespace Neat.Collections
       }
     }
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     ICollection IDictionary.Values
     {
       get
@@ -964,6 +1053,7 @@ namespace Neat.Collections
     /// <summary>
     /// This member is thread-safe.
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly
     {
       get
@@ -975,6 +1065,7 @@ namespace Neat.Collections
     /// <summary>
     /// This member is thread-safe.
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     bool IDictionary.IsReadOnly
     {
       get
@@ -986,6 +1077,7 @@ namespace Neat.Collections
     /// <summary>
     /// This member is thread-safe.
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     bool IDictionary.IsFixedSize
     {
       get
@@ -997,6 +1089,7 @@ namespace Neat.Collections
     /// <summary>
     /// This member is thread-safe.
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     bool ICollection.IsSynchronized
     {
       get
@@ -1008,6 +1101,7 @@ namespace Neat.Collections
     /// <summary>
     /// This member is thread-safe.
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     object ICollection.SyncRoot
     {
       get
@@ -1077,8 +1171,26 @@ namespace Neat.Collections
     /// <summary>
     /// Enumerates key/value pairs in <see cref="Map2{TKey, TValue}"/>.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Enumerator : IEnumerator2<KeyValuePair<TKey, TValue>>
     {
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+      private string DebuggerDisplay
+      {
+        get
+        {
+          return "TotalEntriesToCheck = " + myTouchedCount.ToString(CultureInfo.InvariantCulture)
+            + ", NextIndexToCheck = " + myIndexAfterCurrent.ToString(CultureInfo.InvariantCulture)
+#if MAP2_ENUMERATION_VERSION
+            + ", Version = " + myVersion.ToString(CultureInfo.InvariantCulture)
+#endif
+#if MAP2_ENUMERATOR_DISPOSE
+            + (myNotDisposed ? "" : " <disposed>")
+#endif
+            ;
+        }
+      }
+
       [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
       private Entry[] myEntries;
 
@@ -1259,6 +1371,11 @@ namespace Neat.Collections
         }
       }
 
+      /// <summary>
+      /// This property is hidden in the debugging view to work around
+      /// <a href="https://developercommunity.visualstudio.com/t/Inspecting-a-property-returning-a-field/10056308">this bug of Visual Studio</a>.
+      /// </summary>
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
       object IEnumerator.Current
       {
         [MethodImpl(Helper.OptimizeInline)]
@@ -1292,8 +1409,26 @@ namespace Neat.Collections
     /// <summary>
     /// Enumerates keys in <see cref="Map2{TKey, TValue}"/>.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct KeyEnumerator : IEnumerator2<TKey>
     {
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+      private string DebuggerDisplay
+      {
+        get
+        {
+          return "TotalEntriesToCheck = " + myTouchedCount.ToString(CultureInfo.InvariantCulture)
+            + ", NextIndexToCheck = " + myIndexAfterCurrent.ToString(CultureInfo.InvariantCulture)
+#if MAP2_ENUMERATION_VERSION
+            + ", Version = " + myVersion.ToString(CultureInfo.InvariantCulture)
+#endif
+#if MAP2_ENUMERATOR_DISPOSE
+            + (myNotDisposed ? "" : " <disposed>")
+#endif
+            ;
+        }
+      }
+
       [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
       private Entry[] myEntries;
 
@@ -1474,6 +1609,11 @@ namespace Neat.Collections
         }
       }
 
+      /// <summary>
+      /// This property is hidden in the debugging view to work around
+      /// <a href="https://developercommunity.visualstudio.com/t/Inspecting-a-property-returning-a-field/10056308">this bug of Visual Studio</a>.
+      /// </summary>
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
       object IEnumerator.Current
       {
         [MethodImpl(Helper.OptimizeInline)]
@@ -1507,8 +1647,26 @@ namespace Neat.Collections
     /// <summary>
     /// Enumerates values in <see cref="Map2{TKey, TValue}"/>.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct ValueEnumerator : IEnumerator2<TValue>
     {
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+      private string DebuggerDisplay
+      {
+        get
+        {
+          return "TotalEntriesToCheck = " + myTouchedCount.ToString(CultureInfo.InvariantCulture)
+            + ", NextIndexToCheck = " + myIndexAfterCurrent.ToString(CultureInfo.InvariantCulture)
+#if MAP2_ENUMERATION_VERSION
+            + ", Version = " + myVersion.ToString(CultureInfo.InvariantCulture)
+#endif
+#if MAP2_ENUMERATOR_DISPOSE
+            + (myNotDisposed ? "" : " <disposed>")
+#endif
+            ;
+        }
+      }
+
       [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
       private Entry[] myEntries;
 
@@ -1689,6 +1847,11 @@ namespace Neat.Collections
         }
       }
 
+      /// <summary>
+      /// This property is hidden in the debugging view to work around
+      /// <a href="https://developercommunity.visualstudio.com/t/Inspecting-a-property-returning-a-field/10056308">this bug of Visual Studio</a>.
+      /// </summary>
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
       object IEnumerator.Current
       {
         [MethodImpl(Helper.OptimizeInline)]
@@ -1719,8 +1882,23 @@ namespace Neat.Collections
       }
     }
 
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     private protected sealed class DictionaryEnumerator : IDictionaryEnumerator
     {
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+      private string DebuggerDisplay
+      {
+        get
+        {
+          return "TotalEntriesToCheck = " + myTouchedCount.ToString(CultureInfo.InvariantCulture)
+            + ", NextIndexToCheck = " + myIndexAfterCurrent.ToString(CultureInfo.InvariantCulture)
+#if MAP2_ENUMERATION_VERSION
+            + ", Version = " + myVersion.ToString(CultureInfo.InvariantCulture)
+#endif
+            ;
+        }
+      }
+
       [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
       private Entry[] myEntries;
 
@@ -1791,11 +1969,14 @@ namespace Neat.Collections
         return true;
       }
 
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
       public DictionaryEntry Entry
       {
         [MethodImpl(Helper.OptimizeInline)]
         get
         {
+          /* The debugger view of DictionaryEntry is not very satisfactory.
+          /* Since the information is available from Key and Value, we choose to hide it. */
 #if MAP2_ENUMERATION_VERSION
           if (myVersion != myTarget.myVersion)
           {
@@ -1836,6 +2017,12 @@ namespace Neat.Collections
         }
       }
 
+      /// <summary>
+      /// This property is hidden in the debugging view to work around
+      /// <a href="https://developercommunity.visualstudio.com/t/Inspecting-a-property-returning-a-field/10056308">this bug of Visual Studio</a>.
+      /// See also the hiding of <see cref="Entry"/>.
+      /// </summary>
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
       public object Current
       {
         [MethodImpl(Helper.OptimizeInline)]
@@ -1852,6 +2039,7 @@ namespace Neat.Collections
       }
     }
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private static readonly Map2.Contains<TKey, TValue> theContainsTValue = Map2.ContainsTValueHelper<TKey, TValue>.Delegate;
 
     /// <summary>
@@ -1859,8 +2047,45 @@ namespace Neat.Collections
     /// Among instance members,
     /// only those of <see cref="IEquatable{T}"/> and <see cref="object"/> can be invoked on <see langword="default"/> instances.
     /// </summary>
+    [DebuggerTypeProxy(typeof(Map2<,>.ValueView.DebuggerView))]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public readonly struct ValueView : IEquatable<ValueView>, IEnumerable2<TValue, ValueEnumerator>, ICollection<TValue>, IReadOnlyCollection<TValue>, ICollection
     {
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+      private string DebuggerDisplay
+      {
+        get
+        {
+          Map2<TKey, TValue> target = myTarget;
+          return target is null ? "null" : target.DebuggerDisplay;
+        }
+      }
+
+      private sealed class DebuggerView
+      {
+        private readonly Map2<TKey, TValue> myTarget;
+
+        public DebuggerView(ValueView target)
+        {
+          myTarget = target.myTarget;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+        public TValue[] Items
+        {
+          get
+          {
+            if (myTarget is null)
+            {
+              return null;
+            }
+            TValue[] items = new TValue[myTarget.myActiveCount];
+            myTarget.CopyValuesTo(items, 0);
+            return items;
+          }
+        }
+      }
+
       private readonly Map2<TKey, TValue> myTarget;
 
       [MethodImpl(Helper.OptimizeInline)]
@@ -2028,6 +2253,10 @@ namespace Neat.Collections
       /// <summary>
       /// This member is thread-safe.
       /// </summary>
+#if MAP2_SYNCROOT
+#else
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+#endif
       object ICollection.SyncRoot
       {
         [MethodImpl(Helper.OptimizeInline)]
@@ -2707,11 +2936,14 @@ namespace Neat.Collections
     /// Gets a view of the keys.
     /// Obtaining such a view is thread-safe.
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Collapsed)]
     public new KeyView Keys
     {
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
+        /* Somehow hiding the property hidden by this property from the debugger
+        /* also hides this property from the debugger, so we un-hide it. */
         return new KeyView(this);
       }
     }
@@ -2796,6 +3028,7 @@ namespace Neat.Collections
 
     #region IReadOnlyCollection<KeyValuePair<TKey, TValue>>.Count, ICollection<KeyValuePair<TKey, TValue>>.Count, ICollection.Count
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     int IReadOnlyCollection<KeyValuePair<TKey, TValue>>.Count
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -2805,6 +3038,7 @@ namespace Neat.Collections
       }
     }
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     int ICollection<KeyValuePair<TKey, TValue>>.Count
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -2814,6 +3048,7 @@ namespace Neat.Collections
       }
     }
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     int ICollection.Count
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -2971,6 +3206,7 @@ namespace Neat.Collections
       return ContainsKey(key);
     }
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private static readonly Map2.Equals<TValue> theEqualsTValue = Map2.EqualsTValueHelper<TValue>.Delegate;
 
     [MethodImpl(Helper.JustOptimize)]
@@ -3132,6 +3368,7 @@ namespace Neat.Collections
 
     #region IReadOnlyDictionary<TKey, TValue>.Keys, IDictionary<TKey, TValue>.Keys, IDictionary.Keys
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -3141,6 +3378,7 @@ namespace Neat.Collections
       }
     }
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     ICollection<TKey> IDictionary<TKey, TValue>.Keys
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -3150,6 +3388,7 @@ namespace Neat.Collections
       }
     }
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     ICollection IDictionary.Keys
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -3163,6 +3402,7 @@ namespace Neat.Collections
 
     #region IReadOnlyDictionary<TKey, TValue>.Values, IDictionary<TKey, TValue>.Values, IDictionary.Values
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -3172,6 +3412,7 @@ namespace Neat.Collections
       }
     }
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     ICollection<TValue> IDictionary<TKey, TValue>.Values
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -3181,6 +3422,7 @@ namespace Neat.Collections
       }
     }
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     ICollection IDictionary.Values
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -3197,6 +3439,7 @@ namespace Neat.Collections
     /// <summary>
     /// This member is thread-safe.
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -3209,6 +3452,7 @@ namespace Neat.Collections
     /// <summary>
     /// This member is thread-safe.
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Collapsed)]
     bool IDictionary.IsReadOnly
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -3221,6 +3465,7 @@ namespace Neat.Collections
     /// <summary>
     /// This member is thread-safe.
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Collapsed)]
     bool IDictionary.IsFixedSize
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -3233,6 +3478,7 @@ namespace Neat.Collections
     /// <summary>
     /// This member is thread-safe.
     /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Collapsed)]
     bool ICollection.IsSynchronized
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -3245,6 +3491,11 @@ namespace Neat.Collections
     /// <summary>
     /// This member is thread-safe.
     /// </summary>
+#if MAP2_SYNCROOT
+    [DebuggerBrowsable(DebuggerBrowsableState.Collapsed)]
+#else
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+#endif
     object ICollection.SyncRoot
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -3301,8 +3552,45 @@ namespace Neat.Collections
     /// Among instance members,
     /// only those of <see cref="IEquatable{T}"/> and <see cref="object"/> can be invoked on <see langword="default"/> instances.
     /// </summary>
+    [DebuggerTypeProxy(typeof(Map2<,,>.KeyView.DebuggerView))]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public readonly struct KeyView : IEquatable<KeyView>, IEnumerable2<TKey, KeyEnumerator>, ICollection<TKey>, IReadOnlyCollection<TKey>, ICollection
     {
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+      private string DebuggerDisplay
+      {
+        get
+        {
+          Map2<TKey, TValue, TEqualityComparer> target = myTarget;
+          return target is null ? "null" : target.DebuggerDisplay;
+        }
+      }
+
+      private sealed class DebuggerView
+      {
+        private readonly Map2<TKey, TValue, TEqualityComparer> myTarget;
+
+        public DebuggerView(KeyView target)
+        {
+          myTarget = target.myTarget;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+        public TKey[] Items
+        {
+          get
+          {
+            if (myTarget is null)
+            {
+              return null;
+            }
+            TKey[] items = new TKey[myTarget.myActiveCount];
+            myTarget.CopyKeysTo(items, 0);
+            return items;
+          }
+        }
+      }
+
       private readonly Map2<TKey, TValue, TEqualityComparer> myTarget;
 
       [MethodImpl(Helper.OptimizeInline)]
@@ -3468,6 +3756,10 @@ namespace Neat.Collections
       /// <summary>
       /// This member is thread-safe.
       /// </summary>
+#if MAP2_SYNCROOT
+#else
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+#endif
       object ICollection.SyncRoot
       {
         [MethodImpl(Helper.OptimizeInline)]
