@@ -44,7 +44,7 @@ namespace Neat.Unicode
     /// <summary>
     /// Enumerates <see langword="char"/> instances in <see langword="string"/>.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplay(),nq}")]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Enumerator : IEnumerator2<char>
     {
       [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
@@ -65,13 +65,17 @@ namespace Neat.Unicode
 
 #endif
 
-      private string DebuggerDisplay()
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+      private string DebuggerDisplay
       {
-        return "Index = " + myIndex.ToString(CultureInfo.InvariantCulture)
+        get
+        {
+          return "Index = " + myIndex.ToString(CultureInfo.InvariantCulture)
 #if STRING16_ENUMERATOR_DISPOSE
-          + (myNotDisposed ? "" : " <disposed>")
+            + (myNotDisposed ? "" : " <disposed>")
 #endif
-          ;
+            ;
+        }
       }
 
       [MethodImpl(Helper.OptimizeInline)]

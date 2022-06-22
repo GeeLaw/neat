@@ -15,7 +15,7 @@ namespace Neat.Unicode
   /// a trick used by <see cref="ImmutableArray{T}"/> (though this trick could be coincidence-oriented
   /// programming; see <a href="https://github.com/dotnet/docs/issues/29696">dotnet/docs#29696</a>.)
   /// </summary>
-  [DebuggerDisplay("{DebuggerDisplay(),nq}")]
+  [DebuggerDisplay("{DebuggerDisplay,nq}")]
   [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 1)]
   public readonly struct Char8 : IComparable<Char8>, IComparable, IEquatable<Char8>
   {
@@ -416,9 +416,13 @@ namespace Neat.Unicode
       "252 Char8(0xFC) <L6 too large>", "253 Char8(0xFD) <L6 too large>", "254 Char8(0xFE) <invalid>", "255 Char8(0xFF) <invalid>"
     };
 
-    private string DebuggerDisplay()
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    private string DebuggerDisplay
     {
-      return theDebuggerDisplayResults[Value];
+      get
+      {
+        return theDebuggerDisplayResults[Value];
+      }
     }
 
     #endregion debugging

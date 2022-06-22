@@ -15,7 +15,7 @@ namespace Neat.Unicode
   /// a trick used by <see cref="ImmutableArray{T}"/> (though this trick could be coincidence-oriented
   /// programming; see <a href="https://github.com/dotnet/docs/issues/29696">dotnet/docs#29696</a>.)
   /// </summary>
-  [DebuggerDisplay("{DebuggerDisplay(),nq}")]
+  [DebuggerDisplay("{DebuggerDisplay,nq}")]
   [StructLayout(LayoutKind.Explicit, Pack = 4, Size = 4)]
   public readonly struct Char32 : IComparable<Char32>, IComparable, IEquatable<Char32>
   {
@@ -500,27 +500,31 @@ namespace Neat.Unicode
       "120 'x'", "121 'y'", "122 'z'", "123 '{'", "124 '|'", "125 '}'", "126 '~'", "127 Char32(^?)"
     };
 
-    private string DebuggerDisplay()
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    private string DebuggerDisplay
     {
-      int value = Value;
-      if (UtfUnsafe.Char32IsBelow0x80(value))
+      get
       {
-        return theDebuggerDisplayResults[value];
+        int value = Value;
+        if (UtfUnsafe.Char32IsBelow0x80(value))
+        {
+          return theDebuggerDisplayResults[value];
+        }
+        string toString = GetString(value);
+        if (toString.Length < 6)
+        {
+          return value.ToString(CultureInfo.InvariantCulture) + " '" + toString + "'";
+        }
+        if (UtfUnsafe.Char32IsHighSurrogate(value))
+        {
+          return value.ToString(CultureInfo.InvariantCulture) + " " + toString + " <high surrogate>";
+        }
+        if (UtfUnsafe.Char32IsLowSurrogate(value))
+        {
+          return value.ToString(CultureInfo.InvariantCulture) + " " + toString + " <low surrogate>";
+        }
+        return value.ToString(CultureInfo.InvariantCulture) + " " + toString + " <too large>";
       }
-      string toString = GetString(value);
-      if (toString.Length < 6)
-      {
-        return value.ToString(CultureInfo.InvariantCulture) + " '" + toString + "'";
-      }
-      if (UtfUnsafe.Char32IsHighSurrogate(value))
-      {
-        return value.ToString(CultureInfo.InvariantCulture) + " " + toString + " <high surrogate>";
-      }
-      if (UtfUnsafe.Char32IsLowSurrogate(value))
-      {
-        return value.ToString(CultureInfo.InvariantCulture) + " " + toString + " <low surrogate>";
-      }
-      return value.ToString(CultureInfo.InvariantCulture) + " " + toString + " <too large>";
     }
 
     #endregion debugging

@@ -21,12 +21,21 @@ namespace Neat.Unicode
   /// a trick used by <see cref="ImmutableArray{T}"/> (though this trick could be coincidence-oriented
   /// programming; see <a href="https://github.com/dotnet/docs/issues/29696">dotnet/docs#29696</a>.)
   /// </summary>
-  [DebuggerDisplay("{ToString(),nq}")]
+  [DebuggerDisplay("{DebuggerDisplay,nq}")]
   [StructLayout(LayoutKind.Explicit)]
   public readonly struct String8
     : IComparable<String8>, IComparable, IEquatable<String8>,
       IEnumerable2<Char8, String8.Enumerator>, IReadOnlyList<Char8>
   {
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    private string DebuggerDisplay
+    {
+      get
+      {
+        return ToString();
+      }
+    }
+
     [FieldOffset(0)]
     internal readonly Char8[] myData;
 
@@ -88,7 +97,6 @@ namespace Neat.Unicode
     /// Gets the UTF-8 byte at the specified index.
     /// This indexer cannot be read if the instance is <see langword="default"/> (the <see langword="null"/> wrapper).
     /// </summary>
-    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public Char8 this[int index]
     {
       [MethodImpl(Helper.OptimizeInline)]
@@ -435,7 +443,7 @@ namespace Neat.Unicode
     /// <summary>
     /// Enumerates <see cref="Char8"/> instances in a <see cref="String8"/>.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplay(),nq}")]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Enumerator : IEnumerator2<Char8>
     {
       [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]
@@ -456,13 +464,17 @@ namespace Neat.Unicode
 
 #endif
 
-      private string DebuggerDisplay()
+      [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+      private string DebuggerDisplay
       {
-        return "Index = " + myIndex.ToString(CultureInfo.InvariantCulture)
+        get
+        {
+          return "Index = " + myIndex.ToString(CultureInfo.InvariantCulture)
 #if STRING8_ENUMERATOR_DISPOSE
-          + (myNotDisposed ? "" : " <disposed>")
+            + (myNotDisposed ? "" : " <disposed>")
 #endif
-          ;
+            ;
+        }
       }
 
       [MethodImpl(Helper.OptimizeInline)]
