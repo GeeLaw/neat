@@ -1,3 +1,3 @@
 # Neat
 
-Neat is a .NET basic utility library.
+Neat is a high-performance .NET basic utility library.
