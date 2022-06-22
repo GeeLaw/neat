@@ -4480,7 +4480,7 @@ namespace Neat.Collections
           {
             ++i;
           }
-          if (numeric == GetEnum8Value(entries[i].Value))
+          if (numeric == Unsafe.As<TValue, byte>(ref entries[i].Value))
           {
             return true;
           }
@@ -4498,7 +4498,7 @@ namespace Neat.Collections
           {
             ++i;
           }
-          if (numeric == GetEnum16Value(entries[i].Value))
+          if (numeric == Unsafe.As<TValue, ushort>(ref entries[i].Value))
           {
             return true;
           }
@@ -4516,7 +4516,7 @@ namespace Neat.Collections
           {
             ++i;
           }
-          if (numeric == GetEnum32Value(entries[i].Value))
+          if (numeric == Unsafe.As<TValue, uint>(ref entries[i].Value))
           {
             return true;
           }
@@ -4534,7 +4534,7 @@ namespace Neat.Collections
           {
             ++i;
           }
-          if (numeric == GetEnum64Value(entries[i].Value))
+          if (numeric == Unsafe.As<TValue, ulong>(ref entries[i].Value))
           {
             return true;
           }
@@ -4552,7 +4552,7 @@ namespace Neat.Collections
           {
             ++i;
           }
-          if (numeric == GetEnumNativeValue(entries[i].Value))
+          if (numeric == Unsafe.As<TValue, nuint>(ref entries[i].Value))
           {
             return true;
           }
