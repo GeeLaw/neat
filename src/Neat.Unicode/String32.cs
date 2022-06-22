@@ -349,14 +349,11 @@ namespace Neat.Unicode
       return new String32(data);
     }
 
-    [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
     [EditorBrowsable(EditorBrowsableState.Never)]
     [MethodImpl(Helper.OptimizeInline)]
     public readonly ref Char32 GetPinnableReference()
     {
-      Char32[] data = myData;
-      int throwIfNull = data.Length;
-      return ref MemoryMarshal.GetArrayDataReference(data);
+      return ref MemoryMarshal.GetArrayDataReference(myData);
     }
 
     /// <summary>

@@ -356,14 +356,11 @@ namespace Neat.Unicode
       return new String8(data);
     }
 
-    [SuppressMessage("Style", "IDE0059", Justification = "Avoid discarding with '_'.")]
     [EditorBrowsable(EditorBrowsableState.Never)]
     [MethodImpl(Helper.OptimizeInline)]
     public readonly ref Char8 GetPinnableReference()
     {
-      Char8[] data = myData;
-      int throwIfNull = data.Length;
-      return ref MemoryMarshal.GetArrayDataReference(data);
+      return ref MemoryMarshal.GetArrayDataReference(myData);
     }
 
     /// <summary>
