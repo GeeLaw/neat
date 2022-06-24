@@ -355,8 +355,9 @@ namespace Neat.Collections
     /// </summary>
     /// <param name="least">This number should be positive and not exceed <see cref="MaximumCapacity"/>.</param>
     /// <param name="suggested">This number should be greater than or equal to <paramref name="least"/> and not exceed <see cref="MaximumCapacity"/>.</param>
+    [SuppressMessage("Performance", "CA1822", Justification = "Use 'this' to pass the type argument.")]
     [MethodImpl(Helper.JustOptimize)]
-    private static T[] AllocImpl(int least, int suggested)
+    private T[] AllocImpl(int least, int suggested)
     {
     Retry:
       try
@@ -465,15 +466,15 @@ namespace Neat.Collections
 #endif
       /* The non-inlining tries to protect us from read introduction.
       /* See https://github.com/dotnet/docs/issues/29696 */
-      TrimExcessImpl(this, myData, myCount);
+      TrimExcessImpl(myData, myCount);
     }
 
     [MethodImpl(Helper.OptimizeNoInline)]
-    private static void TrimExcessImpl(List2<T> that, T[] data, int count)
+    private void TrimExcessImpl(T[] data, int count)
     {
       if (count == 0)
       {
-        that.myData = theEmptyArray;
+        myData = theEmptyArray;
         return;
       }
       if (count < (int)(data.Length * 0.9))
@@ -494,7 +495,7 @@ namespace Neat.Collections
         }
         Array.ConstrainedCopy(data, 0, newData, 0, count);
         /* No more exception is possible beyond this point. */
-        that.myData = newData;
+        myData = newData;
       }
     }
 
@@ -541,8 +542,9 @@ namespace Neat.Collections
       return ToArrayImpl(myData, myCount);
     }
 
+    [SuppressMessage("Performance", "CA1822", Justification = "Use 'this' to pass the type argument.")]
     [MethodImpl(Helper.OptimizeNoInline)]
-    private static T[] ToArrayImpl(T[] data, int count)
+    private T[] ToArrayImpl(T[] data, int count)
     {
       if (count == 0)
       {
@@ -565,13 +567,12 @@ namespace Neat.Collections
     [MethodImpl(Helper.OptimizeInline)]
     public T[] ToArray(int start, int length)
     {
-      /* Why do we put myData as the first argument but myCount the last?
-      /* To reduce the need to shuffle arguments in case ToArray itself is not inlined. */
-      return ToArrayImpl(myData, start, length, myCount);
+      return ToArrayImpl(start, length, myData, myCount);
     }
 
+    [SuppressMessage("Performance", "CA1822", Justification = "Use 'this' to pass the type argument.")]
     [MethodImpl(Helper.OptimizeNoInline)]
-    private static T[] ToArrayImpl(T[] data, int start, int length, int count)
+    private T[] ToArrayImpl(int start, int length, T[] data, int count)
     {
       if ((uint)start > (uint)count)
       {
@@ -601,11 +602,12 @@ namespace Neat.Collections
     [MethodImpl(Helper.OptimizeInline)]
     public List2<T> GetRange(int start, int length)
     {
-      return GetRangeImpl(myData, start, length, myCount);
+      return GetRangeImpl(start, length, myData, myCount);
     }
 
+    [SuppressMessage("Performance", "CA1822", Justification = "Use 'this' to pass the type argument.")]
     [MethodImpl(Helper.OptimizeNoInline)]
-    private static List2<T> GetRangeImpl(T[] data, int start, int length, int count)
+    private List2<T> GetRangeImpl(int start, int length, T[] data, int count)
     {
       if ((uint)start > (uint)count)
       {
@@ -1594,15 +1596,15 @@ namespace Neat.Collections
     [MethodImpl(Helper.OptimizeInline)]
     public bool ThereExists<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
-      return ThereExistsImpl(this, predicate, myData, myCount);
+      return ThereExistsImpl(predicate, myData, myCount);
     }
 
     [MethodImpl(Helper.OptimizeNoInline)]
-    private static bool ThereExistsImpl<TPredicate>(List2<T> that, TPredicate predicate, T[] data, int count) where TPredicate : IPredicate
+    private bool ThereExistsImpl<TPredicate>(TPredicate predicate, T[] data, int count) where TPredicate : IPredicate
     {
       /* A rude predicate.Invoke could mutate the list. */
 #if LIST2_ENUMERATION_VERSION
-      uint version = that.myVersion;
+      uint version = myVersion;
 #endif
       /* It is important to adjust "count", because it could come from an instance corrupted by race conditions.
       /* We want to skip array bounds check while keeping memory safety as far as CLR is concerned. */
@@ -1614,10 +1616,10 @@ namespace Neat.Collections
       }
       for (int index = 0; index != count; ++index)
       {
-        if (predicate.Invoke(that, index, Unsafe.Add(ref data0, index)))
+        if (predicate.Invoke(this, index, Unsafe.Add(ref data0, index)))
         {
 #if LIST2_ENUMERATION_VERSION
-          if (version != that.myVersion)
+          if (version != myVersion)
           {
             List2.ThrowVersion();
           }
@@ -1626,7 +1628,7 @@ namespace Neat.Collections
         }
       }
 #if LIST2_ENUMERATION_VERSION
-      if (version != that.myVersion)
+      if (version != myVersion)
       {
         List2.ThrowVersion();
       }
@@ -1643,14 +1645,14 @@ namespace Neat.Collections
     [MethodImpl(Helper.OptimizeInline)]
     public bool ForAll<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
-      return ForAllImpl(this, predicate, myData, myCount);
+      return ForAllImpl(predicate, myData, myCount);
     }
 
     [MethodImpl(Helper.OptimizeNoInline)]
-    private static bool ForAllImpl<TPredicate>(List2<T> that, TPredicate predicate, T[] data, int count) where TPredicate : IPredicate
+    private bool ForAllImpl<TPredicate>(TPredicate predicate, T[] data, int count) where TPredicate : IPredicate
     {
 #if LIST2_ENUMERATION_VERSION
-      uint version = that.myVersion;
+      uint version = myVersion;
 #endif
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
@@ -1660,10 +1662,10 @@ namespace Neat.Collections
       }
       for (int index = 0; index != count; ++index)
       {
-        if (!predicate.Invoke(that, index, Unsafe.Add(ref data0, index)))
+        if (!predicate.Invoke(this, index, Unsafe.Add(ref data0, index)))
         {
 #if LIST2_ENUMERATION_VERSION
-          if (version != that.myVersion)
+          if (version != myVersion)
           {
             List2.ThrowVersion();
           }
@@ -1672,7 +1674,7 @@ namespace Neat.Collections
         }
       }
 #if LIST2_ENUMERATION_VERSION
-      if (version != that.myVersion)
+      if (version != myVersion)
       {
         List2.ThrowVersion();
       }
@@ -1689,14 +1691,14 @@ namespace Neat.Collections
     [MethodImpl(Helper.OptimizeInline)]
     public int CountSuchThat<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
-      return CountSuchThatImpl(this, predicate, myData, myCount);
+      return CountSuchThatImpl(predicate, myData, myCount);
     }
 
     [MethodImpl(Helper.OptimizeNoInline)]
-    private static int CountSuchThatImpl<TPredicate>(List2<T> that, TPredicate predicate, T[] data, int count) where TPredicate : IPredicate
+    private int CountSuchThatImpl<TPredicate>(TPredicate predicate, T[] data, int count) where TPredicate : IPredicate
     {
 #if LIST2_ENUMERATION_VERSION
-      uint version = that.myVersion;
+      uint version = myVersion;
 #endif
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
@@ -1707,13 +1709,13 @@ namespace Neat.Collections
       int countSuchThat = 0;
       for (int index = 0; index != count; ++index)
       {
-        if (predicate.Invoke(that, index, Unsafe.Add(ref data0, index)))
+        if (predicate.Invoke(this, index, Unsafe.Add(ref data0, index)))
         {
           ++countSuchThat;
         }
       }
 #if LIST2_ENUMERATION_VERSION
-      if (version != that.myVersion)
+      if (version != myVersion)
       {
         List2.ThrowVersion();
       }
@@ -1735,14 +1737,14 @@ namespace Neat.Collections
     [MethodImpl(Helper.OptimizeInline)]
     public int FirstSuchThat<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
-      return FirstSuchThatImpl(this, predicate, myData, myCount);
+      return FirstSuchThatImpl(predicate, myData, myCount);
     }
 
     [MethodImpl(Helper.OptimizeNoInline)]
-    private static int FirstSuchThatImpl<TPredicate>(List2<T> that, TPredicate predicate, T[] data, int count) where TPredicate : IPredicate
+    private int FirstSuchThatImpl<TPredicate>(TPredicate predicate, T[] data, int count) where TPredicate : IPredicate
     {
 #if LIST2_ENUMERATION_VERSION
-      uint version = that.myVersion;
+      uint version = myVersion;
 #endif
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
@@ -1752,10 +1754,10 @@ namespace Neat.Collections
       }
       for (int index = 0; index != count; ++index)
       {
-        if (predicate.Invoke(that, index, Unsafe.Add(ref data0, index)))
+        if (predicate.Invoke(this, index, Unsafe.Add(ref data0, index)))
         {
 #if LIST2_ENUMERATION_VERSION
-          if (version != that.myVersion)
+          if (version != myVersion)
           {
             List2.ThrowVersion();
           }
@@ -1764,7 +1766,7 @@ namespace Neat.Collections
         }
       }
 #if LIST2_ENUMERATION_VERSION
-      if (version != that.myVersion)
+      if (version != myVersion)
       {
         List2.ThrowVersion();
       }
@@ -1784,14 +1786,14 @@ namespace Neat.Collections
     [MethodImpl(Helper.OptimizeInline)]
     public int FirstSuchThat<TPredicate>(TPredicate predicate, int afterInclusive) where TPredicate : IPredicate
     {
-      return FirstSuchThatImpl(this, predicate, afterInclusive, myData, myCount);
+      return FirstSuchThatImpl(predicate, afterInclusive, myData, myCount);
     }
 
     [MethodImpl(Helper.OptimizeNoInline)]
-    private static int FirstSuchThatImpl<TPredicate>(List2<T> that, TPredicate predicate, int afterInclusive, T[] data, int count) where TPredicate : IPredicate
+    private int FirstSuchThatImpl<TPredicate>(TPredicate predicate, int afterInclusive, T[] data, int count) where TPredicate : IPredicate
     {
 #if LIST2_ENUMERATION_VERSION
-      uint version = that.myVersion;
+      uint version = myVersion;
 #endif
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
@@ -1805,10 +1807,10 @@ namespace Neat.Collections
       }
       for (; afterInclusive != count; ++afterInclusive)
       {
-        if (predicate.Invoke(that, afterInclusive, Unsafe.Add(ref data0, afterInclusive)))
+        if (predicate.Invoke(this, afterInclusive, Unsafe.Add(ref data0, afterInclusive)))
         {
 #if LIST2_ENUMERATION_VERSION
-          if (version != that.myVersion)
+          if (version != myVersion)
           {
             List2.ThrowVersion();
           }
@@ -1817,7 +1819,7 @@ namespace Neat.Collections
         }
       }
 #if LIST2_ENUMERATION_VERSION
-      if (version != that.myVersion)
+      if (version != myVersion)
       {
         List2.ThrowVersion();
       }
@@ -1838,14 +1840,14 @@ namespace Neat.Collections
     [MethodImpl(Helper.OptimizeInline)]
     public int FirstSuchThat<TPredicate>(TPredicate predicate, int afterInclusive, int length) where TPredicate : IPredicate
     {
-      return FirstSuchThatImpl(this, predicate, afterInclusive, length, myData, myCount);
+      return FirstSuchThatImpl(predicate, afterInclusive, length, myData, myCount);
     }
 
     [MethodImpl(Helper.OptimizeNoInline)]
-    private static int FirstSuchThatImpl<TPredicate>(List2<T> that, TPredicate predicate, int afterInclusive, int length, T[] data, int count) where TPredicate : IPredicate
+    private int FirstSuchThatImpl<TPredicate>(TPredicate predicate, int afterInclusive, int length, T[] data, int count) where TPredicate : IPredicate
     {
 #if LIST2_ENUMERATION_VERSION
-      uint version = that.myVersion;
+      uint version = myVersion;
 #endif
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
@@ -1863,10 +1865,10 @@ namespace Neat.Collections
       }
       for (count = afterInclusive + length; afterInclusive != count; ++afterInclusive)
       {
-        if (predicate.Invoke(that, afterInclusive, Unsafe.Add(ref data0, afterInclusive)))
+        if (predicate.Invoke(this, afterInclusive, Unsafe.Add(ref data0, afterInclusive)))
         {
 #if LIST2_ENUMERATION_VERSION
-          if (version != that.myVersion)
+          if (version != myVersion)
           {
             List2.ThrowVersion();
           }
@@ -1875,7 +1877,7 @@ namespace Neat.Collections
         }
       }
 #if LIST2_ENUMERATION_VERSION
-      if (version != that.myVersion)
+      if (version != myVersion)
       {
         List2.ThrowVersion();
       }
@@ -1893,14 +1895,14 @@ namespace Neat.Collections
     [MethodImpl(Helper.OptimizeInline)]
     public int LastSuchThat<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
-      return LastSuchThatImpl(this, predicate, myData, myCount);
+      return LastSuchThatImpl(predicate, myData, myCount);
     }
 
     [MethodImpl(Helper.OptimizeNoInline)]
-    private static int LastSuchThatImpl<TPredicate>(List2<T> that, TPredicate predicate, T[] data, int count) where TPredicate : IPredicate
+    private int LastSuchThatImpl<TPredicate>(TPredicate predicate, T[] data, int count) where TPredicate : IPredicate
     {
 #if LIST2_ENUMERATION_VERSION
-      uint version = that.myVersion;
+      uint version = myVersion;
 #endif
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
@@ -1910,13 +1912,13 @@ namespace Neat.Collections
       }
       while (count-- != 0)
       {
-        if (predicate.Invoke(that, count, Unsafe.Add(ref data0, count)))
+        if (predicate.Invoke(this, count, Unsafe.Add(ref data0, count)))
         {
           break;
         }
       }
 #if LIST2_ENUMERATION_VERSION
-      if (version != that.myVersion)
+      if (version != myVersion)
       {
         List2.ThrowVersion();
       }
@@ -1936,14 +1938,14 @@ namespace Neat.Collections
     [MethodImpl(Helper.OptimizeInline)]
     public int LastSuchThat<TPredicate>(TPredicate predicate, int beforeExclusive) where TPredicate : IPredicate
     {
-      return LastSuchThatImpl(this, predicate, beforeExclusive, myData, myCount);
+      return LastSuchThatImpl(predicate, beforeExclusive, myData, myCount);
     }
 
     [MethodImpl(Helper.OptimizeNoInline)]
-    private static int LastSuchThatImpl<TPredicate>(List2<T> that, TPredicate predicate, int beforeExclusive, T[] data, int count) where TPredicate : IPredicate
+    private int LastSuchThatImpl<TPredicate>(TPredicate predicate, int beforeExclusive, T[] data, int count) where TPredicate : IPredicate
     {
 #if LIST2_ENUMERATION_VERSION
-      uint version = that.myVersion;
+      uint version = myVersion;
 #endif
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
@@ -1957,13 +1959,13 @@ namespace Neat.Collections
       }
       while (beforeExclusive-- != 0)
       {
-        if (predicate.Invoke(that, beforeExclusive, Unsafe.Add(ref data0, beforeExclusive)))
+        if (predicate.Invoke(this, beforeExclusive, Unsafe.Add(ref data0, beforeExclusive)))
         {
           break;
         }
       }
 #if LIST2_ENUMERATION_VERSION
-      if (version != that.myVersion)
+      if (version != myVersion)
       {
         List2.ThrowVersion();
       }
@@ -1984,15 +1986,15 @@ namespace Neat.Collections
     [MethodImpl(Helper.OptimizeInline)]
     public int LastSuchThat<TPredicate>(TPredicate predicate, int beforeExclusive, int length) where TPredicate : IPredicate
     {
-      return LastSuchThatImpl(this, predicate, beforeExclusive, length, myData, myCount);
+      return LastSuchThatImpl(predicate, beforeExclusive, length, myData, myCount);
     }
 
     [MethodImpl(Helper.OptimizeNoInline)]
-    private static int LastSuchThatImpl<TPredicate>(List2<T> that, TPredicate predicate, int beforeExclusive, int length,
+    private int LastSuchThatImpl<TPredicate>(TPredicate predicate, int beforeExclusive, int length,
       T[] data, int count) where TPredicate : IPredicate
     {
 #if LIST2_ENUMERATION_VERSION
-      uint version = that.myVersion;
+      uint version = myVersion;
 #endif
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
@@ -2010,11 +2012,11 @@ namespace Neat.Collections
       }
       for (count = beforeExclusive - length; beforeExclusive-- != count;)
       {
-        if (predicate.Invoke(that, beforeExclusive, Unsafe.Add(ref data0, beforeExclusive)))
+        if (predicate.Invoke(this, beforeExclusive, Unsafe.Add(ref data0, beforeExclusive)))
         {
           /* Note that the not-found termination does not have "beforeExclusive == -1". */
 #if LIST2_ENUMERATION_VERSION
-          if (version != that.myVersion)
+          if (version != myVersion)
           {
             List2.ThrowVersion();
           }
@@ -2023,7 +2025,7 @@ namespace Neat.Collections
         }
       }
 #if LIST2_ENUMERATION_VERSION
-      if (version != that.myVersion)
+      if (version != myVersion)
       {
         List2.ThrowVersion();
       }
@@ -2047,14 +2049,14 @@ namespace Neat.Collections
     [MethodImpl(Helper.OptimizeInline)]
     public int RemoveAllSuchThat<TPredicate>(TPredicate predicate) where TPredicate : IPredicate
     {
-      return RemoveAllSuchThatImpl(this, predicate, myData, myCount);
+      return RemoveAllSuchThatImpl(predicate, myData, myCount);
     }
 
     [MethodImpl(Helper.OptimizeNoInline)]
-    private static int RemoveAllSuchThatImpl<TPredicate>(List2<T> that, TPredicate predicate, T[] data, int count) where TPredicate : IPredicate
+    private int RemoveAllSuchThatImpl<TPredicate>(TPredicate predicate, T[] data, int count) where TPredicate : IPredicate
     {
 #if LIST2_ENUMERATION_VERSION
-      uint version = ++that.myVersion;
+      uint version = ++myVersion;
 #endif
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
@@ -2066,7 +2068,7 @@ namespace Neat.Collections
       int i = 0;
       while (i != count)
       {
-        if (predicate.Invoke(that, i, Unsafe.Add(ref data0, i)))
+        if (predicate.Invoke(this, i, Unsafe.Add(ref data0, i)))
         {
           break;
         }
@@ -2077,14 +2079,14 @@ namespace Neat.Collections
       int j = i;
       while (i++ != count)
       {
-        if (!predicate.Invoke(that, i, Unsafe.Add(ref data0, i)))
+        if (!predicate.Invoke(this, i, Unsafe.Add(ref data0, i)))
         {
           Unsafe.Add(ref data0, j++) = Unsafe.Add(ref data0, i);
         }
       }
       /* If bad things happen, throw the exception without touching the internal state of the list any more. */
 #if LIST2_ENUMERATION_VERSION
-      if (version != that.myVersion)
+      if (version != myVersion)
       {
         List2.ThrowVersion();
       }
@@ -2097,7 +2099,7 @@ namespace Neat.Collections
         Array.Clear(data, j, count);
       }
       /* No more exception is possible beyond this point. */
-      that.myCount = j;
+      myCount = j;
       return count;
     }
 
@@ -2117,14 +2119,14 @@ namespace Neat.Collections
     [MethodImpl(Helper.OptimizeInline)]
     public int RemoveAllSuchThat<TPredicate>(TPredicate predicate, int start, int length) where TPredicate : IPredicate
     {
-      return RemoveAllSuchThatImpl(this, predicate, start, length, myData, myCount);
+      return RemoveAllSuchThatImpl(predicate, start, length, myData, myCount);
     }
 
     [MethodImpl(Helper.OptimizeNoInline)]
-    private static int RemoveAllSuchThatImpl<TPredicate>(List2<T> that, TPredicate predicate, int start, int length, T[] data, int count) where TPredicate : IPredicate
+    private int RemoveAllSuchThatImpl<TPredicate>(TPredicate predicate, int start, int length, T[] data, int count) where TPredicate : IPredicate
     {
 #if LIST2_ENUMERATION_VERSION
-      uint version = ++that.myVersion;
+      uint version = ++myVersion;
 #endif
       count = ((uint)count < (uint)data.Length ? count : data.Length);
       ref T data0 = ref MemoryMarshal.GetArrayDataReference(data);
@@ -2143,7 +2145,7 @@ namespace Neat.Collections
       int end = start + length;
       while (start != end)
       {
-        if (predicate.Invoke(that, start, Unsafe.Add(ref data0, start)))
+        if (predicate.Invoke(this, start, Unsafe.Add(ref data0, start)))
         {
           break;
         }
@@ -2152,13 +2154,13 @@ namespace Neat.Collections
       int j = start;
       while (start++ != end)
       {
-        if (!predicate.Invoke(that, start, Unsafe.Add(ref data0, start)))
+        if (!predicate.Invoke(this, start, Unsafe.Add(ref data0, start)))
         {
           Unsafe.Add(ref data0, j++) = Unsafe.Add(ref data0, start);
         }
       }
 #if LIST2_ENUMERATION_VERSION
-      if (version != that.myVersion)
+      if (version != myVersion)
       {
         List2.ThrowVersion();
       }
@@ -2176,7 +2178,7 @@ namespace Neat.Collections
         Array.Clear(data, j, end);
       }
       /* No more exception is possible beyond this point. */
-      that.myCount = j;
+      myCount = j;
       return end;
     }
 
