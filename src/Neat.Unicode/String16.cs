@@ -44,7 +44,7 @@ namespace Neat.Unicode
     /// <summary>
     /// Enumerates <see langword="char"/> instances in <see langword="string"/>.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplay,nq}")]
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}", Type = nameof(String16) + "." + nameof(Enumerator))]
     public struct Enumerator : IEnumerator2<char>
     {
       [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]

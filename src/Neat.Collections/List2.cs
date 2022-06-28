@@ -22,7 +22,7 @@ namespace Neat.Collections
   /// (e.g., setting the capacity to its current value will invalidate all existing enumeration operations).
   /// </summary>
   [DebuggerTypeProxy(typeof(List2<>.DebuggerView))]
-  [DebuggerDisplay("{DebuggerDisplay,nq}")]
+  [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
   public sealed class List2<T> : IEnumerable2<T, List2<T>.Enumerator>, IReadOnlyList<T>, IList<T>, IList
   {
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -2268,7 +2268,7 @@ namespace Neat.Collections
     /// <summary>
     /// Enumerates items in <see cref="List2{T}"/>.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplay,nq}")]
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public struct Enumerator : IEnumerator2<T>
     {
       [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]

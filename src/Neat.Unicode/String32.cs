@@ -21,7 +21,7 @@ namespace Neat.Unicode
   /// a trick used by <see cref="ImmutableArray{T}"/> (though this trick could be coincidence-oriented
   /// programming; see <a href="https://github.com/dotnet/docs/issues/29696">dotnet/docs#29696</a>.)
   /// </summary>
-  [DebuggerDisplay("{DebuggerDisplay,nq}")]
+  [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}", Type = nameof(String32))]
   [StructLayout(LayoutKind.Explicit)]
   public readonly struct String32
     : IComparable<String32>, IComparable, IEquatable<String32>,
@@ -442,7 +442,7 @@ namespace Neat.Unicode
     /// <summary>
     /// Enumerates <see cref="Char32"/> instances in a <see cref="String32"/>.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplay,nq}")]
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}", Type = nameof(String32) + "." + nameof(Enumerator))]
     public struct Enumerator : IEnumerator2<Char32>
     {
       [SuppressMessage("Style", "IDE0044", Justification = "https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/")]

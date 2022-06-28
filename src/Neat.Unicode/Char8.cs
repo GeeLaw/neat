@@ -15,7 +15,7 @@ namespace Neat.Unicode
   /// a trick used by <see cref="ImmutableArray{T}"/> (though this trick could be coincidence-oriented
   /// programming; see <a href="https://github.com/dotnet/docs/issues/29696">dotnet/docs#29696</a>.)
   /// </summary>
-  [DebuggerDisplay("{DebuggerDisplay,nq}")]
+  [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}", Type = nameof(Char8))]
   [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 1)]
   public readonly struct Char8 : IComparable<Char8>, IComparable, IEquatable<Char8>
   {

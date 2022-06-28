@@ -24,7 +24,7 @@ namespace Neat.Collections
   /// This class is <see langword="abstract"/> and the concrete type is <see cref="Map2{TKey, TValue, TEqualityComparer}"/>.
   /// </summary>
   [DebuggerTypeProxy(typeof(Map2<,>.DebuggerView))]
-  [DebuggerDisplay("{DebuggerDisplay,nq}")]
+  [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
   public abstract class Map2<TKey, TValue>
     : IEnumerable2<KeyValuePair<TKey, TValue>, Map2<TKey, TValue>.Enumerator>,
       IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, IDictionary
@@ -90,7 +90,7 @@ namespace Neat.Collections
     /// </summary>
     private protected abstract void InternalInheritance();
 
-    [DebuggerDisplay("{DebuggerDisplay,nq}")]
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     internal struct Entry
     {
       [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -1171,7 +1171,7 @@ namespace Neat.Collections
     /// <summary>
     /// Enumerates key/value pairs in <see cref="Map2{TKey, TValue}"/>.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplay,nq}")]
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public struct Enumerator : IEnumerator2<KeyValuePair<TKey, TValue>>
     {
       [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -1409,7 +1409,7 @@ namespace Neat.Collections
     /// <summary>
     /// Enumerates keys in <see cref="Map2{TKey, TValue}"/>.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplay,nq}")]
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public struct KeyEnumerator : IEnumerator2<TKey>
     {
       [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -1647,7 +1647,7 @@ namespace Neat.Collections
     /// <summary>
     /// Enumerates values in <see cref="Map2{TKey, TValue}"/>.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplay,nq}")]
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public struct ValueEnumerator : IEnumerator2<TValue>
     {
       [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -1882,7 +1882,7 @@ namespace Neat.Collections
       }
     }
 
-    [DebuggerDisplay("{DebuggerDisplay,nq}")]
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     private protected sealed class DictionaryEnumerator : IDictionaryEnumerator
     {
       [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -2048,7 +2048,7 @@ namespace Neat.Collections
     /// only those of <see cref="IEquatable{T}"/> and <see cref="object"/> can be invoked on <see langword="default"/> instances.
     /// </summary>
     [DebuggerTypeProxy(typeof(Map2<,>.ValueView.DebuggerView))]
-    [DebuggerDisplay("{DebuggerDisplay,nq}")]
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public readonly struct ValueView : IEquatable<ValueView>, IEnumerable2<TValue, ValueEnumerator>, ICollection<TValue>, IReadOnlyCollection<TValue>, ICollection
     {
       [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -3553,7 +3553,7 @@ namespace Neat.Collections
     /// only those of <see cref="IEquatable{T}"/> and <see cref="object"/> can be invoked on <see langword="default"/> instances.
     /// </summary>
     [DebuggerTypeProxy(typeof(Map2<,,>.KeyView.DebuggerView))]
-    [DebuggerDisplay("{DebuggerDisplay,nq}")]
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public readonly struct KeyView : IEquatable<KeyView>, IEnumerable2<TKey, KeyEnumerator>, ICollection<TKey>, IReadOnlyCollection<TKey>, ICollection
     {
       [DebuggerBrowsable(DebuggerBrowsableState.Never)]
